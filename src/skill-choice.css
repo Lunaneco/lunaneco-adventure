@@ -4,7 +4,7 @@
   --choice-safe-right:env(safe-area-inset-right,0px);
   --choice-safe-bottom:env(safe-area-inset-bottom,0px);
   --choice-safe-left:env(safe-area-inset-left,0px);
-  width:min(1040px,calc(100vw - 24px));height:min(700px,calc(100dvh - 24px));max-width:none;max-height:none;overflow:hidden;
+  width:min(960px,calc(100vw - 32px));height:min(520px,calc(100dvh - 32px));max-width:none;max-height:none;overflow:hidden;
 }
 #modal:has(.skill-options) #modal-content{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:14px;padding:20px}
 #modal .upgrade-heading{margin:0}
@@ -32,7 +32,7 @@
 #modal .skill-select{display:none}
 #modal .upgrade-footer{margin:0;font-size:12px;line-height:1.4;letter-spacing:0}
 @media(max-width:760px),(max-height:500px) and (orientation:landscape){
-  #modal:has(.skill-options){position:fixed;inset:0;margin:0;width:100%;height:100dvh;border:0;border-radius:0;padding:var(--choice-safe-top) var(--choice-safe-right) var(--choice-safe-bottom) var(--choice-safe-left)}
+  #modal:has(.skill-options){position:fixed;inset:var(--choice-safe-top) var(--choice-safe-right) var(--choice-safe-bottom) var(--choice-safe-left);margin:auto;width:min(480px,calc(100vw - var(--choice-safe-left) - var(--choice-safe-right) - 20px));height:min(600px,calc(100dvh - var(--choice-safe-top) - var(--choice-safe-bottom) - 16px));border:1px solid #d7cba059;border-radius:12px;padding:0}
   #modal:has(.skill-options) #modal-content{padding:10px;gap:8px;grid-template-rows:auto minmax(0,1fr)}
   #modal .upgrade-heading h2{font-size:20px;line-height:1.4}
   #modal .blessing-party,#modal .upgrade-footer{display:none}
@@ -45,6 +45,7 @@
   #modal .skill-options{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
 }
 @media(max-height:680px) and (orientation:portrait){
+  #modal:has(.skill-options){width:calc(100vw - var(--choice-safe-left) - var(--choice-safe-right) - 8px);height:calc(100dvh - var(--choice-safe-top) - var(--choice-safe-bottom) - 8px)}
   #modal:has(.skill-options) #modal-content{padding:8px;gap:6px}
   #modal .skill-options{gap:6px}
   #modal .skill-card{padding:6px 10px;gap:3px 6px}
@@ -53,6 +54,7 @@
   #modal .skill-card p{font-size:14px;line-height:1.45}
 }
 @media(max-height:500px) and (orientation:landscape){
+  #modal:has(.skill-options){width:min(900px,calc(100vw - var(--choice-safe-left) - var(--choice-safe-right) - 20px));height:min(340px,calc(100dvh - var(--choice-safe-top) - var(--choice-safe-bottom) - 16px))}
   #modal .skill-options{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
   #modal .skill-card{grid-template-columns:minmax(0,1fr) auto;padding:8px;gap:6px 4px}
   #modal .skill-card .skill-emblem{display:none}
@@ -61,4 +63,7 @@
   #modal .skill-card-meta{gap:2px 6px}
   #modal .skill-card-meta :is(.blessing-source,.skill-upgrade-label){font-size:11px}
   #modal .skill-card p{font-size:14px;line-height:1.45}
+}
+@media(max-height:350px) and (orientation:landscape){
+  #modal:has(.skill-options){width:calc(100vw - var(--choice-safe-left) - var(--choice-safe-right) - 8px);height:calc(100dvh - var(--choice-safe-top) - var(--choice-safe-bottom) - 8px)}
 }
