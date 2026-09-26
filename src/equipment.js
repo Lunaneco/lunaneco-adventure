@@ -21,6 +21,10 @@ export const UNIQUE_EQUIPMENT=Object.freeze([
   {id:'mochi-dream-hourglass',name:'夢砂糖の砂時計',act:9,area:2,icon:'spark',color:'#d3bbff',bonus:{attack:.18,defense:10},note:'奪われた眠りを取り戻す、小さな砂時計。攻撃力 +18%／防御力 +10。'},
   {id:'mochi-echo-bell-relic',name:'こだまの祈り鈴',act:10,area:2,icon:'star',color:'#ffd49d',bonus:{hp:45,attack:.16,defense:10},note:'闇に閉じられた声を、もう一度届ける祈りの鈴。最大HP +45／攻撃力 +16%／防御力 +10。'},
   {id:'mochi-promise-crown',name:'ふぇ〜の約束冠',act:11,area:2,icon:'link',color:'#ffb8df',bonus:{hp:60,attack:.20,defense:16},note:'ひとりぼっちにしない約束を結んだ、小さな冠。最大HP +60／攻撃力 +20%／防御力 +16。'},
+  {id:'demon-crimson-rose',name:'紅月の黒薔薇飾り',act:12,area:2,icon:'heart',color:'#d992b5',bonus:{hp:80,attack:.24},note:'眠らない街を守り抜いた、紅い雫を抱く黒薔薇。最大HP +80／攻撃力 +24%。'},
+  {id:'demon-lullaby-charm',name:'安らぎの夜鈴',act:13,area:2,icon:'shield',color:'#bba5ef',bonus:{hp:100,defense:24},note:'暴走した子守歌に、穏やかな眠りを取り戻す銀の鈴。最大HP +100／防御力 +24。'},
+  {id:'demon-moon-drop-knot',name:'月雫の親友結び',act:14,area:2,icon:'link',color:'#d5b5ef',bonus:{hp:85,attack:.22,defense:18},note:'月と紅い雫を結んだ、背中を預け合う大の仲良しの証。最大HP +85／攻撃力 +22%／防御力 +18。'},
+  {id:'demon-kind-king-crown',name:'優しき魔王の冠',act:15,area:2,icon:'star',color:'#e3be8b',bonus:{hp:110,attack:.26,defense:26},note:'正気を取り戻した悪魔大王から贈られた、みんなを守る冠。最大HP +110／攻撃力 +26%／防御力 +26。'},
 ]);
 export const equipmentImage=id=>publicUrl(`assets/equipment/${id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
 export const uniqueEquipment=id=>UNIQUE_EQUIPMENT.find(item=>item.id===id);

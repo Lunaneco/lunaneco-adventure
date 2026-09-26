@@ -73,7 +73,7 @@ test('three chime models attach to the non-humanoid Mochi rig and reuse the cach
  }
  assert.equal(new Set(geometries).size,3);
 });
-const relics=UNIQUE_EQUIPMENT.filter(e=>e.act>=8);
+const relics=UNIQUE_EQUIPMENT.filter(e=>e.act>=8&&e.act<12);
 function gate(g){g.area=2;g.wave=6;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.ok(g.crossExit());}
 test('each chapter-three trial awards its distinct relic once, with exact time, hit and difficulty gates',()=>{
  assert.equal(relics.length,4);
