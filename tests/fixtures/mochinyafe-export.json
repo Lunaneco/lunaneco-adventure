@@ -1,0 +1,21 @@
+{
+  "source": "user-provided mochinyafe.blend",
+  "sourceSHA256": "33c5c2f68ad62a583c8f0e633eb126bda31ad12e9a3b05fc289ee6678b9b2fd9",
+  "status": "poseable_runtime_slime",
+  "units": "metres; runtime avatar height 1.55 game units",
+  "front": "Blender -Y / glTF +Z",
+  "pivot": "body base at ground; runtime centres XZ",
+  "vertices": 5628,
+  "triangles": 10848,
+  "materials": 4,
+  "animation": "runtime volume-preserving squash/stretch, hop, landing and cry; no skeletal rig",
+  "reference": "user-provided original model; user-requested limbless slime adaptation",
+  "removedParts": [
+    "Mochi_Tiny_Paw.012",
+    "Mochi_Tiny_Paw.013",
+    "Mochi_Tiny_Paw.014",
+    "Mochi_Tiny_Paw.015"
+  ],
+  "limbCount": 0,
+  "target": "mobile WebGL; one avatar / maximum two deployed heroes"
+}

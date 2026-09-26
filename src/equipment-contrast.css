@@ -1,0 +1,39 @@
+/* Separate the illustrated item, readable name and rarity instead of tinting all three. */
+#equipment-panel .equipment-inventory .equipment-item{background:#faf8f2;border-color:#cec8bb;box-shadow:0 3px 10px #343a4310}
+#equipment-panel .equipment-inventory .equipment-item.equipped{background:#f6f0e0;border-color:#a48b56;box-shadow:inset 3px 0 #a48b56}
+#equipment-panel .equipment-inventory .equipment-item-main{grid-template-columns:66px minmax(0,1fr) auto;gap:12px;padding:14px}
+#equipment-panel .equipment-current .equipment-slot>img,#equipment-panel .equipment-inventory .equipment-thumbnail{display:block;width:66px;height:66px;padding:5px;object-fit:contain;background:radial-gradient(ellipse at 45% 35%,#66738d,#35455f 76%);border:1px solid #748097;border-radius:6px;box-shadow:inset 0 0 0 2px #17283f30}
+#equipment-panel .equipment-current .equipment-slot>img{width:56px;height:56px;flex:none}
+#equipment-panel .equipment-inventory .equipment-item-label h4{color:#2e3748;font-weight:750;font-size:14px;line-height:1.65}
+#equipment-panel .equipment-inventory .equipment-item-label p{color:#586273;font-size:max(11px,var(--ui-min-font,0px))}
+#equipment-panel .equipment-inventory .equipment-owner{color:#566372;font-size:max(10px,var(--ui-min-font,0px));font-weight:600}
+#equipment-panel .equipment-inventory .equipped .equipment-owner{color:#715820}
+#equipment-panel .equipment-inventory .equipment-equip{font-weight:700;background:#3f4d65;color:#fff7e6;border-color:#3f4d65;border-radius:5px}
+#equipment-panel .equipment-inventory .equipment-equip:disabled{opacity:1;color:#705726;background:#e7ddc4;border-color:#cfbd8f;cursor:default}
+#equipment-panel .equipment-inventory .equipment-item.equipped .equipment-equip:not(:disabled){color:#705726;background:transparent;border-color:#bcab85}
+#equipment-panel .equipment-inventory .equipment-item-details{border-color:#d7d1c4}
+#equipment-panel .equipment-inventory .equipment-item-details summary{color:#505d73;font-weight:600;font-size:max(11px,var(--ui-min-font,0px))}
+#equipment-panel .equipment-inventory .equipment-item-details>p{color:#566272}
+#equipment-panel .equipment-inventory .weapon-comparison dt{color:#586273}
+#equipment-panel .equipment-inventory .weapon-comparison dd{color:#2f3c51}
+#equipment-panel .equipment-inventory .weapon-comparison .better{color:#216749;font-weight:700;background:#e0ece2;padding:2px 5px;border-radius:3px}
+#equipment-panel .equipment-inventory .weapon-comparison .worse{color:#973d3a;font-weight:700;background:#f4e3de;padding:2px 5px;border-radius:3px}
+#equipment-panel .equipment-inventory .weapon-comparison .same{color:#526174}
+/* The global badge keeps its reveal colors outside the paper menu. */
+.menu-light :is(#equipment-panel,#weapons-panel,#growth-panel) .weapon-rarity[data-rank]{--rarity-ink:#394b59;background:#e1e7e8;border:1px solid #bcc9ce;border-radius:3px;font-weight:700;font-size:max(10px,var(--ui-min-font,0px))!important}
+.menu-light :is(#equipment-panel,#weapons-panel,#growth-panel) .weapon-rarity[data-rank="2"]{--rarity-ink:#215779;background:#dcecf6;border-color:#a9c9df}
+.menu-light :is(#equipment-panel,#weapons-panel,#growth-panel) .weapon-rarity[data-rank="3"]{--rarity-ink:#653c83;background:#eee3f5;border-color:#d0b5e0}
+.menu-light :is(#equipment-panel,#weapons-panel,#growth-panel) .weapon-rarity[data-rank="4"]{--rarity-ink:#72511c;background:#f7e7bf;border-color:#d2b674}
+#weapons-panel .weapon-collection-card>img{background:radial-gradient(ellipse,#61728b,#31415b);border-radius:8px;border:1px solid #748097;padding:12px}
+@media(max-width:760px){
+ #equipment-panel .equipment-inventory .equipment-item-main{grid-template-columns:58px minmax(0,1fr) auto;gap:9px;padding:12px}
+ #equipment-panel .equipment-inventory .equipment-thumbnail{width:58px;height:58px;padding:4px}
+ #equipment-panel .equipment-inventory .equipment-item-label h4{font-size:max(13px,var(--ui-min-font,0px))}
+ #equipment-panel .equipment-inventory .equipment-equip{font-size:max(11px,var(--ui-min-font,0px));min-width:60px}
+}
+@media(max-width:360px){
+ #equipment-panel .equipment-inventory .equipment-item-main{grid-template-columns:50px minmax(0,1fr) auto;gap:7px;padding:10px}
+ #equipment-panel .equipment-inventory .equipment-thumbnail{width:50px;height:54px;padding:3px}
+ #equipment-panel .equipment-inventory .equipment-item-label h4{font-size:max(12px,var(--ui-min-font,0px))}
+ #equipment-panel .equipment-inventory .equipment-item-label p{font-size:max(10px,var(--ui-min-font,0px))}
+}

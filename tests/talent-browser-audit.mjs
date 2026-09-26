@@ -1,0 +1,52 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+const out='audit/talent-tree';await mkdir(out,{recursive:true});
+const browser=await chromium.launch({channel:'chrome',headless:true}),checks=[],errors=[];
+const check=(name,data={})=>{checks.push({name,...data});console.log('PASS',name,JSON.stringify(data));};
+const key='lunaria-progression-v1',saved=p=>p.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+async function open(profile,{production=false}={}){
+ const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,isMobile:true,deviceScaleFactor:1});
+ await context.addInitScript(({key,profile})=>{if(!sessionStorage.getItem('seeded')){localStorage.setItem(key,JSON.stringify(profile));localStorage.setItem('lunaria-record-v1',JSON.stringify({...JSON.parse(localStorage.getItem('lunaria-record-v1')||'{}'),chapterOneCleared:true}));localStorage.setItem('lunaria-settings-v1',JSON.stringify({sound:false,music:false,quality:'low',motion:false}));sessionStorage.setItem('seeded','1');}},{key,profile});
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+ await page.goto(`http://127.0.0.1:${production?4173:5174}/?v=talent-audit`);await page.waitForSelector('#loading',{state:'detached',timeout:60000});await page.click('#chapter-menu-open');return {context,page};
+}
+const advanced={version:1,characters:{nyanluna:{level:15,xp:12,breaks:0},tsukineko:{level:15,xp:5,breaks:0}},inventory:{starBud:100,moonDew:10,wardenCore:1,moonPrism:0,astralCore:0,limitStone:2}};
+try{
+ const {page,context}=await open(advanced);
+ await page.click('[data-menu-tab="growth"]');assert.match(await page.locator('#growth-nyanluna .defense-breakdown').innerText(),/固有 8.*レベル 14.*ツリー 0/);assert.match(await page.locator('#growth-tsukineko .defense-breakdown').innerText(),/固有 14/);
+ await page.click('[data-open-tree="nyanluna"]');assert.equal(await page.locator('#talent-panel').isVisible(),true);assert.equal(await page.locator('[data-tree-node]').count(),11);assert.equal(await page.locator('[data-material-count="starBud"]').innerText(),'100');
+ assert.deepEqual((await saved(page)).characters.nyanluna,{level:15,xp:12,breaks:0,tree:[]});check('Legacy growth saves migrate intact and character cards link to the eleven-node tree');
+ for(const size of [{width:390,height:844},{width:320,height:568},{width:844,height:390},{width:1440,height:900}]){
+  await page.setViewportSize(size);await page.evaluate(()=>document.querySelector('#chapter-menu').scrollTop=0);
+  assert.equal(await page.evaluate(()=>document.querySelector('#chapter-menu').scrollWidth>innerWidth),false);
+  const buttons=await page.locator('[data-tree-node]').evaluateAll(els=>els.map(el=>{const r=el.getBoundingClientRect();return {width:r.width,height:r.height,x:r.x,right:r.right};}));for(const r of buttons)assert.ok(r.width>=44&&r.height>=44&&r.x>=0&&r.right<=size.width,JSON.stringify({size,r}));
+  const overflow=await page.locator('.talent-detail').evaluate(el=>el.scrollWidth>el.clientWidth);assert.equal(overflow,false);await page.locator('[data-unlock-node]').scrollIntoViewIfNeeded();const unlock=await page.locator('[data-unlock-node]').boundingBox();assert.ok(unlock.height>=44&&unlock.x+unlock.width<=size.width);
+  await page.locator('.talent-map-heading').scrollIntoViewIfNeeded();await page.screenshot({path:`${out}/tree-${size.width}.png`});
+ }
+ check('The tree, connectors, detail pane and touch targets fit four portrait and landscape layouts');
+ await page.setViewportSize({width:390,height:844});await page.locator('[data-tree-node="guard2"]').tap();assert.equal(await page.locator('[data-unlock-node="guard2"]').isDisabled(),true);assert.match(await page.locator('.talent-requirements').innerText(),/守護の星 I/);assert.deepEqual((await saved(page)).inventory,advanced.inventory);
+ await page.locator('[data-tree-node="origin"]').tap();assert.match(await page.locator('.talent-preview').innerText(),/276/);await page.locator('[data-unlock-node="origin"]').tap();
+ await page.evaluate(()=>document.querySelector('[data-unlock-node="origin"]').click());assert.equal((await saved(page)).inventory.starBud,96);assert.deepEqual((await saved(page)).characters.nyanluna.tree,['origin']);assert.equal(await page.locator('[data-tree-node="origin"]').getAttribute('aria-label'),'はじまりの光：解放済み');
+ assert.deepEqual((await saved(page)).characters.tsukineko.tree,[]);check('Prerequisites prevent premature spending; unlocking is saved once for the selected character');
+ for(const id of ['guard1','guard2']){await page.locator(`[data-tree-node="${id}"]`).tap();assert.equal(await page.locator(`[data-unlock-node="${id}"]`).isEnabled(),true);await page.locator(`[data-unlock-node="${id}"]`).tap();}
+ assert.equal((await saved(page)).inventory.moonDew,8);await page.locator('[data-tree-node="awakening"]').tap();assert.equal(await page.locator('[data-unlock-node="awakening"]').isDisabled(),true);assert.match(await page.locator('.talent-requirements').innerText(),/攻撃の星 II.*生命の星 II/);
+ for(const id of ['attack1','attack2','life1','life2']){await page.locator(`[data-tree-node="${id}"]`).tap();await page.locator(`[data-unlock-node="${id}"]`).tap();}
+ await page.locator('[data-tree-node="awakening"]').tap();assert.equal(await page.locator('[data-unlock-node="awakening"]').isEnabled(),true);assert.match(await page.locator('.talent-detail h3').innerText(),/月光の極意/);assert.match(await page.locator('.talent-effect').innerText(),/12%/);await page.locator('[data-unlock-node="awakening"]').tap();
+ let profile=await saved(page);assert.equal(profile.characters.nyanluna.tree.length,8);assert.deepEqual(profile.inventory,{limitStone:2,starBud:0,moonDew:0,wardenCore:0,moonPrism:0,astralCore:0});await page.locator('.talent-map-heading').scrollIntoViewIfNeeded();await page.screenshot({path:`${out}/completed-mobile.png`});
+ await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>document.querySelector('#chapter-menu').scrollTop=0);await page.screenshot({path:`${out}/completed-desktop.png`});check('All three branches lead to the character awakening and consume exactly the advertised materials');
+ await page.locator('[data-tree-hero="tsukineko"]').click();assert.equal(await page.locator('.talent-node.unlocked').count(),0);assert.equal(await page.locator('[data-unlock-node="origin"]').isDisabled(),true);assert.match(await page.locator('.talent-requirements').innerText(),/星の芽が4個不足/);
+ await page.locator('[data-tree-node="awakening"]').click();assert.match(await page.locator('.talent-detail h3').innerText(),/星影の極意/);assert.match(await page.locator('.talent-effect').innerText(),/防御力 \+8/);
+ await page.reload();await page.waitForSelector('#loading',{state:'detached'});await page.click('#chapter-menu-open');await page.click('[data-menu-tab="growth"]');assert.deepEqual(await saved(page),profile);
+ const stats=await page.locator('#growth-nyanluna .growth-stats dd').allTextContents();assert.deepEqual(stats,['360','35.2','37']);assert.match(await page.locator('#growth-nyanluna .defense-breakdown').innerText(),/ツリー 15/);check('Unlocks survive reload; the second hero stays independent; all permanent stats include the tree');
+ await page.click('[data-menu-tab="adventure"]');await page.click('#chapter-start');await page.click('#story-skip');
+ const combat=await page.evaluate(()=>{const t=window.__LUNARIA_TEST__,g=t.game;g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.player.attack=g.partner.attack=1000;g.player.invincible=0;const hp=g.player.hp;g.hurt(100,0,0);return {maxHp:g.player.maxHp,damage:hp-g.player.hp,defense:g.statsFor(0).defense};});assert.equal(combat.maxHp,360);assert.equal(combat.defense,37);assert.ok(Math.abs(combat.damage-10000/137)<1e-8);
+ await page.evaluate(()=>{const t=window.__LUNARIA_TEST__,g=t.game;for(const type of ['moss','golem','boss']){const e=g.spawnEnemy(type,10,10);g.hit(e,99999,0,0);}t.step(0);});
+ profile=await saved(page);assert.equal(profile.inventory.starBud,9);assert.equal(profile.inventory.wardenCore,1);assert.equal(profile.inventory.moonDew,0);
+ await page.click('#pause');assert.match(await page.locator('.run-materials').innerText(),/星の芽 \+9.*守護者の欠片 \+1/);await page.click('#quit');await page.click('[data-menu-tab="talent"]');assert.equal(await page.locator('[data-material-count="starBud"]').innerText(),'9');assert.equal(await page.locator('[data-material-count="wardenCore"]').innerText(),'1');
+ await page.locator('[data-tree-hero="tsukineko"]').click();await page.locator('[data-unlock-node="origin"]').click();profile=await saved(page);assert.equal(profile.inventory.starBud,5);assert.deepEqual(profile.characters.tsukineko.tree,['origin']);await page.reload();await page.waitForSelector('#loading',{state:'detached'});assert.deepEqual(await saved(page),profile);check('Tree defense and HP work in combat, and actual enemy drops persist through a quit and reload',combat);await context.close();
+
+ const low={characters:{nyanluna:{level:1},tsukineko:{level:1}},inventory:{starBud:20}};const novice=await open(low);await novice.page.click('[data-menu-tab="talent"]');await novice.page.locator('[data-unlock-node="origin"]').tap();await novice.page.locator('[data-tree-node="guard1"]').tap();assert.equal(await novice.page.locator('[data-unlock-node="guard1"]').isDisabled(),true);assert.match(await novice.page.locator('.talent-requirements').innerText(),/Lv.3が必要/);assert.equal((await saved(novice.page)).inventory.starBud,16);await novice.context.close();check('A low-level character cannot buy a node early even with enough material');
+ const live=await open(advanced,{production:true});assert.equal(await live.page.evaluate(()=>typeof window.__LUNARIA_TEST__),'undefined');await live.page.click('[data-menu-tab="talent"]');await live.page.locator('[data-unlock-node="origin"]').tap();assert.equal((await saved(live.page)).inventory.starBud,96);await live.page.reload();await live.page.waitForSelector('#loading',{state:'detached'});assert.deepEqual((await saved(live.page)).characters.nyanluna.tree,['origin']);await live.context.close();check('The production build unlocks and persists growth without a developer bridge');
+ assert.deepEqual(errors,[]);check('No JavaScript, WebGL or resource errors');await writeFile(`${out}/report.json`,JSON.stringify({checks,errors,date:new Date().toISOString()},null,2));
+}finally{await browser.close();}

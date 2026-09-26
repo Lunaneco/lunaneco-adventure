@@ -1,0 +1,47 @@
+.ultimate-cutin{position:fixed;inset:0;z-index:22;display:grid;place-items:center;isolation:isolate;overflow:hidden;background:#030918ed;touch-action:none;user-select:none;--cutin-color:#e0b5ff;--cutin-gold:#ffe29c}
+.cutin-speedlines{position:absolute;inset:-100%;z-index:-1;opacity:.45;background:repeating-conic-gradient(from 12deg at 50% 50%,transparent 0deg 9deg,color-mix(in srgb,var(--cutin-color) 48%,transparent) 9.2deg 9.65deg,transparent 9.8deg 15deg);mask-image:radial-gradient(ellipse,transparent 0 14%,#000 40%);transform:scale(1.1)}
+.cutin-panel{position:relative;display:grid;grid-template-columns:57% 43%;align-items:center;width:min(1220px,100vw);height:min(77dvh,650px);min-height:390px;isolation:isolate;border-block:2px solid var(--cutin-color);background:linear-gradient(120deg,#060c1b,#101b33 72%,#071224);box-shadow:0 0 80px color-mix(in srgb,var(--cutin-color) 25%,transparent);overflow:hidden}
+.cutin-panel:after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 2px 0 #fff9,inset 0 -2px 0 #fff4;background:linear-gradient(118deg,transparent 55%,#ffffff04 55% 56%,transparent 56%)}
+.cutin-portrait{position:relative;height:100%;min-width:0;min-height:0;overflow:hidden;background:radial-gradient(ellipse,color-mix(in srgb,var(--cutin-color) 36%,transparent),transparent 70%)}
+.cutin-face{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;filter:saturate(1.06);transform:scale(1.025)}
+.cutin-art-shade{position:absolute;inset:0;background:linear-gradient(90deg,transparent 78%,#101b33),linear-gradient(0deg,#07102066,transparent 25%);pointer-events:none}
+.cutin-sparks{position:absolute;inset:0;pointer-events:none;overflow:hidden}.cutin-sparks i{position:absolute;left:calc(8% + var(--i)*7.5%);top:calc(20% + var(--i)*5%);width:3px;height:30px;transform:rotate(35deg);background:linear-gradient(transparent,var(--cutin-color),#fff);box-shadow:0 0 10px var(--cutin-color);opacity:.7}
+.cutin-copy{position:relative;min-width:0;margin-left:-9%;padding:25px 28px 25px 0;color:#fff;z-index:4;text-shadow:0 2px 14px #02091b}
+.cutin-role{display:block;width:max-content;max-width:100%;padding:6px 15px;background:var(--cutin-color);color:#10162b;font-weight:800;font-size:max(11px,var(--ui-min-font,0px));letter-spacing:2px;transform:skew(-9deg);box-shadow:4px 4px 0 #050c1b}
+.cutin-hero{display:block;font-weight:800;font-size:21px;letter-spacing:3px;margin:13px 0 32px}.cutin-english{display:block;font:900 max(11px,var(--ui-min-font,0px))/1.5 system-ui;letter-spacing:4px;color:var(--cutin-gold);transform:rotate(-4deg);transform-origin:left bottom}
+.cutin-ability{position:relative;isolation:isolate;font:900 clamp(30px,3.6vw,52px)/1.45 "Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;font-style:italic;letter-spacing:1px;margin:8px -10px 26px;padding:12px 14px 15px;transform:rotate(-4deg);color:#fff5d4;paint-order:stroke fill;-webkit-text-stroke:1.2px #1b1531;text-shadow:3px 3px 0 #070d23,5px 5px 0 var(--cutin-color),0 0 22px color-mix(in srgb,var(--cutin-color) 65%,transparent);overflow-wrap:anywhere}
+.cutin-ability:before{content:'';position:absolute;inset:0 -35px 0 -10px;z-index:-1;background:linear-gradient(110deg,#0b122bea,#162745e0 70%,#0c132aba);border-block:2px solid var(--cutin-gold);transform:skew(-13deg);box-shadow:0 5px 0 #020b228c}
+.cutin-line{font-size:14px;line-height:1.85;margin:0;color:#edf4ff;min-height:55px;text-wrap:pretty}.cutin-signal{display:flex;align-items:center;gap:4px;height:22px;margin-top:16px}.cutin-signal i{display:block;width:3px;height:3px;background:var(--cutin-color);border-radius:2px;opacity:.6}.is-speaking .cutin-signal i{height:12px;opacity:1}.is-speaking .cutin-signal i:nth-child(2n){height:20px}.is-speaking .cutin-signal i:nth-child(3n){height:7px}
+.cutin-flash{position:absolute;inset:0;pointer-events:none;z-index:8;background:radial-gradient(ellipse at 38% 45%,#fff,color-mix(in srgb,var(--cutin-color) 80%,#fff) 25%,transparent 75%);opacity:0}.cutin-shockwave{position:absolute;top:50%;left:45%;width:42vmin;aspect-ratio:1;border:3px solid var(--cutin-color);box-shadow:0 0 35px var(--cutin-color),inset 0 0 24px #fff7;border-radius:50%;transform:translate(-50%,-50%);opacity:0;pointer-events:none;z-index:5}
+.cutin-pause{position:absolute;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:10;border:1px solid #ffffff5c;border-radius:50%;width:44px;height:44px;background:#101b32db;display:grid;place-items:center}.cutin-pause .icon{width:18px}
+.cutin-skip{position:absolute;bottom:max(15px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:10px;min-height:44px;max-width:calc(100vw - 32px);width:max-content;padding:9px 23px;border:1px solid #d6e1fa70;border-radius:24px;background:#10182ddb;color:#f5edd8;font-size:max(12px,var(--ui-min-font,0px));letter-spacing:1px;z-index:10}.cutin-skip .icon{width:16px}.cutin-skip:active{background:#35445f}
+@media(max-width:760px) and (orientation:portrait){
+ .cutin-panel{display:flex;flex-direction:column;height:min(84dvh,820px);max-height:calc(100dvh - 106px);min-height:0;width:100%}.cutin-portrait{width:100%;flex:1;min-height:120px}.cutin-face{object-fit:contain;transform:scale(1.02)}.cutin-art-shade{background:linear-gradient(0deg,#101b33 0,transparent 16%)}
+ .cutin-copy{flex-shrink:0;width:100%;padding:0 25px 18px;margin:-12px 0 0;text-align:center}.cutin-role{font-size:max(8px,var(--ui-min-font,0px));padding:4px 11px;margin:auto;letter-spacing:1.5px}.cutin-hero{font-size:15px;margin:6px 0 10px}.cutin-english{font-size:max(8px,var(--ui-min-font,0px));letter-spacing:3px;transform-origin:center}.cutin-ability{font-size:clamp(25px,7.9vw,41px);margin:5px -5px 14px;padding:5px 6px 9px;line-height:1.4;white-space:nowrap}.cutin-ability:before{inset:0 -28px}.cutin-line{font-size:max(11px,var(--ui-min-font,0px));min-height:35px;line-height:1.7}.cutin-signal{justify-content:center;height:17px;margin-top:9px}.cutin-skip{font-size:max(11px,var(--ui-min-font,0px));bottom:max(10px,env(safe-area-inset-bottom))}
+}
+@media(max-height:650px) and (orientation:portrait){.cutin-copy{padding-bottom:10px;margin-top:-5px}.cutin-hero{margin:4px 0 7px;font-size:max(13px,var(--ui-min-font,0px))}.cutin-role{font-size:max(7px,var(--ui-min-font,0px))}.cutin-english{font-size:max(7px,var(--ui-min-font,0px))}.cutin-ability{margin-bottom:10px;font-size:clamp(22px,7.3vw,29px)}.cutin-line{font-size:max(10px,var(--ui-min-font,0px));min-height:30px}.cutin-signal{margin-top:5px;height:12px}}
+@media(max-height:520px) and (orientation:landscape){.cutin-panel{height:calc(100dvh - 68px);min-height:0;grid-template-columns:51% 49%}.cutin-copy{margin-left:-3%;padding:8px 27px 12px 0}.cutin-role{font-size:max(8px,var(--ui-min-font,0px));padding:4px 11px}.cutin-hero{font-size:15px;margin:7px 0 15px}.cutin-english{font-size:max(8px,var(--ui-min-font,0px));letter-spacing:3px}.cutin-ability{font-size:28px;margin:4px -6px 15px;padding:6px 10px;line-height:1.35}.cutin-line{font-size:max(10px,var(--ui-min-font,0px));min-height:0}.cutin-signal{height:15px;margin-top:9px}.cutin-skip{bottom:4px;min-height:32px;padding:4px 16px;font-size:max(10px,var(--ui-min-font,0px))}.cutin-pause{top:8px;right:10px}}
+@media(prefers-reduced-motion:no-preference){
+ body:not(.reduce-motion) .ultimate-cutin{animation:cutin-arrive .14s ease-out both}
+ body:not(.reduce-motion) .cutin-panel{animation:cutin-slam .42s cubic-bezier(.16,.8,.2,1) both}
+ body:not(.reduce-motion) .cutin-face{animation:cutin-art-enter .48s cubic-bezier(.12,.7,.3,1) both}
+ body:not(.reduce-motion) .cutin-copy{animation:cutin-type-enter .45s .09s cubic-bezier(.1,.8,.25,1) both}
+ body:not(.reduce-motion) .cutin-flash{animation:cutin-flash .42s ease-out both}
+ body:not(.reduce-motion) .cutin-shockwave{animation:cutin-shockwave .68s .1s ease-out both}
+ body:not(.reduce-motion) .cutin-speedlines{animation:cutin-rush .8s ease-out both}
+ body:not(.reduce-motion) .cutin-sparks i{animation:cutin-spark 1.5s calc(var(--i)*-.11s) ease-in-out infinite}
+ body:not(.reduce-motion) .is-speaking .cutin-signal i{animation:cutin-voice .45s ease-in-out infinite alternate}
+ body:not(.reduce-motion) .is-speaking .cutin-signal i:nth-child(2n){animation-delay:-.3s}
+ body:not(.reduce-motion) .ultimate-cutin[data-phase=release]{animation:cutin-release .18s ease-in both}
+ .ultimate-cutin.is-paused,.ultimate-cutin.is-paused *{animation-play-state:paused!important}
+}
+@keyframes cutin-arrive{from{opacity:0}to{opacity:1}}
+@keyframes cutin-slam{0%{transform:translateX(-8%) skewX(-7deg) scale(1.04)}55%{transform:translateX(1%) skewX(1deg) scale(1)}75%{transform:translateX(-.5%)}100%{transform:none}}
+@keyframes cutin-art-enter{from{transform:scale(1.22) translateX(-3%)}to{transform:scale(1.025)}}
+@keyframes cutin-type-enter{from{opacity:0;transform:translateX(70px) scale(1.15)}to{opacity:1;transform:none}}
+@keyframes cutin-flash{0%{opacity:.75}100%{opacity:0}}
+@keyframes cutin-shockwave{0%{opacity:.85;transform:translate(-50%,-50%) scale(.25)}100%{opacity:0;transform:translate(-50%,-50%) scale(3.8)}}
+@keyframes cutin-rush{from{transform:scale(.6);opacity:.9}to{transform:scale(1.1);opacity:.45}}
+@keyframes cutin-spark{0%{opacity:0;translate:-40px 65px}30%{opacity:.7}100%{opacity:0;translate:45px -110px}}
+@keyframes cutin-voice{to{transform:scaleY(.4)}}
+@keyframes cutin-release{to{opacity:0;transform:scale(1.07)}}

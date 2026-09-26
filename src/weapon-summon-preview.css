@@ -1,0 +1,40 @@
+.preview-body{overflow:auto;overscroll-behavior:auto;background:#060b16}
+.preview{min-height:100dvh;padding:max(28px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(40px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:radial-gradient(ellipse 80% 480px at 50% 0,#2a3d6a66,transparent) no-repeat;color:#f3ecda}
+.preview>*{max-width:1040px;margin-inline:auto}
+.preview-head{text-align:center}
+.preview-head .eyebrow{font-size:max(9px,var(--ui-min-font,0px));letter-spacing:.24em;color:#ddc599}
+.preview-head h1{margin:10px 0 8px;font:500 clamp(21px,5.6vw,28px)/1.45 "Hiragino Mincho ProN","Yu Mincho",serif;letter-spacing:.12em;color:#fff3d6}
+.preview-head p{margin:0;font-size:max(12px,var(--ui-min-font,0px));line-height:1.8;color:#b9c8d3}
+.preview-options{display:flex;flex-wrap:wrap;gap:8px;margin-block:20px}
+.preview-options fieldset{flex:1 1 auto;display:flex;flex-wrap:wrap;column-gap:14px;min-width:0;margin:0;padding:6px 12px 8px;border:1px solid #ffffff1c;border-radius:10px;background:#0c1527}
+.preview-options fieldset:first-child{flex-basis:100%}
+.preview-options legend{padding:0 6px;font-size:max(11px,var(--ui-min-font,0px));letter-spacing:.08em;color:#e5d4af}
+.preview-choice{display:flex;align-items:center;gap:8px;min-height:34px;font-size:max(12px,var(--ui-min-font,0px));color:#dbe4ec;cursor:pointer}
+.preview-choice input{margin:0;accent-color:#ffd580}
+.preview-run{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:26px}
+.preview-run button{flex:1 1 260px;width:auto;max-width:340px;min-height:48px;margin:0;padding:10px 20px}
+.preview-run p{flex-basis:100%;margin:2px 0 0;text-align:center;font-size:max(11px,var(--ui-min-font,0px));line-height:1.8;color:#9fb0c2}
+.preview-catalog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.preview-hero{min-width:0;padding:14px;border:1px solid #ffffff1a;border-radius:12px;background:linear-gradient(160deg,#16223bcc,#0a1120)}
+.preview-hero h2{display:flex;align-items:center;gap:10px;margin:0 0 4px;font-size:16px;font-weight:600;color:#f5ead0}
+.preview-hero .portrait{width:36px;height:36px}
+.preview-weapon{display:grid;grid-template:"art name" auto "art style" auto "ranks ranks" auto/64px minmax(0,1fr);column-gap:12px;margin-top:10px;padding-top:12px;border-top:1px solid #ffffff12}
+.preview-weapon img{grid-area:art;width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 2px 8px #000a)}
+.preview-weapon h3{grid-area:name;align-self:end;margin:0;font-size:max(13px,var(--ui-min-font,0px));font-weight:600;line-height:1.4;color:#f1e7cf}
+.preview-weapon>small{grid-area:style;align-self:start;margin-top:2px;font-size:max(10px,var(--ui-min-font,0px));color:#9fb3c2}
+.preview-ranks{grid-area:ranks;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.preview-ranks button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:46px;border:1px solid color-mix(in srgb,var(--rarity-color) 55%,transparent);border-radius:8px;background:color-mix(in srgb,var(--rarity-color) 10%,#0b1222);color:var(--rarity-color);font-size:14px;font-weight:700;line-height:1.1}
+.preview-ranks button:hover{background:color-mix(in srgb,var(--rarity-color) 22%,#0b1222)}
+.preview-ranks button small{font-size:max(9px,var(--ui-min-font,0px));font-weight:500;color:#cfd8e2}
+@media(max-width:900px){.preview-catalog{grid-template-columns:1fr}}
+
+.preview-bar{position:absolute;z-index:5;top:max(10px,env(safe-area-inset-top));left:max(10px,env(safe-area-inset-left));width:max-content;max-width:min(300px,calc(100% - 20px));padding:8px;border:1px solid #ffffff2e;border-radius:12px;background:#060a18d9;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#ece4cf}
+.preview-label{margin:0 2px 6px;font-size:max(11px,var(--ui-min-font,0px));line-height:1.5;color:#f3e7c8}
+.preview-actions{display:flex;gap:4px}
+.preview-actions button{min-width:40px;min-height:36px;padding:4px 8px;border:1px solid #ffffff30;border-radius:8px;background:#ffffff10;font-size:max(12px,var(--ui-min-font,0px));white-space:nowrap}
+.preview-actions button:disabled{opacity:.35}
+.preview-actions [aria-pressed=true]{border-color:#ffd580;color:#ffe3a0;background:#ffd58024}
+.preview-bar[data-auto=true]:after{content:'';position:absolute;left:10px;right:10px;bottom:3px;height:2px;border-radius:2px;background:#ffd580;transform-origin:left;animation:preview-countdown var(--auto-next) linear both}
+@keyframes preview-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+#batch-preview{scroll-margin-top:20px}
+#batch-preview h2{flex-basis:100%;text-align:center;font-size:20px;line-height:1.5;font-weight:500;color:#f5e3bb;margin:4px 0 10px}

@@ -1,0 +1,11 @@
+import { chromium } from '@playwright/test';
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+await page.goto('http://127.0.0.1:5174');await page.waitForSelector('#loading',{state:'detached',timeout:30000});await page.screenshot({path:'audit/desktop-title.png'});
+await page.click('#start');await page.click('#chapter-start');await page.waitForTimeout(5500);await page.screenshot({path:'audit/desktop-game.png'});
+console.log(JSON.stringify({errors,state:await page.evaluate(()=>window.__LUNARIA_TEST__.state),stats:await page.evaluate(()=>window.__LUNARIA_TEST__.stats)},null,2));
+await page.evaluate(()=>window.__LUNARIA_TEST__.home());await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);await page.screenshot({path:'audit/mobile-title.png'});
+await page.click('#start');await page.click('#chapter-start');await page.waitForTimeout(4000);await page.screenshot({path:'audit/mobile-game.png'});
+console.log('mobile',JSON.stringify(await page.evaluate(()=>({w:innerWidth,body:document.body.scrollWidth,state:window.__LUNARIA_TEST__.state,stats:window.__LUNARIA_TEST__.stats}))));
+await browser.close();

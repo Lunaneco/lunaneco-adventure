@@ -1,0 +1,36 @@
+.tree-tiers{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tree-tiers button{min-width:0}.tree-tiers strong{line-height:1.7}
+.skill-talent-map{height:360px}
+.skill-unlock-guide{font-size:max(12px,var(--ui-min-font,0px));line-height:1.9;color:#d0d8ea}
+.skill-loadout-link{min-height:44px;display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:12px;margin:0 0 18px;background:#c6aff726;border:1px solid #c6aff785;border-radius:6px;color:#f0e3ff;font-size:max(12px,var(--ui-min-font,0px))}
+.skill-loadout-link .icon{width:18px;height:18px}
+.blessing-loadout{margin:24px 0;padding:24px;border:1px solid #c6aff74a;border-radius:12px;background:linear-gradient(130deg,#26334ae6,#112335f2)}
+.blessing-loadout header{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px}
+.blessing-loadout header>small{flex-basis:100%;letter-spacing:2px;font-size:max(9px,var(--ui-min-font,0px));color:#bdaacb}
+.blessing-loadout h3{font-size:19px;margin:2px 0;font-weight:500;color:#f0e3ff}
+.blessing-loadout header>span{font-size:max(11px,var(--ui-min-font,0px));color:#cfbddf;margin-left:auto}
+.blessing-loadout p{font-size:max(12px,var(--ui-min-font,0px));line-height:1.9;color:#c3d0df}
+.blessing-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0 22px}
+.blessing-slots button{min-width:0;min-height:106px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 6px;background:#132339;border:1px solid #a9bfd044;border-radius:8px}
+.blessing-slots button[aria-pressed=true]{background:#c6aff726;border-color:#efd8a3;box-shadow:0 0 0 2px #efd8a320}
+.blessing-slots small{font-size:max(10px,var(--ui-min-font,0px));color:#bcc9dc}.blessing-slots .icon{width:24px;height:24px;color:#d9c4ff}
+.blessing-slots strong{font-size:max(12px,var(--ui-min-font,0px));font-weight:500;line-height:1.7;overflow-wrap:anywhere}
+.blessing-loadout h4{font-size:max(13px,var(--ui-min-font,0px));color:#efdfbc;font-weight:500}
+.blessing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.blessing-options button{display:flex;align-items:center;gap:12px;text-align:left;min-width:0;padding:16px;border:1px solid #b0bdd040;border-radius:8px;background:#16283b;color:#e1e5f3}
+.blessing-options button:disabled{opacity:1;border-color:#bca5e071;background:#bca5e014}
+.blessing-options button>.icon{width:25px;height:25px;flex-shrink:0;color:#d1b8f5}
+.blessing-options button>span{flex:1;min-width:0}.blessing-options strong{font-size:max(13px,var(--ui-min-font,0px));line-height:1.7;font-weight:500;display:block}
+.blessing-options small{display:block;font-size:max(11px,var(--ui-min-font,0px));line-height:1.8;margin-top:5px;color:#b6c6d8}
+.blessing-options em{font-size:max(10px,var(--ui-min-font,0px));font-style:normal;flex-shrink:0;color:#ebd7a4;text-align:center;max-width:52px;line-height:1.8}
+.blessing-loadout .blessing-loadout-note{font-size:max(11px,var(--ui-min-font,0px));padding-top:16px;margin-bottom:0;border-top:1px solid #bdc8d32d;color:#b3c7db}
+.blessing-slots button:focus-visible,.blessing-options button:focus-visible,.skill-loadout-link:focus-visible{outline:2px solid #f6d8a0;outline-offset:3px}
+@media(max-width:760px){.blessing-loadout{padding:18px 14px}.blessing-options{grid-template-columns:1fr}.blessing-slots{gap:6px}.blessing-slots strong{font-size:max(11px,var(--ui-min-font,0px))}.tree-tiers button{padding:12px 5px}.tree-tiers strong{font-size:max(10px,var(--ui-min-font,0px));letter-spacing:0}.tree-tiers small,.tree-tiers span{font-size:max(8px,var(--ui-min-font,0px))}.blessing-options button{padding:14px 10px;gap:9px}}
+
+.skill-upgrade-label{display:block;color:#f2dca0;font-size:max(11px,var(--ui-min-font,0px));line-height:1.8;font-weight:600;overflow-wrap:anywhere}
+.blessing-options .skill-upgrade-label{font-size:max(10px,var(--ui-min-font,0px));margin-bottom:4px}
+@media(max-width:760px){
+  .skill-card>.skill-upgrade-label{grid-column:2;grid-row:3;font-size:max(9px,var(--ui-min-font,0px));line-height:1.6;margin:0 0 5px}
+  .skill-card:has(>.skill-upgrade-label)>p{grid-row:4}
+  .skill-card:has(>.skill-upgrade-label)>.blessing-source{grid-row:5;margin-top:5px}
+}

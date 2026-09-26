@@ -1,0 +1,141 @@
+{
+  "character": "omsolo",
+  "unweighted_vertices": 0,
+  "meshes": [
+    {
+      "source_mesh": "CAT_BELT",
+      "evaluated_triangles": 17496,
+      "game_triangles": 3149
+    },
+    {
+      "source_mesh": "CAT_CAP",
+      "evaluated_triangles": 33931,
+      "game_triangles": 6107
+    },
+    {
+      "source_mesh": "CAT_HEAD",
+      "evaluated_triangles": 115172,
+      "game_triangles": 41997
+    },
+    {
+      "source_mesh": "CAT_PAW.L",
+      "evaluated_triangles": 10398,
+      "game_triangles": 1871
+    },
+    {
+      "source_mesh": "CAT_PAW.R",
+      "evaluated_triangles": 9630,
+      "game_triangles": 1732
+    },
+    {
+      "source_mesh": "CAT_POUCH",
+      "evaluated_triangles": 3871,
+      "game_triangles": 696
+    },
+    {
+      "source_mesh": "CAT_ROBE_TORSO",
+      "evaluated_triangles": 48009,
+      "game_triangles": 8641
+    },
+    {
+      "source_mesh": "CAT_SLEEVE.L",
+      "evaluated_triangles": 38866,
+      "game_triangles": 6995
+    },
+    {
+      "source_mesh": "CAT_SLEEVE.R",
+      "evaluated_triangles": 38669,
+      "game_triangles": 6960
+    },
+    {
+      "source_mesh": "CAT_SUNGLASSES",
+      "evaluated_triangles": 15337,
+      "game_triangles": 2760
+    },
+    {
+      "source_mesh": "CAT_TAIL",
+      "evaluated_triangles": 36219,
+      "game_triangles": 6519
+    },
+    {
+      "source_mesh": "CAT_ROBE_SKIRT",
+      "evaluated_triangles": 100352,
+      "game_triangles": 18000
+    },
+    {
+      "source_mesh": "CAT_COLLAR",
+      "evaluated_triangles": 9079,
+      "game_triangles": 1634
+    },
+    {
+      "source_mesh": "CAT_FOOT.L",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_1.L",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_2.L",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_3.L",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_FOOT.R",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_1.R",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_2.R",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_TOE_3.R",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_NECK_GUARD",
+      "evaluated_triangles": 1216,
+      "game_triangles": 300
+    },
+    {
+      "source_mesh": "CAT_BODY_RT_Torso",
+      "evaluated_triangles": 2944,
+      "game_triangles": 528
+    },
+    {
+      "source_mesh": "CAT_BODY_RT_Arm.L",
+      "evaluated_triangles": 2784,
+      "game_triangles": 500
+    },
+    {
+      "source_mesh": "CAT_BODY_RT_Leg.L",
+      "evaluated_triangles": 2592,
+      "game_triangles": 466
+    },
+    {
+      "source_mesh": "CAT_BODY_RT_Arm.R",
+      "evaluated_triangles": 2784,
+      "game_triangles": 500
+    },
+    {
+      "source_mesh": "CAT_BODY_RT_Leg.R",
+      "evaluated_triangles": 2592,
+      "game_triangles": 466
+    }
+  ]
+}

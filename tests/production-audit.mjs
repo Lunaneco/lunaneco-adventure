@@ -1,0 +1,21 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {writeFile,readdir,readFile} from 'node:fs/promises';
+const browser=await chromium.launch({channel:'chrome',headless:true});const context=await browser.newContext({viewport:{width:1440,height:900},serviceWorkers:'allow'});const page=await context.newPage();const errors=[],checks=[];
+page.on('pageerror',error=>errors.push(error.message));const pass=(name,details={})=>{checks.push({name,status:'passed',...details});console.log('PASS',name,JSON.stringify(details));};
+await page.addInitScript(()=>{localStorage.setItem('lunaria-record-v1',JSON.stringify({...JSON.parse(localStorage.getItem('lunaria-record-v1')||'{}'),chapterOneCleared:true}));const Original=window.AudioContext;window.__auditAudio=[];if(Original)window.AudioContext=class extends Original{constructor(...args){super(...args);window.__auditAudio.push(this);}};window.__auditPad={axes:[0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))};Object.defineProperty(navigator,'getGamepads',{value:()=>[window.__auditPad]});});
+try{
+await page.goto('http://127.0.0.1:4173');await page.waitForSelector('#loading',{state:'detached',timeout:30000});assert.equal(await page.evaluate(()=>typeof window.__LUNARIA_TEST__),'undefined');pass('Production boots without the development/test bridge');
+const cache=await page.evaluate(async()=>{await navigator.serviceWorker.ready;return await caches.keys();});assert.ok(cache.some(k=>k.startsWith('lunaria-v1-')));pass('Versioned offline cache installs',{cache});
+const manifest=await page.evaluate(async()=>await(await fetch('/manifest.webmanifest')).json());assert.equal(manifest.display,'standalone');assert.equal(manifest.lang,'ja');pass('PWA manifest is valid and self-contained');
+await page.click('#start');await page.click('#chapter-start');await page.click('#story-skip');await page.waitForTimeout(1200);const audio=await page.evaluate(()=>window.__auditAudio.map(c=>({state:c.state,sampleRate:c.sampleRate})));assert.ok(audio.length>0);assert.equal(audio[0].state,'running');pass('Web Audio starts from the actual start gesture',{audio});
+await page.evaluate(()=>window.__auditPad.buttons[1].pressed=true);await page.waitForTimeout(100);await page.evaluate(()=>window.__auditPad.buttons[1].pressed=false);assert.equal(await page.locator('#hero-name').innerText(),'つきねこ');
+await page.evaluate(()=>window.__auditPad.buttons[0].pressed=true);await page.waitForTimeout(80);assert.equal(await page.locator('#dash').evaluate(el=>el.classList.contains('cooling')),true);await page.evaluate(()=>window.__auditPad.buttons[0].pressed=false);
+await page.evaluate(()=>window.__auditPad.buttons[9].pressed=true);await page.waitForTimeout(80);assert.equal(await page.locator('#resume').isVisible(),true);await page.evaluate(()=>window.__auditPad.buttons[9].pressed=false);pass('Gamepad mappings respond to emulated A, B and Start');
+await page.click('#quit');await page.screenshot({path:'audit/final-title.png'});
+await page.reload();await page.waitForSelector('#loading',{state:'detached'});assert.ok(await page.evaluate(()=>!!navigator.serviceWorker.controller));await context.setOffline(true);await page.reload({waitUntil:'domcontentloaded'});await page.waitForSelector('#loading',{state:'detached'});assert.equal(await page.locator('#start').isVisible(),true);await page.click('#start');await page.click('#chapter-start');await page.click('#story-skip');await page.waitForTimeout(1800);assert.equal(await page.locator('#hud').isVisible(),true);assert.ok(await page.locator('#timer').innerText()!=='00:00');pass('Offline reload and live gameplay work without network');
+await page.click('#pause');await page.click('#quit');await context.setOffline(false);
+const scripts=(await readdir('dist/assets')).filter(p=>p.endsWith('.js'));for(const path of scripts){const code=await readFile('dist/assets/'+path,'utf8');assert.ok(!code.includes('__LUNARIA_TEST__'));}pass('Compiled scripts contain no developer state mutation bridge');
+assert.deepEqual(errors,[]);pass('No uncaught errors in the production or offline flows');
+await writeFile('audit/production-report.json',JSON.stringify({date:new Date().toISOString(),browser:await browser.version(),checks,errors},null,2));
+}finally{await browser.close();}

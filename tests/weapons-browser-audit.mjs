@@ -1,0 +1,63 @@
+import {chromium} from '@playwright/test';
+import assert from 'node:assert/strict';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {normalizeProgression} from '../src/progression.js';
+import {HEROES} from '../src/model.js';
+import {WEAPON_CATALOG} from '../src/weapons.js';
+const out='audit/weapons-v137',DEV=process.env.LUNARIA_URL??'http://127.0.0.1:5174/';await mkdir(out,{recursive:true});
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const errors=[],sizes=[{width:320,height:568},{width:390,height:844},{width:844,height:390},{width:1440,height:900}];
+const seed=normalizeProgression({characters:{nyanluna:{level:4,xp:7}},inventory:{weaponTicket:4,starBud:93,moonDew:14,moonPrism:2,limitStone:2},equipment:{owned:['meadow-charm','dawn-seal'],loadout:{nyanluna:'meadow-charm'}},tutorial:{firstBattleCompleted:true}},HEROES);
+async function open(url,recruited=false,profile=seed){
+ const context=await browser.newContext({viewport:sizes[1],isMobile:true,hasTouch:true});
+ await context.addInitScript(({profile,recruited})=>{if(sessionStorage.getItem('weapon-audit'))return;if(recruited)profile.story={version:2,actClears:Array(8).fill(true)};localStorage.setItem('lunaria-progression-v1',JSON.stringify(profile));localStorage.setItem('lunaria-settings-v1',JSON.stringify({quality:'low',motion:false,music:false,sound:false}));sessionStorage.setItem('weapon-audit','1');},{profile,recruited});
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});await page.goto(url,{timeout:180000});await page.waitForSelector('#loading',{state:'detached',timeout:180000});return {page,context};
+}
+const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('lunaria-progression-v1')));
+const summon=async(page,hero,rarity,type=0)=>page.evaluate(({hero,rarity,type})=>{const original=Math.random,values=[hero,rarity,type];Math.random=()=>values.length?values.shift():original();try{const b=document.querySelector('[data-draw-weapon]');b.click();b.click();}finally{Math.random=original;}},{hero,rarity,type});
+// The draw opens the summon presentation (motion is off here); its result sheet appears at the end.
+const drawn=page=>page.waitForSelector('.summon-root.is-final',{timeout:15000});
+const close=async page=>{await page.waitForTimeout(400);await page.locator('#weapon-draw-result [data-close]').tap();await page.waitForFunction(()=>!document.querySelector('#weapon-summon').open);};
+try{
+ const {page,context}=await open(DEV);await page.locator('#chapter-menu-open').tap();await page.locator('[data-menu-tab="weapons"]').tap();
+ assert.equal(await page.locator('#weapon-ticket-count').innerText(),'4枚');await page.locator('.weapon-odds summary').tap();assert.match(await page.locator('.weapon-odds').innerText(),/75%/);assert.match(await page.locator('.weapon-odds').innerText(),/約0.5556%/);
+ for(const size of sizes){await page.setViewportSize(size);await page.locator('[data-draw-weapon]').scrollIntoViewIfNeeded();assert.equal(await page.locator('#chapter-menu').evaluate(el=>el.scrollWidth>el.clientWidth),false);assert.equal(await page.locator('.weapon-odds').evaluate(el=>el.scrollWidth>el.clientWidth),false);await page.screenshot({path:`${out}/gacha-${size.width}.png`});}
+ await page.setViewportSize(sizes[1]);await summon(page,.9,.99);await drawn(page);assert.match(await page.locator('#weapon-draw-result').innerText(),/オムソロ専用/);assert.match(await page.locator('#weapon-draw-result').innerText(),/★4/);assert.match(await page.locator('#weapon-draw-result').innerText(),/加入後に使えるよう保管/);let p=await saved(page);assert.equal(p.inventory.weaponTicket,3);assert.equal(p.weapons.draws,1);assert.equal(p.story.omsoloUnlocked,false);assert.ok(p.weapons.owned.includes('light-saber-r4'));
+ for(const size of sizes){await page.setViewportSize(size);assert.equal(await page.locator('#weapon-summon').evaluate(el=>el.scrollWidth>el.clientWidth),false);await page.locator('#weapon-draw-result [data-close]').scrollIntoViewIfNeeded();await page.screenshot({path:`${out}/result-${size.width}.png`});}
+ await page.reload();await page.waitForSelector('#loading',{state:'detached',timeout:180000});assert.deepEqual(await saved(page),p);await page.locator('#chapter-menu-open').tap();await page.locator('[data-menu-tab="weapons"]').tap();assert.match(await page.locator('.last-weapon-draw').innerText(),/オムソロ/);
+ await summon(page,.9,.99);await drawn(page);assert.match(await page.locator('.draw-outcome').innerText(),/星の芽 \+50/);p=await saved(page);assert.equal(p.inventory.weaponTicket,2);assert.equal(p.inventory.starBud,143);assert.equal(p.weapons.draws,2);await close(page);
+ await summon(page,.05,.8);await drawn(page);assert.match(await page.locator('.draw-outcome').innerText(),/装備は変更していません/);assert.equal((await saved(page)).weapons.loadout.nyanluna,'luna-staff-r1');await page.locator('#weapon-draw-result [data-equip-weapon]').tap();assert.equal((await saved(page)).weapons.loadout.nyanluna,'luna-staff-r3');await close(page);await page.locator('[data-menu-tab="equipment"]').tap();assert.match(await page.locator('[data-current-weapon]').innerText(),/★3 特級/);assert.match(await page.locator('[data-current-weapon]').innerText(),/22%/);assert.match(await page.locator('[data-current-unique]').innerText(),/星露の花飾り/);
+ await page.locator('[data-open-weapons]').tap();await summon(page,.05,.1);await drawn(page);assert.match(await page.locator('.draw-outcome').innerText(),/装備は変更していません/);await close(page);assert.equal(await page.locator('[data-draw-weapon]').isDisabled(),true);assert.match(await page.locator('[data-weapon-hero="nyanluna"] .weapon-rarity').innerText(),/★3/);
+ const before=await saved(page);assert.deepEqual(before.characters,seed.characters);assert.deepEqual(before.equipment,seed.equipment);assert.equal(before.inventory.limitStone,2);assert.equal(before.inventory.moonDew,14);
+ await page.evaluate(()=>{const t=window.__LUNARIA_TEST__;t.start();const g=t.game;g.lootRng=()=>0;g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;const boss=g.spawnEnemy('boss',8,8);g.hit(boss,999999,0,0);g.hit(boss,999999,0,0);t.step(0);});assert.equal((await saved(page)).inventory.weaponTicket,1);await page.locator('#pause').tap();assert.match(await page.locator('.run-ticket-reward').innerText(),/1枚/);await page.locator('#quit').tap();await page.locator('[data-menu-tab="weapons"]').tap();assert.equal(await page.locator('#weapon-ticket-count').innerText(),'1枚');await page.reload();await page.waitForSelector('#loading',{state:'detached',timeout:180000});assert.equal((await saved(page)).inventory.weaponTicket,1);await context.close();
+ console.log('PASS dev: mobile layouts, published odds, exactly one consumption on duplicate click, locked hero result, duplicate compensation, manual equip, no auto-equip, result persistence, boss drop once and quit retention');
+ const prod=await open(process.env.AUDIT_URL??'http://127.0.0.1:4173/',true),live=prod.page;assert.match(await live.locator('.version').innerText(),/1\.41/);assert.equal(await live.evaluate(()=>typeof window.__LUNARIA_TEST__),'undefined');await live.locator('#chapter-menu-open').tap();await live.locator('[data-menu-tab="equipment"]').tap();
+ await live.locator('[data-equipment-category="unique"]').tap();await live.locator('[data-equipment-hero="tsukineko"]').tap();await live.locator('[data-equip-item="meadow-charm"]').tap();let transfer=await saved(live);assert.equal(transfer.equipment.loadout.tsukineko,'meadow-charm');assert.equal(transfer.equipment.loadout.nyanluna,undefined);
+ await live.locator('[data-equipment-hero="omsolo"]').tap();await live.locator('[data-equip-item="meadow-charm"]').tap();transfer=await saved(live);assert.equal(transfer.equipment.loadout.omsolo,'meadow-charm');assert.equal(transfer.equipment.loadout.tsukineko,undefined);await live.locator('[data-equip-item="dawn-seal"]').tap();assert.equal((await saved(live)).equipment.loadout.omsolo,'dawn-seal');
+ await live.locator('[data-equipment-category="weapons"]').tap();await live.locator('[data-open-weapons]').tap();await summon(live,.4,.99);await drawn(live);assert.match(await live.locator('#weapon-draw-result').innerText(),/つきねこ専用/);assert.equal((await saved(live)).inventory.weaponTicket,3);await live.screenshot({path:`${out}/production-result.png`});await close(live);await live.reload();await live.waitForSelector('#loading',{state:'detached',timeout:180000});assert.ok((await saved(live)).weapons.owned.includes('nox-rifle-r4'));assert.equal((await saved(live)).equipment.loadout.omsolo,'dawn-seal');await prod.context.close();
+
+ const full=normalizeProgression({...seed,story:{version:2,actClears:Array(8).fill(true)},weapons:{version:2,owned:WEAPON_CATALOG.map(w=>w.id)}},HEROES);
+ const extra=await open(DEV,true,full),view=extra.page;await view.locator('#chapter-menu-open').tap();await view.locator('[data-menu-tab="equipment"]').tap();
+ for(const hero of HEROES){
+  await view.locator(`[data-equipment-hero="${hero.id}"]`).tap();assert.equal(await view.locator('[data-weapon-option]').count(),10);
+  const variants=WEAPON_CATALOG.filter(w=>w.heroId===hero.id&&w.rarity.rank===2);
+  for(const item of variants){await view.locator(`[data-equip-weapon="${item.id}"]`).tap();assert.equal((await saved(view)).weapons.loadout[hero.id],item.id);assert.match(await view.locator('[data-current-weapon]').innerText(),new RegExp(item.weapon.name));assert.equal(await view.locator(`[data-equip-weapon="${item.id}"]`).isDisabled(),true);}
+  const loaded=await view.locator('[data-weapon-option] img').evaluateAll(async imgs=>{await Promise.all(imgs.map(img=>img.decode()));return imgs.every(img=>img.naturalWidth>0);});assert.ok(loaded);
+ }
+ await view.locator('[data-equipment-hero="nyanluna"]').tap();await view.locator('[data-equip-weapon="lilica-staff-r2"]').tap();
+ for(const size of sizes){await view.setViewportSize(size);await view.locator('[data-weapon-option="lilica-staff-r2"]').scrollIntoViewIfNeeded();assert.equal(await view.locator('#chapter-menu').evaluate(el=>el.scrollWidth>el.clientWidth),false);assert.ok(await view.locator('[data-equip-weapon="lilica-staff-r2"]').evaluate(el=>el.getBoundingClientRect().height>=44));await view.screenshot({path:`${out}/loadout-${size.width}.png`});}
+ const selected=await saved(view);await view.reload();await view.waitForSelector('#loading',{state:'detached',timeout:180000});assert.deepEqual(await saved(view),selected);
+ await view.evaluate(()=>window.__LUNARIA_TEST__.start());await view.waitForFunction(()=>window.__LUNARIA_TEST__.world?.assetsReady);await view.waitForFunction(()=>window.__LUNARIA_TEST__.world.heroes[0].userData.weapon.userData.family==='lilica-staff');
+ const models=await view.evaluate(async()=>{
+  const {setHeroWeapon,animateHero}=await import('/src/hero-assets.js'),{WEAPON_CATALOG}=await import('/src/weapons.js'),{Box3,Vector3}=await import('/node_modules/.vite/deps/three.js');const world=window.__LUNARIA_TEST__.world,checks=[];
+  for(const [i,id] of ['nyanluna','tsukineko','omsolo'].entries()){
+   const root=world.heroes[i];for(let loop=0;loop<2;loop++)for(const item of WEAPON_CATALOG.filter(w=>w.heroId===id&&w.rarity.rank===2)){
+    setHeroWeapon(root,item);root.userData.attackTime=.1;animateHero(root,{x:0,z:0,face:0,moving:false,invincible:0},1,.01,true);const w=root.userData.weapon,box=new Box3().setFromObject(w),size=box.getSize(new Vector3());
+    checks.push({id:item.id,family:w.userData.family,finite:[...size.toArray(),...w.position.toArray(),...w.quaternion.toArray()].every(Number.isFinite),height:size.length(),meshes:w.children.length,cache:root.userData.weaponCache?.size??1,grip:w.position.distanceTo(root.userData.rig.worldToLocal(root.userData.bones.get('hand.R').bone.getWorldPosition(new Vector3())))});
+   }
+  }return checks;
+ });
+ for(const check of models){assert.ok(check.finite,check.id);assert.ok(check.height>.5&&check.height<4,check.id);assert.ok(check.grip<.25,check.id);assert.ok(check.cache<=3,check.id);assert.ok(check.meshes<=12,check.id);}await writeFile(`${out}/models.json`,JSON.stringify(models,null,2));
+ await extra.context.close();console.log('PASS variants: all 30 equipment cards, 9 held models, actual hand attachment, bounded model cache, six new images, comparisons, mobile tap sizes, lower rarity selections and persistence');
+ assert.deepEqual(errors,[]);console.log('PASS production: shared relic transfer across all heroes, single slot, gacha result and save restoration, no test bridge or browser errors');await writeFile(`${out}/report.json`,JSON.stringify({date:new Date().toISOString(),checks:'passed',errors},null,2));
+}finally{await browser.close();}

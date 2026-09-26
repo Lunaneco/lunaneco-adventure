@@ -1,0 +1,32 @@
+import {publicUrl} from './public-url.js';
+// Shared by stage selection, story portraits and the realtime environment.
+export const FIELD_THEMES = [
+  { focus:.5, image:publicUrl('assets/fields/starlit-meadow.webp'), fog:0x304d79, ground:0xaacada, grass:0xafd7ce,
+    stone:0xbacada, tint:0xc0cfe9, sky:0xbdceff, bounce:0x354f65, sun:0xd2dfff, fill:0x9cbbff,
+    portal:0xc1edff, motes:0xf2d6aa, accent:0xc6a5ff, sunPower:1.75, exposure:.94 },
+  { focus:.69, image:publicUrl('assets/fields/moonlit-ruins.webp'), fog:0x243b6a, ground:0x9bb4df, grass:0x9cbbe1,
+    stone:0xa9bad4, tint:0xb2c4ed, sky:0xbbc8ff, bounce:0x354262, sun:0xcbd8ff, fill:0x8daaff,
+    portal:0xb5b5ff, motes:0xbcdfff, accent:0x95dfff, sunPower:1.6, exposure:.91 },
+  { focus:.60, image:publicUrl('assets/fields/dawn-sanctuary.webp'), fog:0xc0a5b8, ground:0xe3d1b9, grass:0xe7d3b8,
+    stone:0xeee0c6, tint:0xffe5cf, sky:0xffe3d5, bounce:0x6d6267, sun:0xffd4a0, fill:0xc1c9ff,
+    portal:0xffdb9c, motes:0xffdeb4, accent:0xffd58d, sunPower:2.05, exposure:.98 },
+  { country:'village', focus:.50, image:publicUrl('assets/fields/musubi-village.webp'), fog:0xb6c4a3, ground:0xc7bb83, grass:0xc3bd71,
+    stone:0xcabd9a, tint:0xffebc3, sky:0xe9efce, bounce:0x596d4f, sun:0xffdfa0, fill:0xc1ded8,
+    portal:0xffe6a5, motes:0xffefab, accent:0xe8c16e, sunPower:1.8, exposure:.95 },
+  { country:'valley', focus:.50, image:publicUrl('assets/fields/musubi-valley.webp'), fog:0x86b6af, ground:0x86a38a, grass:0x95b788,
+    stone:0xa9b8aa, tint:0xd6eed5, sky:0xd5f2ee, bounce:0x3d6862, sun:0xe9edc8, fill:0xaddde0,
+    portal:0xb5f2d3, motes:0xc8ead4, accent:0x8ecdb3, sunPower:1.65, exposure:.94 },
+  { country:'town', focus:.50, image:publicUrl('assets/fields/musubi-town.webp'), fog:0xbbaa91, ground:0xb7a986, grass:0x9dad7d,
+    stone:0xc8b795, tint:0xffe3bf, sky:0xf5ddc0, bounce:0x685c49, sun:0xffd28f, fill:0xc7d6d3,
+    portal:0xffdb99, motes:0xffd59a, accent:0xe5be77, sunPower:1.8, exposure:.94 },
+  { country:'fortress', focus:.50, image:publicUrl('assets/fields/musubi-fortress.webp'), fog:0x718093, ground:0x939c99, grass:0x93a494,
+    stone:0xb6b4a4, tint:0xd6d6d1, sky:0xbecbdd, bounce:0x4d555e, sun:0xf3d4ad, fill:0xa8c8d8,
+    portal:0xc5edb3, motes:0xe2d0a3, accent:0xe0be86, sunPower:1.55, exposure:.94 },
+  ...[
+    ['mochi-village',0xc6a7b5,0xf0d3c7,0xffbed5,0xffe8d6],
+    ['mochi-teagarden',0xa4afc1,0xddc8bc,0xcab8fa,0xe8deff],
+    ['mochi-dreamtown',0x39304f,0xa8a0bf,0xdfa6ea,0xc9b2e8],
+    ['mochi-palace',0x6c5276,0xd9bdcf,0xffc1df,0xffd6d0],
+  ].map(([mochi,fog,ground,accent,sky])=>({mochi,focus:.5,image:publicUrl(`assets/fields/${mochi}.jpg`),fog,ground,grass:0xd4b2bd,stone:ground,tint:sky,sky,bounce:0x66546d,sun:0xffd8c9,fill:0xc5c4ff,portal:0xffd8e9,motes:0xffd8eb,accent,sunPower:1.7,exposure:.94})),
+  ...['demon-gate','demon-canal','demon-town','demon-palace'].map((demon,i)=>({demon,focus:.5,image:publicUrl('assets/fields/demon-country-v1.webp'),fog:[0x40364f,0x302c48,0x45273d,0x312638][i],ground:0x9e91a8,grass:0x716778,stone:0x95849f,tint:0xdbcee9,sky:0xbca7de,bounce:0x453d58,sun:0xffc1cb,fill:0xb7bfff,portal:0xffbacc,motes:0xf4bcd4,accent:0xda708c,sunPower:1.7,exposure:.96})),
+];

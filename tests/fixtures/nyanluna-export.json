@@ -1,0 +1,251 @@
+{
+  "character": "nyanluna",
+  "unweighted_vertices": 0,
+  "meshes": [
+    {
+      "source_mesh": "HEAD_CORE",
+      "evaluated_triangles": 114909,
+      "game_triangles": 42000
+    },
+    {
+      "source_mesh": "SCALP_SOURCE_BOUNDARY_PATCH",
+      "evaluated_triangles": 18406,
+      "game_triangles": 5152
+    },
+    {
+      "source_mesh": "HAIR_LOWER_RECOVERED",
+      "evaluated_triangles": 204,
+      "game_triangles": 204
+    },
+    {
+      "source_mesh": "NYAN_Rebuilt_Back_Hair_Retained_Source",
+      "evaluated_triangles": 83692,
+      "game_triangles": 18412
+    },
+    {
+      "source_mesh": "NYAN_Rebuilt_Back_Hair_Source_Fitted_Cap",
+      "evaluated_triangles": 53720,
+      "game_triangles": 11818
+    },
+    {
+      "source_mesh": "NYAN_Rebuilt_Back_Hair_Exact_Rims",
+      "evaluated_triangles": 90596,
+      "game_triangles": 19931
+    },
+    {
+      "source_mesh": "MOON_CLIP",
+      "evaluated_triangles": 5851,
+      "game_triangles": 1800
+    },
+    {
+      "source_mesh": "MOON_EARRING.L",
+      "evaluated_triangles": 2448,
+      "game_triangles": 1799
+    },
+    {
+      "source_mesh": "MOON_EARRING.R",
+      "evaluated_triangles": 1777,
+      "game_triangles": 1777
+    },
+    {
+      "source_mesh": "MAID_CLOTH",
+      "evaluated_triangles": 24171,
+      "game_triangles": 7251
+    },
+    {
+      "source_mesh": "MAID_CUFF.L",
+      "evaluated_triangles": 3072,
+      "game_triangles": 860
+    },
+    {
+      "source_mesh": "MAID_CUFF.R",
+      "evaluated_triangles": 3072,
+      "game_triangles": 860
+    },
+    {
+      "source_mesh": "NYAN_Maid_Puff_Sleeve.L",
+      "evaluated_triangles": 9728,
+      "game_triangles": 2722
+    },
+    {
+      "source_mesh": "NYAN_Maid_Sleeve_White_Trim.L",
+      "evaluated_triangles": 2304,
+      "game_triangles": 644
+    },
+    {
+      "source_mesh": "NYAN_Maid_Puff_Sleeve.R",
+      "evaluated_triangles": 9728,
+      "game_triangles": 2722
+    },
+    {
+      "source_mesh": "NYAN_Maid_Sleeve_White_Trim.R",
+      "evaluated_triangles": 2304,
+      "game_triangles": 644
+    },
+    {
+      "source_mesh": "NYAN_Maid_Skirt_Continuous",
+      "evaluated_triangles": 24576,
+      "game_triangles": 7372
+    },
+    {
+      "source_mesh": "NYAN_Maid_Apron_Continuous",
+      "evaluated_triangles": 11336,
+      "game_triangles": 3400
+    },
+    {
+      "source_mesh": "NYAN_Maid_Waistband_Continuous",
+      "evaluated_triangles": 6144,
+      "game_triangles": 1720
+    },
+    {
+      "source_mesh": "NYAN_Maid_Apron_Scallops",
+      "evaluated_triangles": 7192,
+      "game_triangles": 2156
+    },
+    {
+      "source_mesh": "MAID_SHOE.L",
+      "evaluated_triangles": 8530,
+      "game_triangles": 2387
+    },
+    {
+      "source_mesh": "MAID_SHOE.R",
+      "evaluated_triangles": 7613,
+      "game_triangles": 2131
+    },
+    {
+      "source_mesh": "MAID_SOCK.L",
+      "evaluated_triangles": 1811,
+      "game_triangles": 507
+    },
+    {
+      "source_mesh": "MAID_SOCK.R",
+      "evaluated_triangles": 1963,
+      "game_triangles": 549
+    },
+    {
+      "source_mesh": "MAID_HEADWEAR",
+      "evaluated_triangles": 13041,
+      "game_triangles": 3650
+    },
+    {
+      "source_mesh": "MAID_HEADWEAR_REMAINDER",
+      "evaluated_triangles": 5365,
+      "game_triangles": 1502
+    },
+    {
+      "source_mesh": "BODY_RT",
+      "evaluated_triangles": 864,
+      "game_triangles": 240
+    },
+    {
+      "source_mesh": "BODY_RT_Arm.L",
+      "evaluated_triangles": 1856,
+      "game_triangles": 518
+    },
+    {
+      "source_mesh": "BODY_RT_Leg.L",
+      "evaluated_triangles": 3168,
+      "game_triangles": 886
+    },
+    {
+      "source_mesh": "BODY_RT_Palm.L",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Index.L",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Middle.L",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Ring.L",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Little.L",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Thumb.L",
+      "evaluated_triangles": 624,
+      "game_triangles": 174
+    },
+    {
+      "source_mesh": "BODY_RT_Arm.R",
+      "evaluated_triangles": 1856,
+      "game_triangles": 518
+    },
+    {
+      "source_mesh": "BODY_RT_Leg.R",
+      "evaluated_triangles": 3168,
+      "game_triangles": 886
+    },
+    {
+      "source_mesh": "BODY_RT_Palm.R",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Index.R",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Middle.R",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Ring.R",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Little.R",
+      "evaluated_triangles": 720,
+      "game_triangles": 200
+    },
+    {
+      "source_mesh": "BODY_RT_Thumb.R",
+      "evaluated_triangles": 624,
+      "game_triangles": 174
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Attachment",
+      "evaluated_triangles": 960,
+      "game_triangles": 268
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Knot",
+      "evaluated_triangles": 960,
+      "game_triangles": 268
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Wing.L",
+      "evaluated_triangles": 2496,
+      "game_triangles": 698
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Tail.L",
+      "evaluated_triangles": 1712,
+      "game_triangles": 478
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Wing.R",
+      "evaluated_triangles": 2496,
+      "game_triangles": 698
+    },
+    {
+      "source_mesh": "NYAN_WD_Maid_BackBow_Tail.R",
+      "evaluated_triangles": 1712,
+      "game_triangles": 478
+    }
+  ]
+}

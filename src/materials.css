@@ -1,0 +1,27 @@
+/* Material silhouettes identify the item; polish and the written badge identify its rarity. */
+.material-wallet{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.material-wallet .material-item{--material-light:#d3dfbd;--material-wash:#9bb58b0c;position:relative;display:grid;grid-template-columns:76px minmax(0,1fr);align-items:center;gap:14px;padding:18px 16px;border:1px solid #b4c4b538;border-radius:10px;background:linear-gradient(135deg,var(--material-wash),#11233066);overflow:hidden;min-width:0}
+.material-wallet .material-item.rarity-2{--material-light:#dfd2ff;--material-wash:#ac9bdc19;border-color:#ad9ac567;box-shadow:inset 0 1px #ead7ad18}
+.material-wallet .material-item.rarity-special{--material-light:#f7dfab;--material-wash:#d3b5781c;border-color:#d4b77580;box-shadow:inset 0 1px #f8de9b35}
+.material-wallet .material-item.rarity-2:before,.material-wallet .material-item.rarity-special:before{content:"";position:absolute;inset:0 18px auto;height:1px;background:linear-gradient(90deg,transparent,#e4cd9c77,transparent);pointer-events:none}
+.material-wallet .material-illustration{display:grid;place-items:center;position:relative;width:76px;height:88px;padding:0;flex:none;background:radial-gradient(ellipse,var(--material-wash),transparent 72%)}
+.material-art{display:block;width:80px;height:80px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 5px #0004)}
+.material-wallet .material-info{display:block;min-width:0;padding:0}
+.material-wallet .rarity-tag{display:block;font:normal max(9px,var(--ui-min-font,0px))/1.5 system-ui;letter-spacing:.3px;margin:0 0 7px;width:fit-content;max-width:100%;padding:2px 6px;color:#cbdcc1;border-color:#adc5ac50;background:#9bb58b0e}
+.material-wallet .rarity-2 .rarity-tag{color:#e0cfff;border-color:#b8a4d568;background:#b5a0d518}
+.material-wallet .rarity-special .rarity-tag{color:#f5ddb0;border-color:#dfbe7d6b;background:#bf9d5714}
+.material-wallet .material-name{margin:0;font-size:14px;font-weight:600;line-height:1.6;letter-spacing:.3px;color:var(--material-light);overflow-wrap:anywhere}
+.material-wallet .material-stock{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin:8px 0 5px}
+.material-wallet .material-stock small{font:max(9px,var(--ui-min-font,0px))/1.5 system-ui;color:#9cb1bc;white-space:nowrap}
+.material-wallet .material-stock strong{display:block;margin:0;min-width:0;font:26px/1 Georgia,serif;font-variant-numeric:tabular-nums;letter-spacing:.2px;color:#f2e9d4;overflow-wrap:anywhere}
+.material-wallet .material-source{display:block;font:max(9px,var(--ui-min-font,0px))/1.7 system-ui;letter-spacing:0;color:#b0c3cd;white-space:normal}
+.talent-cost .material-art{width:32px;height:32px;filter:drop-shadow(0 2px 3px #0003)}
+.talent-cost li>span{min-width:0;line-height:1.7}.talent-cost li>b{flex:none}
+.material-guide .material-art{width:32px;height:32px;margin-top:0}
+.material-guide strong{min-width:108px;font-weight:600}
+@media(min-width:761px) and (max-width:1100px){.material-wallet .material-item{grid-template-columns:60px minmax(0,1fr);padding:14px 12px;gap:10px}.material-wallet .material-illustration{width:60px;height:78px}.material-wallet .material-art{width:66px;height:66px}.material-wallet .material-name{font-size:max(12px,var(--ui-min-font,0px))}.material-wallet .material-stock strong{font-size:23px}}
+@media(max-width:760px){.material-wallet{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.material-wallet .material-item{grid-template-columns:minmax(0,1fr);padding:12px;gap:5px;align-items:start}.material-wallet .material-illustration{width:100%;height:76px;align-self:center}.material-wallet .material-art{width:80px;height:80px}.material-wallet .material-info{display:block;padding:0}.material-wallet .material-name{font-size:max(13px,var(--ui-min-font,0px));letter-spacing:.2px}.material-wallet .rarity-tag{font-size:max(9px,var(--ui-min-font,0px));margin-bottom:5px}.material-wallet .material-stock{margin:8px 0 5px}.material-wallet .material-stock strong{font-size:25px}.material-wallet .material-source{min-height:30px;font-size:max(9px,var(--ui-min-font,0px))}.material-guide p{display:grid;grid-template-columns:32px minmax(0,1fr);gap:3px 10px}.material-guide .material-art{grid-row:1/3}.material-guide p>span{width:auto;padding:0;grid-column:2}.material-guide strong{font-size:max(11px,var(--ui-min-font,0px));min-width:0;white-space:normal}.talent-cost li{gap:8px}.talent-cost .material-art{width:29px;height:29px}}
+@media(max-width:360px){.material-wallet .material-item{padding:10px}.material-wallet .material-name{font-size:max(12px,var(--ui-min-font,0px))}.material-wallet .material-stock strong{font-size:23px}.material-wallet .material-source{font-size:max(8px,var(--ui-min-font,0px))}.material-wallet .rarity-tag{font-size:max(8px,var(--ui-min-font,0px))}.talent-cost li{font-size:max(10px,var(--ui-min-font,0px))}}
+.mission-reward{flex-wrap:wrap}.material-reward{display:flex;align-items:center;gap:7px;width:100%;min-width:0}.material-reward .material-art{width:27px;height:27px}.material-reward>span{min-width:0;line-height:1.7}.material-reward b{white-space:nowrap;font-weight:600}.material-reward>.icon{width:27px;height:21px;flex:none}
+.material-wallet .large-count strong{font-size:18px;white-space:nowrap}@media(max-width:760px){.material-wallet .large-count strong{font-size:16px}}
+.currency .material-art{width:26px;height:26px}.stone-wallet .material-art{width:38px;height:38px}
