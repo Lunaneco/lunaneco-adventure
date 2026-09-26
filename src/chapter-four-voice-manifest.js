@@ -226,8 +226,8 @@ export const CHAPTER_FOUR_VOICE_MANIFEST={
     "voiced": true,
     "id": "nyanluna-da3a116d",
     "kind": "story",
-    "file": "assets/voices/nyanluna/nyanluna-da3a116d-f931719eb1b0.mp3",
-    "duration": 2.76,
+    "file": "assets/voices/nyanluna/nyanluna-da3a116d-8634ede95183.mp3",
+    "duration": 2.52,
     "normalizationDb": 0
   },
   "shizuku-b6ef53b2": {
@@ -296,8 +296,8 @@ export const CHAPTER_FOUR_VOICE_MANIFEST={
     "voiced": true,
     "id": "nyanluna-d195d46d",
     "kind": "story",
-    "file": "assets/voices/nyanluna/nyanluna-d195d46d-b1248ecb5aa7.mp3",
-    "duration": 2.826,
+    "file": "assets/voices/nyanluna/nyanluna-d195d46d-fb8b71b122d9.mp3",
+    "duration": 3.06,
     "normalizationDb": 0
   },
   "shizuku-86b3765": {
@@ -396,8 +396,8 @@ export const CHAPTER_FOUR_VOICE_MANIFEST={
     "voiced": true,
     "id": "nyanluna-4cd69a2c",
     "kind": "story",
-    "file": "assets/voices/nyanluna/nyanluna-4cd69a2c-4b8d76b40a7d.mp3",
-    "duration": 4.506,
+    "file": "assets/voices/nyanluna/nyanluna-4cd69a2c-f29a3d863f4e.mp3",
+    "duration": 4.72,
     "normalizationDb": 0
   },
   "shizuku-23dad2d1": {
@@ -476,8 +476,8 @@ export const CHAPTER_FOUR_VOICE_MANIFEST={
     "voiced": true,
     "id": "nyanluna-6890d77",
     "kind": "story",
-    "file": "assets/voices/nyanluna/nyanluna-6890d77-275c4ee0c065.mp3",
-    "duration": 3.269,
+    "file": "assets/voices/nyanluna/nyanluna-6890d77-cef03cf3998e.mp3",
+    "duration": 3.16,
     "normalizationDb": 0
   },
   "shizuku-b5d85a6b": {
@@ -694,9 +694,9 @@ export const CHAPTER_FOUR_VOICE_MANIFEST={
     "id": "nyanluna-shizuku-duet",
     "who": "shizuku",
     "kind": "battle",
-    "text": "にゃんるな「雫、一緒に！」 雫「……背中、任せた。」 二人「月雫・おかえりの約束！」",
-    "file": "assets/voices/shizuku/nyanluna-shizuku-duet-679bea260ae0.mp3",
-    "duration": 9.516,
+    "text": "にゃんるな「雫、一緒に！」 雫「背中、任せた。」 二人「月雫・おかえりの約束！」",
+    "file": "assets/voices/shizuku/nyanluna-shizuku-duet-93f7c140e4cd.mp3",
+    "duration": 6.75,
     "normalizationDb": 0
   }
 };
