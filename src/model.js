@@ -11,7 +11,7 @@ import {ultimateFor} from './abilities.js';
 import {bossWeaponTicket,grantWeaponTickets,weaponAttackProfile,equippedWeapon} from './weapons.js';
 import {advanceMissions,claimActMissions,missionsFor,trialStatus} from './missions.js';
 import {skillsForParty,skillEffectRank} from './blessings.js';
-import {normalizeParty} from './party.js';
+import {partyForAct} from './party.js';
 import {availableHeroes,isHeroUnlocked} from './recruitment.js';
 import {FirstBattleTutorial} from './tutorial.js';
 import {normalizeProgression,characterProgress,combatStats,awardCharacterXp,grantMaterials,grantLimitStone,ENEMY_REWARDS} from './progression.js';
@@ -39,7 +39,7 @@ export class Adventure {
   constructor({seed=Date.now(),hero=0,difficulty='normal',progression,party,tutorial=false,act=0}={}) {
     this.tutorial=tutorial?new FirstBattleTutorial():null;if(tutorial){hero=0;party=['nyanluna'];act=0;}
     this.progression=normalizeProgression(progression,HEROES);this.guestHeroId=null;this.recruitedHeroId=null;this.act=isActUnlocked(this.progression,act)?act:0;this.actConfig=actFor(this.act);this.pendingTrials=new Set();this.rescue=null;
-    this.party=Object.freeze(normalizeParty(party,availableHeroes(this.progression,HEROES)));this.partyHeroes=this.party.map(id=>HEROES.findIndex(h=>h.id===id));hero=this.partyHeroes.includes(hero)?hero:this.partyHeroes[0];this.skillPool=Object.freeze(skillsForParty(this.party,this.progression));
+    this.party=Object.freeze(partyForAct(party,availableHeroes(this.progression,HEROES),this.progression,this.act,HEROES[hero]?.id));this.partyHeroes=this.party.map(id=>HEROES.findIndex(h=>h.id===id));hero=this.partyHeroes.includes(hero)?hero:this.partyHeroes[0];this.skillPool=Object.freeze(skillsForParty(this.party,this.progression));
     this.goldenSlimeKills=0;this.goldenSlimeLastWave=0;this.earnedRareStones=0;this.clearRewardTickets=0;this.earnedWeaponTickets=0;this.earnedMissions=[];this.earnedXp=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.earnedMaterials=Object.fromEntries(Object.keys(MATERIALS).map(id=>[id,0]));
     this.rng=seededRandom(seed);this.lootRng=seededRandom(seed^0x57EA90C1);this.materialRng=seededRandom(seed^0x4D41544C);this.rareRng=seededRandom(seed^0x604D5A1E);this.goldenSlime=null;this.goldenSlimeWave=guaranteedExtraRareWave(this.actConfig);this.seed=seed;this.difficulty=this.actConfig.extra?'hard':difficulty;this.phase='playing';this.events=[];this.ids=1;
     this.heroHealth=Object.fromEntries(HEROES.map(h=>{const maxHp=this.statsFor(HEROES.indexOf(h)).maxHp;return [h.id,{hp:maxHp,maxHp}];}));

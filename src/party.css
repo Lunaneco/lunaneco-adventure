@@ -49,3 +49,5 @@
   .menu-preparation .menu-hero>span[data-party-role]{margin-left:auto}
   #start small{font-size:max(9px,var(--ui-min-font,0px));letter-spacing:.2px}
 }
+
+.party-required-note{padding:12px 14px;margin:0 0 16px;border:1px solid #d5bd8059;border-radius:7px;background:#bba15e14;color:#efd59c;font-size:max(12px,var(--ui-min-font,0px));line-height:1.8}
