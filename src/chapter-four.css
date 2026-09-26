@@ -6,7 +6,6 @@
 [data-hero="shizukuDuet"] .cutin-copy{z-index:3}
 [data-hero="shizukuDuet"] .cutin-ability{white-space:normal;font-size:clamp(25px,3.1vw,42px)}
 @media(max-width:760px) and (orientation:portrait){[data-hero="shizukuDuet"] .cutin-ability{font-size:clamp(20px,6vw,30px);line-height:1.25;max-width:100%;margin-inline:0}}
-@media(max-width:760px) and (orientation:portrait){#story-dialog[data-speaker="shizuku"] .story-cast{flex:1 0 110px}}
 @media(max-width:480px){.tree-tiers{grid-template-columns:repeat(2,minmax(0,1fr))}.shizuku-bond{padding:13px}.journey-chapters{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
 .shizuku-scythe-catalog{margin:24px 0;padding:18px;border:1px solid #c69fbf;border-radius:18px;background:#f4edf4}
