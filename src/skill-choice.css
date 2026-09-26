@@ -1,0 +1,64 @@
+/* Keep all three choices and their complete effects inside one viewport. */
+#modal:has(.skill-options){
+  --choice-safe-top:env(safe-area-inset-top,0px);
+  --choice-safe-right:env(safe-area-inset-right,0px);
+  --choice-safe-bottom:env(safe-area-inset-bottom,0px);
+  --choice-safe-left:env(safe-area-inset-left,0px);
+  width:min(1040px,calc(100vw - 24px));height:min(700px,calc(100dvh - 24px));max-width:none;max-height:none;overflow:hidden;
+}
+#modal:has(.skill-options) #modal-content{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:14px;padding:20px}
+#modal .upgrade-heading{margin:0}
+#modal .upgrade-heading h2{margin:0;font-size:24px;line-height:1.4;letter-spacing:1px}
+#modal .upgrade-heading>.eyebrow,#modal .upgrade-heading>p,#modal .blessing-affinity{display:none}
+#modal .blessing-party{margin-top:8px;padding:4px 12px;font-size:13px}
+#modal .blessing-party b{font-size:12px}
+#modal .skill-options{min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#modal .skill-card{
+  min-width:0;min-height:44px;display:grid;grid-template-columns:28px minmax(0,1fr) auto;
+  grid-template-rows:auto auto auto;align-content:center;align-items:center;gap:8px 6px;
+  padding:16px 12px;text-align:left;line-height:1.4;transition:background .15s,border-color .15s;
+}
+#modal .skill-card:hover{transform:none}
+#modal .skill-card:focus-visible{outline-offset:-4px}
+#modal .skill-card .skill-emblem{grid-column:1;grid-row:1;display:grid;width:26px;height:26px;margin:0;border:0;background:none;align-self:center}
+#modal .skill-emblem:before{display:none}
+#modal .skill-emblem>.icon{width:24px;height:24px}
+#modal .skill-card h3{grid-column:2;grid-row:1;margin:0;font-size:18px;line-height:1.4;letter-spacing:0;font-weight:700}
+#modal .skill-type{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:2px;width:auto;font-size:11px;line-height:1.2;letter-spacing:0;text-align:right}
+#modal .skill-type>span{font-size:12px;letter-spacing:0;white-space:nowrap}
+#modal .skill-card-meta{grid-column:1/-1;grid-row:2;display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;min-width:0}
+#modal .skill-card-meta :is(.blessing-source,.skill-upgrade-label){font-size:12px;line-height:1.4;letter-spacing:0;margin:0}
+#modal .skill-card p{grid-column:1/-1;grid-row:3;min-height:0;margin:0;font-size:16px;line-height:1.6;letter-spacing:0;overflow-wrap:anywhere}
+#modal .skill-select{display:none}
+#modal .upgrade-footer{margin:0;font-size:12px;line-height:1.4;letter-spacing:0}
+@media(max-width:760px),(max-height:500px) and (orientation:landscape){
+  #modal:has(.skill-options){position:fixed;inset:0;margin:0;width:100%;height:100dvh;border:0;border-radius:0;padding:var(--choice-safe-top) var(--choice-safe-right) var(--choice-safe-bottom) var(--choice-safe-left)}
+  #modal:has(.skill-options) #modal-content{padding:10px;gap:8px;grid-template-rows:auto minmax(0,1fr)}
+  #modal .upgrade-heading h2{font-size:20px;line-height:1.4}
+  #modal .blessing-party,#modal .upgrade-footer{display:none}
+  #modal .skill-options{gap:8px}
+  #modal .skill-card{padding:10px;gap:5px 6px}
+  #modal .skill-card h3{font-size:17px}
+  #modal .skill-card p{font-size:15px;line-height:1.5}
+}
+@media(max-width:760px) and (orientation:portrait){
+  #modal .skill-options{grid-template-columns:1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
+}
+@media(max-height:680px) and (orientation:portrait){
+  #modal:has(.skill-options) #modal-content{padding:8px;gap:6px}
+  #modal .skill-options{gap:6px}
+  #modal .skill-card{padding:6px 10px;gap:3px 6px}
+  #modal .skill-card h3{font-size:16px}
+  #modal .skill-card-meta :is(.blessing-source,.skill-upgrade-label){font-size:11px}
+  #modal .skill-card p{font-size:14px;line-height:1.45}
+}
+@media(max-height:500px) and (orientation:landscape){
+  #modal .skill-options{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,1fr)}
+  #modal .skill-card{grid-template-columns:minmax(0,1fr) auto;padding:8px;gap:6px 4px}
+  #modal .skill-card .skill-emblem{display:none}
+  #modal .skill-card h3{grid-column:1;font-size:16px}
+  #modal .skill-type{grid-column:2}
+  #modal .skill-card-meta{gap:2px 6px}
+  #modal .skill-card-meta :is(.blessing-source,.skill-upgrade-label){font-size:11px}
+  #modal .skill-card p{font-size:14px;line-height:1.45}
+}
