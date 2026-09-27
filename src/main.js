@@ -6,6 +6,7 @@ import './difficulty.css';
 import {heightAt} from './terrain.js';
 import {fieldSummary,updateTerrainUi,floorGuide} from './terrain-ui.js';
 import './terrain.css';
+import {drawFloorLabels} from './floor-appearance.js';
 import {ENEMY_TYPES,BOSSES,ELITE_BOSS_LABEL,enemyRosterForAct} from './enemies.js';
 import {ACTS,CHAPTERS,actFor,chapterForAct,actLabel,isActUnlocked,nextAct} from './acts.js';
 import {ultimateFor} from './abilities.js';
@@ -104,7 +105,7 @@ $('#app').innerHTML=`
     <div class="key-art" aria-hidden="true"><div class="title-backdrop"></div><div class="title-film"><img src="${publicUrl('assets/title/adventure-poster.jpg')}" alt="" fetchpriority="high"><video id="title-video" data-src="${publicUrl('assets/title/adventure-loop.mp4')}" poster="${publicUrl('assets/title/adventure-poster.jpg')}" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1"></video></div></div><div class="home-shade"></div><div class="dust dust-one"></div><div class="dust dust-two"></div>
     <div class="title-lockup"><span class="title-orbit" aria-hidden="true">☾</span><p class="title-kicker">LUNANECO ADVENTURE</p><h1 class="game-title"><span>ルナネコの</span><span>不思議な冒険</span></h1><p class="title-caption">月明かりが、ふたりを導く。</p></div>
     <div class="title-entry"><button id="start" class="title-start"><span>冒険をはじめる</span>${icon('arrow')}</button></div>
-    <footer class="title-footer"><span>月と星をめぐる、小さな冒険。</span><span class="version">Ver. 2.0.0</span></footer>
+    <footer class="title-footer"><span>月と星をめぐる、小さな冒険。</span><span class="version">Ver. 2.0.1</span></footer>
   </section>
   <section id="chapter-menu" class="chapter-menu menu-light hidden" tabindex="-1" aria-label="冒険メニュー"></section>
   <section id="hud" class="hud hidden" aria-label="戦闘情報">
@@ -486,6 +487,7 @@ function updateHud(){
 }
 const numberCanvas=$('#numbers'),numberContext=numberCanvas.getContext('2d');
 function drawNumbers(){const ctx=numberContext,width=numberCanvas.width,height=numberCanvas.height;ctx.clearRect(0,0,numberCanvas.width,numberCanvas.height);if(!game)return;
+  drawFloorLabels(ctx,world,game,width,height);
   if(game.exitOpen){
     const pos=world.project(game.exitPoint.x,game.layout.height+.15,game.exitPoint.z),x=Math.max(40,Math.min(width-40,pos.x)),y=Math.max(215,Math.min(height-230,pos.y));
     ctx.save();ctx.translate(x,y-20);ctx.fillStyle='#ffecae';ctx.strokeStyle='#153747';ctx.lineWidth=4;ctx.save();ctx.rotate(Math.atan2(pos.y-(y-20),pos.x-x)-Math.PI/2);ctx.beginPath();ctx.moveTo(-12,-12);ctx.lineTo(12,-12);ctx.lineTo(0,4);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.strokeText('月の門',0,-23);ctx.fillText('月の門',0,-23);ctx.restore();

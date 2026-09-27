@@ -1,10 +1,10 @@
 import {fieldFor} from './terrain.js';
-import {FLOOR_TYPES,floorPatchesFor,floorPhase,floorUnderfoot,floorState} from './special-floors.js';
+import {FLOOR_TYPES,floorPatchesFor,floorUnderfoot} from './special-floors.js';
+import {FLOOR_VISUALS,floorHex,floorReadout,floorLegend} from './floor-appearance.js';
 import {ELITE_BOSS_LABEL} from './enemies.js';
 export const fieldSummary=(act,area)=>{const field=fieldFor(act,area);return `${field.rooms[0].shapeLabel} · ${field.note}`+(field.kind==='branch'?`（強ボス ${ELITE_BOSS_LABEL}）`:'');};
-const floorSymbol={damage:'×',slow:'≈',boost:'»',heal:'+'};
-export function floorGuide(game){return `<section class="floor-guide"><h3>この場所の特殊床</h3>${floorPatchesFor(game.layout).map(p=>{const s=FLOOR_TYPES[p.type];return `<p><b><i style="color:#${s.color.toString(16).padStart(6,'0')}">${floorSymbol[s.kind]}</i> ${s.name}</b> ${s.note}</p>`;}).join('')}<p>ダメージは操作中のキャラに発生し、搭乗中は二人とも被弾します。床の効果は会話・一時停止中に止まり、敵を倒すと休止します。</p></section>`;}
-function floorMap(layout){return `<g class="map-floors">${floorPatchesFor(layout).map(p=>{const s=FLOOR_TYPES[p.type];return `<g data-floor="${p.id}"><circle cx="${p.x}" cy="${p.z}" r="${p.radius}" fill="#${s.color.toString(16).padStart(6,'0')}" stroke="#e8eff5" stroke-width=".3"/><text x="${p.x}" y="${p.z+.9}" text-anchor="middle" font-size="3" fill="#173445">${floorSymbol[s.kind]}</text></g>`;}).join('')}</g>`;}
+export function floorGuide(game){return `<section class="floor-guide"><h3>この場所の特殊床</h3>${floorLegend(game.layout)}${floorPatchesFor(game.layout).map(p=>{const s=FLOOR_TYPES[p.type],v=FLOOR_VISUALS[s.kind];return `<p><b>${v.symbol} ${s.name}</b><small>${v.shape}</small>${s.note}</p>`;}).join('')}<p>回復床の白い点は残り回数（最大3回）。使い切ると灰色になります。ダメージは操作中のキャラに発生し、搭乗中は二人とも被弾します。会話・一時停止中は床の時間が止まり、敵を倒すと休止します。</p></section>`;}
+function floorMap(layout){return `<g class="map-floors">${floorPatchesFor(layout).map(p=>{const s=FLOOR_TYPES[p.type],v=FLOOR_VISUALS[s.kind];return `<g data-floor="${p.id}" data-kind="${s.kind}" transform="translate(${p.x} ${p.z})"><circle r="${p.radius}" fill="${floorHex(v.base)}" stroke="${floorHex(v.color)}" stroke-width=".6"${s.kind==='slow'?' stroke-dasharray="1 .6"':''}/><text y="1.05" text-anchor="middle" font-size="3.8" font-weight="900" fill="#ffffff">${v.symbol}</text></g>`;}).join('')}</g>`;}
 export function mapSvg(layout,extra=''){
  return `<svg viewBox="-28 -28 56 56" aria-hidden="true"><polygon points="${layout.points.map(p=>p.join(',')).join(' ')}" fill="#456776" stroke="#c1d5bd" stroke-width=".7"/>${floorMap(layout)}${extra}</svg>`;
 }
@@ -31,12 +31,12 @@ function updateMapEnemies(layer,enemies){
 export function updateTerrainUi(game){
  const map=document.querySelector('#field-map'),guide=document.querySelector('#passage-guide');if(!game)return;
  const l=game.layout,key=l.id+':'+game.travelOpen+':'+game.exitOpen;
- if(key!==mapKey||!map.querySelector('#map-enemies')){mapKey=key;map.innerHTML=`<small>${game.field.kind==='floors'?(game.wave%2?'1F / 2F':'2F / 2F'):game.route==='elite'?'DANGER ROUTE':game.field.kind==='branch'?'BRANCH ROUTE':'FIELD MAP'} <i>N ↑</i></small>${mapSvg(l,`<g id="map-enemies"></g><g id="map-targets"></g><circle id="map-player" r="1.25" fill="#fff7cc" stroke="#153240" stroke-width=".6"/>`)}<div class="map-legend"><span class="map-key-player">自分</span><span class="map-key-enemy">敵</span><span class="map-key-boss">ボス</span><span class="map-key-rare hidden">レア</span></div><span>${l.name}</span>`;}
+ if(key!==mapKey||!map.querySelector('#map-enemies')){mapKey=key;map.innerHTML=`<small>${game.field.kind==='floors'?(game.wave%2?'1F / 2F':'2F / 2F'):game.route==='elite'?'DANGER ROUTE':game.field.kind==='branch'?'BRANCH ROUTE':'FIELD MAP'} <i>N ↑</i></small>${mapSvg(l,`<g id="map-enemies"></g><g id="map-targets"></g><circle id="map-player" r="1.25" fill="#fff7cc" stroke="#153240" stroke-width=".6"/>`)}<div class="map-legend"><span class="map-key-player">自分</span><span class="map-key-enemy">敵</span><span class="map-key-boss">ボス</span><span class="map-key-rare hidden">レア</span></div><span>${l.name}</span>${floorLegend(l)}`;}
  if(!map.querySelector('.floor-status')){const status=document.createElement('div');status.className='floor-status';map.append(status);}
- for(const p of floorPatchesFor(l)){const node=map.querySelector(`[data-floor="${p.id}"]`);if(node)node.dataset.phase=floorPhase(game,p).phase;}
+ for(const p of floorPatchesFor(l)){const node=map.querySelector(`[data-floor="${p.id}"]`);if(node)node.dataset.phase=floorReadout(game,p).phase;}
  const under=floorUnderfoot(game),status=map.querySelector('.floor-status');
- if(under){const s=FLOOR_TYPES[under.type],phase=floorPhase(game,under).phase;status.textContent=`${floorSymbol[s.kind]} ${s.name} · ${phase==='warning'?'予告中':phase==='quiet'?'休止':phase==='spent'?'回復済':s.kind==='damage'?'危険':s.kind==='heal'?`残り${s.charges-(floorState(game).healing[under.id]?.used??0)}回`:s.kind==='slow'?'減速':'加速'}`;status.dataset.kind=s.kind;}
- else{status.textContent=floorPatchesFor(l).map(p=>{const s=FLOOR_TYPES[p.type];return `${floorSymbol[s.kind]}${{damage:'危険',heal:'回復',slow:'減速',boost:'加速'}[s.kind]}`;}).join(' ');status.dataset.kind='';}
+ if(under){const {spec,visual,phase,detail}=floorReadout(game,under);status.textContent=`${visual.symbol} ${spec.name} · ${detail}`;status.dataset.kind=spec.kind;status.dataset.phase=phase;}
+ else{status.textContent='床の色とマークで効果を確認';status.dataset.kind='';status.dataset.phase='';}
  const counts=updateMapEnemies(map.querySelector('#map-enemies'),game.enemies);
  map.querySelector('.map-key-rare').classList.toggle('hidden',!counts.rare);
  const description=`${l.name}の地図：現在地、敵${counts.enemies}体、ボス${counts.bosses}体${counts.rare?`、金色のスライム${counts.rare}体`:''}、開いている出口`;
