@@ -29,12 +29,12 @@ test('rare chance is 20% on every chapter-three wave, and other chapters never r
 });
 test('chapter three extra guarantees exactly one rare slime, on the first wave',()=>{
  for(let seed=1;seed<=12;seed++){
-  const g=new Adventure({act:18,seed,party:['nyanluna','mochinyafe'],progression:profile()});
+  const g=new Adventure({act:22,seed,party:['nyanluna','mochinyafe'],progression:profile()});
   assert.equal(g.goldenSlimeWave,1);let rares=0;
   for(let wave=1;wave<=6;wave++){g.wave=wave;g.waveSpawned=2;g.enemies=[];if(g.goldenSlime?.status==='active')g.goldenSlime.status='escaped';g.spawn();rares+=g.enemies.filter(e=>e.rare).length;}
   assert.equal(rares,1);
  }
- for(const act of [16,17]){const g=new Adventure({act,seed:4,party:['nyanluna','mochinyafe'],progression:profile()});assert.equal(g.goldenSlimeWave,null);assert.equal(g.spawnGoldenSlime(),null);}
+ for(const act of [20,21]){const g=new Adventure({act,seed:4,party:['nyanluna','mochinyafe'],progression:profile()});assert.equal(g.goldenSlimeWave,null);assert.equal(g.spawnGoldenSlime(),null);}
 });
 test('a rare spawn supplements the normal wave once without changing its roster, count or RNG',()=>{
  const a=quiet(),b=quiet();a.waveSpawned=b.waveSpawned=0;a.goldenSlimeWave=2;b.goldenSlimeWave=null;
@@ -42,7 +42,7 @@ test('a rare spawn supplements the normal wave once without changing its roster,
  assert.equal(a.enemies.filter(e=>e.rare).length,1);assert.equal(a.enemies.length,b.enemies.length+1);assert.equal(a.waveSpawned,b.waveSpawned);assert.equal(a.waveGoal,b.waveGoal);
  assert.deepEqual(a.enemies.filter(e=>!e.rare).map(e=>[e.type,e.x,e.z,e.hp,e.special]),b.enemies.map(e=>[e.type,e.x,e.z,e.hp,e.special]));
  assert.equal(a.spawnGoldenSlime(),null);assert.equal(a.rng(),b.rng());assert.equal(a.lootRng(),b.lootRng());assert.equal(a.materialRng(),b.materialRng());
- for(const act of [0,4,16,17])assert.equal(quiet({act}).spawnGoldenSlime(),null);
+ for(const act of [0,4,20,21])assert.equal(quiet({act}).spawnGoldenSlime(),null);
  const boss=quiet();boss.wave=6;assert.ok(boss.spawnGoldenSlime());assert.equal(enemyForSpawn(8,6,0,0),'boss');
 });
 test('gold flees from the player, never attacks or causes a contact hit, and can be stopped by Mochi',()=>{

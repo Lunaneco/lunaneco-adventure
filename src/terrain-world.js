@@ -1,3 +1,4 @@
+import {dressPrismTerrain} from './prim-visuals.js';
 import {MOCHI_PALETTES} from './mochi-country.js';
 import {publicUrl} from './public-url.js';
 import * as THREE from 'three';
@@ -17,10 +18,10 @@ export class TerrainWorld{
  dispose(){this.root.traverse(o=>o.geometry?.dispose());this.root.clear();this.materials.forEach(m=>m.dispose());this.materials=[];this.markers.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.markers.clear();this.markerGroups=[];}
  mat(options){const m=new THREE.MeshStandardMaterial(options);this.materials.push(m);return m;}
  build(layout){
-  this.dispose();this.id=layout.id;this.layout=layout;const [ground,side,accent]=(MOCHI_PALETTES[layout.mochi]??COUNTRY_PALETTES[layout.country]??PALETTE[layout.style]),shape=shapeFor(layout.points),y=layout.height;
+  this.dispose();this.id=layout.id;this.layout=layout;const [ground,side,accent]=(layout.prism?[0x99bfd8,0x445c89,0xbcdfff]:MOCHI_PALETTES[layout.mochi]??COUNTRY_PALETTES[layout.country]??PALETTE[layout.style]),shape=shapeFor(layout.points),y=layout.height;
   const cliffGeo=new THREE.ExtrudeGeometry(shape,{depth:4,bevelEnabled:false}),vertices=cliffGeo.attributes.position;for(let i=0;i<vertices.count;i++){if(!layout.country&&vertices.getZ(i)===0){const x=vertices.getX(i),z=vertices.getY(i),scale=.79+Math.sin(Math.atan2(z,x)*5)*.035;vertices.setXYZ(i,x*scale,z*scale,0);}}cliffGeo.computeVertexNormals();const cliff=new THREE.Mesh(cliffGeo,this.mat({color:side,roughness:1}));cliff.rotation.x=-Math.PI/2;cliff.position.y=y-4;cliff.receiveShadow=true;cliff.castShadow=true;this.root.add(cliff);
-  const map=layout.country?this.surfaces[layout.country==='village'||layout.country==='valley'?'earth':'stone']:layout.style==='meadow'||layout.style==='sky'?this.world.ground.material.map:this.world.floor.material.map;
-  const topGeo=new THREE.ShapeGeometry(shape),uv=topGeo.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)/48+.5,uv.getY(i)/52+.5);const top=new THREE.Mesh(topGeo,this.mat({color:ground,map,roughness:1}));top.rotation.x=-Math.PI/2;top.position.y=y+.012;top.receiveShadow=true;this.root.add(top);
+  const map=layout.prism?null:layout.country?this.surfaces[layout.country==='village'||layout.country==='valley'?'earth':'stone']:layout.style==='meadow'||layout.style==='sky'?this.world.ground.material.map:this.world.floor.material.map;
+  const topGeo=new THREE.ShapeGeometry(shape),uv=topGeo.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)/48+.5,uv.getY(i)/52+.5);const top=new THREE.Mesh(topGeo,this.mat({color:ground,map,roughness:layout.prism?.3:1,metalness:layout.prism?.25:0}));top.rotation.x=-Math.PI/2;top.position.y=y+.012;top.receiveShadow=true;this.root.add(top);
   const edges=new THREE.Group();edges.name=layout.country?'Homusubi field details':'Field edge details';this.root.add(edges);
   if(!layout.country)for(let i=0;i<layout.points.length;i+=2){const [x,z]=layout.points[i],px=x*.84,pz=z*.84;if(contains(layout,px,pz,1)){const rock=part(edges,new THREE.ConeGeometry(2,3.2+(i%3)*.7,5),side,px,y-4,pz,[1,1,.8]);rock.rotation.z=Math.PI;}}
   for(let i=0;i<layout.points.length;i++){
@@ -36,7 +37,7 @@ export class TerrainWorld{
    for(const radius of [4.5,7]){const r=part(edges,new THREE.TorusGeometry(radius,.065,5,64),accent,0,y+.09,0,null,.2);r.rotation.x=Math.PI/2;}
    for(let i=0;i<12;i++){const a=i/12*Math.PI*2;const tick=part(edges,new THREE.BoxGeometry(.13,.075,.65),accent,Math.sin(a)*6,y+.08,Math.cos(a)*6);tick.rotation.y=a;}
   }
-  if(!layout.country&&(layout.style==='meadow'||layout.style==='sky')){
+  if(!layout.country&&!layout.prism&&(layout.style==='meadow'||layout.style==='sky')){
    const dummy=new THREE.Object3D(),geo=new THREE.ConeGeometry(.16,.47,3),mat=this.mat({color:layout.style==='sky'?0x8eafb7:0x9fbca3,roughness:1}),positions=[];
    for(let i=0;i<900;i++){const x=Math.sin(i*17.13)*24,z=Math.cos(i*11.47)*25;if(contains(layout,x,z,.6)&&Math.abs(x)>3&&!contains(layout,x,z,3))positions.push([x,z]);}
    const grass=new THREE.InstancedMesh(geo,mat,positions.length);positions.forEach(([x,z],i)=>{dummy.position.set(x,y+.22,z);dummy.rotation.y=i*1.17;dummy.scale.set(1,.65+(i%5)*.13,1);dummy.updateMatrix();grass.setMatrixAt(i,dummy.matrix);});grass.receiveShadow=true;this.root.add(grass);
@@ -56,6 +57,7 @@ export class TerrainWorld{
    part(this.closedGate,new THREE.BoxGeometry(6.5,2.6,.16),0x7bacce,0,0,0,[1,1,1],.3).material=this.mat({color:0x8ed5ff,transparent:true,opacity:.28,roughness:.4});
    for(let x=-3;x<=3;x++)part(this.closedGate,new THREE.BoxGeometry(.065,2.6,.08),0xc5e9ff,x,0,.1,null,.5);
   }else this.closedGate=null;
+  if(layout.prism)this.materials.push(dressPrismTerrain(edges,layout,contains));
   dressCountryTerrain(edges,layout);this.countryProps=edges.userData.countryProps??[];
   bakeGroup(edges);
   const portals=layout.stairs?[{id:'stairs',...layout.stairPoint,color:0x9cdcff}]:layout.id.endsWith('fork')?ROUTE_PORTALS:[];

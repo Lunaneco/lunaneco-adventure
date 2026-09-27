@@ -1,5 +1,6 @@
 import {publicUrl} from './public-url.js';
 export const WEAPONS=Object.freeze({
+  prim:{id:'prism-claw',name:'虹晶の爪・はじまり',kind:'claw',icon:'sword',effectColor:0xaeefff,note:'プリム専用。三本の虹晶の爪で近くの敵を扇状にひっかく。'},
   shizuku:{id:'crimson-scythe',name:'紅月の鎌・しずく',kind:'scythe',icon:'sword',effectColor:0xf2a6c7,note:'雫専用。黒銀の大鎌で近くの敵を扇状に斬り、与えた実ダメージの10%を自分のHPへ吸収する。'},
   mochinyafe:{id:'mochi-voice',name:'ふぇ鈴・もちの音',kind:'chime',icon:'heart',effectColor:0xffb8d4,note:'もちにゃふぇ専用の桜色の鈴。小さな声を追尾する音の弾に変え、弱い攻撃でも命中時に最低1ダメージ。援護は4秒間隔・射程13・4体貫通。'},
   omsolo:{id:'light-saber',name:'ライトセーバー・翠守',kind:'saber',icon:'sword',note:'オムソロ専用。近距離の敵を扇状にまとめて斬り払う緑の光刃。'},
@@ -7,6 +8,10 @@ export const WEAPONS=Object.freeze({
   tsukineko:{id:'nox-rifle',name:'星穿銃・ノクス',kind:'gun',icon:'gun',note:'つきねこ専用。直進する星弾が敵を2体まで貫通する。'},
 });
 export const UNIQUE_EQUIPMENT=Object.freeze([
+  {id:'prism-first-light',name:'はじまりの晶針',act:16,area:2,icon:'star',color:'#bceaff',bonus:{hp:80,attack:.24},note:'プリズムの国で二人がつないだ光の証。HP +80／攻撃力 +24%。'},
+  {id:'aurora-wing-charm',name:'オーロラの翼飾り',act:17,area:2,icon:'star',color:'#bceaff',bonus:{hp:100,defense:24},note:'プリズムの国で二人がつないだ光の証。HP +100／防御力 +24。'},
+  {id:'prism-heart-knot',name:'星虹の心結び',act:18,area:2,icon:'star',color:'#bceaff',bonus:{hp:85,attack:.22,defense:18},note:'プリズムの国で二人がつないだ光の証。HP +85／攻撃力 +22%／防御力 +18。'},
+  {id:'prism-home-crown',name:'虹還りの小冠',act:19,area:2,icon:'star',color:'#bceaff',bonus:{hp:110,attack:.26,defense:26},note:'プリズムの国で二人がつないだ光の証。HP +110／攻撃力 +26%／防御力 +26。'},
   {id:'meadow-charm',name:'星露の花飾り',area:0,icon:'heart',color:'#b6e3c4',bonus:{hp:30},note:'草原の朝露を閉じ込めた花。最大HP +30。'},
   {id:'ruins-lens',name:'月影の照準石',area:1,icon:'spark',color:'#b7cbf6',bonus:{attack:.12},note:'遺跡に残された月のレンズ。攻撃力 +12%。'},
   {id:'dawn-seal',name:'暁守の紋章',area:2,icon:'shield',color:'#f3d097',bonus:{defense:12},note:'聖域の光を宿す紋章。防御力 +12。'},
@@ -26,7 +31,7 @@ export const UNIQUE_EQUIPMENT=Object.freeze([
   {id:'demon-moon-drop-knot',name:'月雫の親友結び',act:14,area:2,icon:'link',color:'#d5b5ef',bonus:{hp:85,attack:.22,defense:18},note:'月と紅い雫を結んだ、背中を預け合う大の仲良しの証。最大HP +85／攻撃力 +22%／防御力 +18。'},
   {id:'demon-kind-king-crown',name:'優しき魔王の冠',act:15,area:2,icon:'star',color:'#e3be8b',bonus:{hp:110,attack:.26,defense:26},note:'正気を取り戻した悪魔大王から贈られた、みんなを守る冠。最大HP +110／攻撃力 +26%／防御力 +26。'},
 ]);
-export const equipmentImage=id=>publicUrl(`assets/equipment/${id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
+export const equipmentImage=id=>publicUrl(`assets/equipment/${['prism-first-light','aurora-wing-charm','prism-heart-knot','prism-home-crown'].includes(id)?id+'-v1':id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
 export const uniqueEquipment=id=>UNIQUE_EQUIPMENT.find(item=>item.id===id);
 const safeId=id=>typeof id==='string'&&/^[a-z0-9_-]{1,64}$/i.test(id)&&!['__proto__','constructor','prototype'].includes(id);
 export function normalizeEquipment(raw){

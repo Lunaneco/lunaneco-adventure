@@ -40,7 +40,7 @@ test('defeat, retry and intermediate gates retain the requirement; the final gat
 
 test('cleared chapter-four acts, earlier chapters, extra stages and tutorial retain free or existing recruitment rules',()=>{
   const p=profile(16);
-  for(const act of [...ACTS.map(a=>a.id),...EXTRA_ACTS.map(a=>a.id)]){
+  for(const act of [...ACTS.filter(a=>a.chapter<4).map(a=>a.id),...EXTRA_ACTS.map(a=>a.id)]){
     assert.equal(requiredPartyMember(p,act),null);assert.deepEqual(new Adventure({progression:p,act,party:['mochinyafe'],hero:3}).party,['mochinyafe']);
   }
   assert.equal(requiredPartyMember(profile(12),11),null);

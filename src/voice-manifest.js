@@ -1,3 +1,4 @@
+import {CHAPTER_FIVE_VOICE_MANIFEST} from './chapter-five-voice-manifest.js';
 import {CHAPTER_FOUR_VOICE_MANIFEST} from './chapter-four-voice-manifest.js';
 import {MOCHI_VOICE_MANIFEST} from './mochi-voice-manifest.js';
 // Irodori-TTS v4-Small audio; openings and selected key scenes.
@@ -7,7 +8,7 @@ import {MOCHI_VOICE_MANIFEST} from './mochi-voice-manifest.js';
 // v1.45: All 35 Tsukineko clips use a new Irodori voice design with soft, bright and expressive delivery.
 // v1.46: Measured battle loudness supports per-clip normalization before 50% playback. Removed Tsukineko damage grunt.
 // v1.47: Tsukineko damage reaction retaken as a soft, cute ita; calibrated to the existing battle level.
-export const VOICE_MANIFEST={...CHAPTER_FOUR_VOICE_MANIFEST,...MOCHI_VOICE_MANIFEST,
+export const VOICE_MANIFEST={...CHAPTER_FIVE_VOICE_MANIFEST,...CHAPTER_FOUR_VOICE_MANIFEST,...MOCHI_VOICE_MANIFEST,
   "nyanluna-a4069723": {
     "file": "assets/voices/nyanluna/nyanluna-a4069723-47459080630d.mp3",
     "who": "nyanluna",

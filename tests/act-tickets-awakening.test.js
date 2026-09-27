@@ -5,7 +5,7 @@ import {normalizeProgression,breakthrough,breakthroughStatus,talentStatus,unlock
 import {LEVEL_AWAKENING_COSTS} from '../src/level-rules.js';
 import {LIMIT_BREAK_NODES} from '../src/talents.js';
 import {talentView} from '../src/talent-ui.js';
-const story={version:2,actClears:Array(16).fill(true)};
+const story={version:2,actClears:Array(20).fill(true)};
 function gate(g,area){g.phase='playing';g.area=area;g.wave=area*2+2;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.equal(g.crossExit(),true);}
 
 test('each of eight acts guarantees one ticket on every clear in both modes, independently of first-clear missions',()=>{

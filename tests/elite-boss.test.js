@@ -7,7 +7,7 @@ import {tickEnemyBehavior} from '../src/enemy-combat.js';
 import {levelThirtyProfile,playRun} from './chapter-two-fixtures.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function quiet(act=0,difficulty='normal'){
- const g=new Adventure({act,difficulty,seed:2,progression:levelThirtyProfile({tree:true,cleared:16})});
+ const g=new Adventure({act,difficulty,seed:2,progression:levelThirtyProfile({tree:true,cleared:20})});
  g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.enemies=[];g.projectiles=[];g.hazards=[];g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;
 }
 function cast(act,difficulty,elite,action,low=false){

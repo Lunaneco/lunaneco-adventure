@@ -1,0 +1,8 @@
+.portrait.prim{background-image:url('/assets/story/prim-story-v1.webp');background-size:180%;background-position:49% 22%;background-color:#455975}
+.prim-bond{padding:16px 18px;margin:14px 0;border:1px solid #a8c6dc;border-radius:16px;background:linear-gradient(120deg,#e7f4fa,#f1eafb);color:#344d69}.prim-bond strong{font-size:18px}.prim-bond p{margin:7px 0;line-height:1.65}
+.journey-chapters{grid-template-columns:repeat(5,minmax(0,1fr))}
+.mount-button{position:absolute;bottom:calc(100% + 100px);right:0;min-width:112px;min-height:50px;border-radius:16px;border:1px solid #bceaff;background:linear-gradient(120deg,#293c59,#51476a);color:#fff;box-shadow:0 3px 18px #101c3944;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 12px;touch-action:manipulation}.mount-button span{font-weight:750;font-size:14px}.mount-button small{font-size:11px}.mount-button:disabled{opacity:.68}.mount-button.riding{border-color:#ffdfa9;background:linear-gradient(120deg,#425a73,#72536d)}
+[data-hero="prim"] .cutin-face,[data-hero="primDuet"] .cutin-face{object-fit:contain}
+[data-hero="primDuet"] .cutin-ability{white-space:normal;font-size:clamp(22px,3vw,38px)}
+@media(max-width:480px){.journey-chapters{gap:4px}.journey-chapters button{padding-inline:4px;font-size:12px}.mount-button{bottom:calc(100% + 105px);min-width:105px;min-height:45px}}
+@media(max-height:500px) and (orientation:landscape){.mount-button{right:calc(100% + 8px);bottom:0;min-width:70px;min-height:48px;flex-wrap:wrap;gap:2px}.mount-button kbd{display:none}}

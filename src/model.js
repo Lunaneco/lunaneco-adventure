@@ -1,3 +1,4 @@
+import {PRIM_BOND,PRIM_MOUNT,PRIM_DUET,hasPrimBond,canPrimDuet,canMount,startMount,endMount,tickMount} from './prim-combat.js';
 import {SHIZUKU_BOND,hasShizukuBond,canShizukuDuet,SHIZUKU_DUET,drainShizuku} from './shizuku-combat.js';
 import {GOLDEN_SLIME,goldenSlimeWave,guaranteedExtraRareWave} from './golden-slime.js';
 import {MOCHI_SUPPORT,mochiCryHit,mochiFrozen,mochiIncomingDamage,mochiDefenseMultiplier} from './mochi-combat.js';
@@ -26,6 +27,7 @@ export const HEROES = [
   {id:'omsolo',name:'オムソロ',title:'翠光の剣士',color:'#aaffba',moveSpeed:11.2,dashSpeed:48,range:3.2,damage:42,baseHp:250,baseDefense:21,interval:.60,skillPower:1.1,chargeRate:1.2,role:'近接・守護',trait:'守り手の剣',traitText:'通常移動速度・回避距離2倍／扇状の近接攻撃／高いHPと防御力／必殺ゲージ獲得 +20%。必殺技で周囲を斬り払い、自分を守る'},
   {id:'mochinyafe',name:'もちにゃふぇ',title:'最後のもちもち守り手',color:'#ffb8d4',moveSpeed:4.2,dashSpeed:20,range:6,damage:5,baseHp:75,baseDefense:1,interval:1.4,skillPower:1,chargeRate:1.3,role:'援護特化・大器晩成',trait:'小さな声の大きな奇跡',traitText:'操作中は弱い追尾音弾で攻撃。援護のふぇ〜で雑魚を1.8秒停止／ボスの攻撃・防御を5秒間30%低下。初期能力は最弱、Lv.50では全員を超える基礎能力。ツリーのHP・防御成長3倍、攻撃成長2.5倍'},
   {id:'shizuku',name:'雫',title:'紅月の鎌使い',color:'#e5a0ba',moveSpeed:7,dashSpeed:30,range:3.9,damage:39,baseHp:230,baseDefense:16,interval:.64,skillPower:1.15,chargeRate:1.15,role:'近接・HP吸収',trait:'不器用な守り手',traitText:'鎌で与えた実ダメージの10%を自分のHPへ吸収。にゃんるなと編成すると二人のHP・攻撃+12%、必殺ゲージ獲得+20%。二人のゲージ100で特殊連携技。'},
+  {id:'prim',name:'プリム',title:'七彩の小竜',color:'#bceaff',moveSpeed:6.2,dashSpeed:26,range:3.5,damage:41,baseHp:265,baseDefense:20,interval:.62,skillPower:1.15,chargeRate:1.15,role:'爪・直線ブレス・搭乗',trait:'キュ〜の約束',traitText:'爪で近接攻撃。必殺技は一直線のプリズムブレス。つきねこと組むとHP・攻撃+12%、ゲージ+20%。搭乗中12秒は二人がメインで攻撃・個別に被弾し、オムソロと同じ速さで移動。終了後20秒待機。'},
 ];
 export {SKILLS} from './blessings.js';
 export const AREAS = [
@@ -51,7 +53,7 @@ export class Adventure {
     });
     this.ultimateCharges=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.ultimateEffects=[];
     Object.defineProperty(this.player,'charge',{enumerable:true,get:()=>this.chargeFor(this.player.hero),set:value=>{this.ultimateCharges[this.heroId(this.player.hero)]=Number.isFinite(value)?clamp(value,0,100):0;}});
-    this.partner={x:-1.7,z:4.5,attack:0,face:Math.PI};this.enemies=[];this.projectiles=[];this.orbs=[];this.hazards=[];
+    this.mount={active:false,remaining:0,cooldown:0};this.partner={x:-1.7,z:4.5,attack:0,face:Math.PI};this.enemies=[];this.projectiles=[];this.orbs=[];this.hazards=[];
     this.skills={};this.offers=[];this.pendingBlessings=0;this.blessingTier=0;this.stageCrystals=0;this.crystalGoal=8;this.totalCrystals=0;this.blessingsTaken=0;this.time=0;this.kills=0;this.combo=0;this.comboTimer=0;this.maxCombo=0;this.damageDealt=0;
     this.stageTrial={startedAt:0,hits:0};this.runHits=0;this.seenEnemyTypes=new Set();
     this.travelOpen=null;this.travelDelay=0;this.route=null;this.routeRewards=[];this.wave=0;this.spawnTimer=0;this.waveSpawned=0;this.waveGoal=0;this.waveBreak=0;this.orbitTimer=0;this.exitOpen=false;this.exitDelay=0;this.stagesCleared=0;this.refreshStats();this.player.hp=this.player.maxHp;this.startWave();
@@ -106,18 +108,22 @@ export class Adventure {
   heroId(hero){return HEROES[hero].id;}
   chargeFor(hero){return this.ultimateCharges[this.heroId(hero)]??0;}
   ultimateActive(hero){return this.ultimateEffects.some(effect=>effect.heroId===this.heroId(hero)||effect.heroIds?.includes(this.heroId(hero)));}
-  get duetReady(){return canShizukuDuet(this);}
+  get duetReady(){return canShizukuDuet(this)||canPrimDuet(this);}
+  get duetKind(){return canPrimDuet(this)?'prim':canShizukuDuet(this)?'shizuku':null;}
+  get mountReady(){return canMount(this);}
+  mountPrim(){return startMount(this);}
+  dismount(){return endMount(this);}
   sourceFor(heroId){return this.heroId(this.player.hero)===heroId?this.player:this.partner;}
-  skillDamage(heroId,base){const index=HEROES.findIndex(h=>h.id===heroId);if(index<0)return 0;const hero=HEROES[index];return base*(this.statsFor(index).attack/hero.damage)*(1+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*hero.skillPower*(1+this.rank('arcanePower')*.18);}
-  ultimateSpec(hero=this.player.hero){if(this.duetReady)return SHIZUKU_DUET;return ultimateFor(this.heroId(hero),this.progressFor(hero));}
-  gainUltimateCharge(heroId,amount){if(!this.party.includes(heroId)||!Number.isFinite(amount)||amount<=0)return;const hero=HEROES.find(h=>h.id===heroId),bonus=ultimateBonuses(this.progression.characters[heroId],heroId);this.ultimateCharges[heroId]=clamp(this.ultimateCharges[heroId]+amount*hero.chargeRate*(heroId==='shizuku'?1+this.rank('shizukuPromise')*.15:1)*(hasShizukuBond(this.party)?SHIZUKU_BOND.charge:1)*(1+this.effectRank('focus')*.3)*(1+bonus.ultimateCharge),0,100);}
+  skillDamage(heroId,base){const index=HEROES.findIndex(h=>h.id===heroId);if(index<0)return 0;const hero=HEROES[index];return base*(this.statsFor(index).attack/hero.damage)*(1+this.rank('prismBond')*.15+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*hero.skillPower*(1+this.rank('arcanePower')*.18)*(heroId==='prim'?1+this.rank('primBrave')*.15:1);}
+  ultimateSpec(hero=this.player.hero){if(canPrimDuet(this))return PRIM_DUET;if(canShizukuDuet(this))return SHIZUKU_DUET;const spec=ultimateFor(this.heroId(hero),this.progressFor(hero));return spec.kind==='prismBeam'?{...spec,range:spec.range+this.rank('primBeam')*2}:spec;}
+  gainUltimateCharge(heroId,amount){if(!this.party.includes(heroId)||!Number.isFinite(amount)||amount<=0)return;const hero=HEROES.find(h=>h.id===heroId),bonus=ultimateBonuses(this.progression.characters[heroId],heroId);this.ultimateCharges[heroId]=clamp(this.ultimateCharges[heroId]+amount*hero.chargeRate*(heroId==='prim'?1+this.effectRank('primFocus')*.2:1)*(heroId==='shizuku'?1+this.rank('shizukuPromise')*.15:1)*(hasShizukuBond(this.party)?SHIZUKU_BOND.charge:hasPrimBond(this.party)?PRIM_BOND.charge:1)*(1+this.effectRank('focus')*.3)*(1+bonus.ultimateCharge),0,100);}
   get hasPartner(){return this.party.length===2;}
   get partnerHero(){return this.partyHeroes.find(hero=>hero!==this.player.hero)??null;}
   isHeroAlive(hero){return this.partyHeroes.includes(hero)&&this.healthFor(hero).hp>0;}
   get hasLivingPartner(){return this.hasPartner&&this.isHeroAlive(this.partnerHero);}
   progressFor(hero){return characterProgress(this.progression,HEROES[hero].id);}
-  statsFor(hero){const stats=combatStats(this.progression,HEROES[hero]);if(hasShizukuBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*SHIZUKU_BOND.hp);stats.attack*=SHIZUKU_BOND.attack;}return stats;}
-  attackProfile(hero){const profile=weaponAttackProfile(this.progression,HEROES[hero]);return {...profile,pierce:profile.pierce+(hero===1?this.rank('penetration'):0),interval:profile.interval*(hero===4?Math.pow(.92,this.effectRank('shizukuTempo')):hero===2?Math.pow(.9,this.rank('bladeTempo')):1)};}
+  statsFor(hero){const stats=combatStats(this.progression,HEROES[hero]);if(hasShizukuBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*SHIZUKU_BOND.hp);stats.attack*=SHIZUKU_BOND.attack;}if(hasPrimBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*PRIM_BOND.hp);stats.attack*=PRIM_BOND.attack;}return stats;}
+  attackProfile(hero){const profile=weaponAttackProfile(this.progression,HEROES[hero]);return {...profile,pierce:profile.pierce+(hero===1?this.rank('penetration'):0),interval:profile.interval*(hero===5?Math.pow(.92,this.effectRank('primTempo')):hero===4?Math.pow(.92,this.effectRank('shizukuTempo')):hero===2?Math.pow(.9,this.rank('bladeTempo')):1)};}
   healthFor(hero){return this.heroHealth[this.heroId(hero)];}
   refreshStats(){
     for(const hero of this.partyHeroes){const health=this.healthFor(hero),maxHp=this.statsFor(hero).maxHp+this.rank('vitality')*40;health.hp=health.hp>0?Math.min(maxHp,health.hp+Math.max(0,maxHp-health.maxHp)):0;health.maxHp=maxHp;}
@@ -189,15 +195,15 @@ export class Adventure {
   spawnEnemy(type,x,z,{elite=false}={}){
     const boss=type==='boss',rare=type===GOLDEN_SLIME.type,rng=rare?this.rareRng:this.rng;const hard=this.difficulty==='hard'?1.3:1,power=boss&&elite?ELITE_BOSS_MULTIPLIER:1;
     const spec=boss?BOSSES[this.actConfig.bossId]:ENEMY_TYPES[type];if(!spec)throw new Error(`Unknown enemy: ${type}`);
-    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra?this.actConfig.hpScale:1+(this.actConfig.chapter===3?this.act-12:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
-    const e={id:this.ids++,type,bossId:boss?this.actConfig.bossId:null,name:(boss?this.actConfig.boss:spec.name)+(elite?'・深淵':''),elite,x,z,hp,maxHp:hp,speed:spec.speed*(extra?extraCombatFor(this.actConfig).moveScale:1),damage:(boss?(this.actConfig.chapter===3?92:this.actConfig.chapter===2?62:this.actConfig.chapter===1?45:22):spec.damage)*hard*power*(extra?this.actConfig.damageScale:1),radius:spec.radius*(elite?1.12:1),hit:0,attack:1+rng(),age:0,knockX:0,knockZ:0,face:0,action:0,special:this.actConfig.chapter>=2?(boss?2.4:1.1+rng()*.7):boss?3:1.4+rng(),cast:null,rush:null,recovery:0,enraged:!!extra&&boss,navTimer:0};
+    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra?this.actConfig.hpScale:1+(this.actConfig.chapter>=3?this.actConfig.number-1:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
+    const e={id:this.ids++,type,bossId:boss?this.actConfig.bossId:null,name:(boss?this.actConfig.boss:spec.name)+(elite?'・深淵':''),elite,x,z,hp,maxHp:hp,speed:spec.speed*(extra?extraCombatFor(this.actConfig).moveScale:1),damage:(boss?(this.actConfig.chapter>=3?92:this.actConfig.chapter===2?62:this.actConfig.chapter===1?45:22):spec.damage)*hard*power*(extra?this.actConfig.damageScale:1),radius:spec.radius*(elite?1.12:1),hit:0,attack:1+rng(),age:0,knockX:0,knockZ:0,face:0,action:0,special:this.actConfig.chapter>=2?(boss?2.4:1.1+rng()*.7):boss?3:1.4+rng(),cast:null,rush:null,recovery:0,enraged:!!extra&&boss,navTimer:0};
     if(rare){e.rare=true;e.expiresAt=this.time+GOLDEN_SLIME.lifetime;}
     this.enemies.push(e);this.emit('spawn',{id:e.id,x,z,boss});return e;
   }
   spawn(){
     const angle=this.rng()*Math.PI*2;let {x,z}=spawnPoint(this.walkLayout,this.player,angle);
     let type=enemyForSpawn(this.act,this.wave,this.waveSpawned,this.rng());
-    if(isRangedEnemy(type)&&this.enemies.filter(e=>e.hp>0&&isRangedEnemy(e.type)).length>=(this.actConfig.extra?extraCombatFor(this.actConfig).rangedLimit:this.actConfig.chapter===3?5:this.actConfig.chapter>=1?4:3))type=this.actConfig.chapter===3?'demonImp':this.actConfig.chapter===2?'mochiGoblin':this.actConfig.chapter===1?'reaper':'bat';
+    if(isRangedEnemy(type)&&this.enemies.filter(e=>e.hp>0&&isRangedEnemy(e.type)).length>=(this.actConfig.extra?extraCombatFor(this.actConfig).rangedLimit:this.actConfig.chapter>=3?5:this.actConfig.chapter>=1?4:3))type=this.actConfig.chapter===4?'prismCrawler':this.actConfig.chapter===3?'demonImp':this.actConfig.chapter===2?'mochiGoblin':this.actConfig.chapter===1?'reaper':'bat';
     if(type!=='boss'&&!this.seenEnemyTypes.has(type)){this.seenEnemyTypes.add(type);if(ENEMY_TYPES[type]?.chapter>=1||['archer','mage','charger'].includes(type))this.emit('enemyIntro',{enemyType:type});}
     const elite=this.route==='elite'&&this.wave%2===0&&(this.wave===6||this.waveSpawned===this.waveGoal-1);
     if(elite)type='boss';
@@ -225,9 +231,9 @@ export class Adventure {
   dash(dx,dz){
     const p=this.player;if(this.phase!=='playing'||p.dashCooldown>0||this.tutorial?.active&&this.tutorial.step.id!=='dash')return false;
     const d=Math.hypot(dx,dz);p.dx=d>.01?dx/d:Math.sin(p.face);p.dz=d>.01?dz/d:Math.cos(p.face);
-    p.dash=.22;p.dashSpeed=HEROES[p.hero].dashSpeed??24;p.dashCooldown=Math.max(.65,1.5-this.rank('stride')*.2);p.invincible=.5;this.emit('dash',{x:p.x,z:p.z,hero:p.hero});this.observeTutorial('dash');return true;
+    p.dash=.22;p.dashSpeed=this.mount.active?PRIM_MOUNT.dashSpeed:HEROES[p.hero].dashSpeed??24;p.dashCooldown=Math.max(.65,1.5-this.rank('stride')*.2);p.invincible=.5;this.emit('dash',{x:p.x,z:p.z,hero:p.hero});this.observeTutorial('dash');return true;
   }
-  switchHero(){if(this.phase!=='playing'||!this.hasLivingPartner||this.player.switchCooldown>0)return false;this.activateHero(this.partnerHero);return true;}
+  switchHero(){if(this.mount.active)return false;if(this.phase!=='playing'||!this.hasLivingPartner||this.player.switchCooldown>0)return false;this.activateHero(this.partnerHero);return true;}
   activateHero(hero,automatic=false){
     const p=this.player;p.hero=hero;this.refreshStats();p.switchCooldown=.65;p.attack=.05;p.invincible=Math.max(p.invincible,automatic?1.5:.32);
     if(automatic){p.dash=0;this.partner.moving=false;}
@@ -236,9 +242,9 @@ export class Adventure {
   ultimate(options){return castUltimate(this,options);}
   attackFrom(source,hero,support=false){
     if(!this.isHeroAlive(hero)||(support&&!this.hasLivingPartner))return false;
-    const stats=this.attackProfile(hero);const range=hero===3&&support?stats.supportRange+this.effectRank('mochiReach')*2:stats.range*(1+this.effectRank('reach')*.18)+(hero===4?this.effectRank('shizukuReach')*.4:hero===2?this.effectRank('saberReach')*.35+this.rank('vowRecovery')*.15:0);const enemy=this.nearest(source.x,source.z,range);if(!enemy)return false;
+    const stats=this.attackProfile(hero);const range=hero===3&&support?stats.supportRange+this.effectRank('mochiReach')*2:stats.range*(1+this.effectRank('reach')*.18)+(hero===5?this.effectRank('primReach')*.4:hero===4?this.effectRank('shizukuReach')*.4:hero===2?this.effectRank('saberReach')*.35+this.rank('vowRecovery')*.15:0);const enemy=this.nearest(source.x,source.z,range);if(!enemy)return false;
     const angle=Math.atan2(enemy.x-source.x,enemy.z-source.z);source.face=angle;
-    const heroId=HEROES[hero].id;let damage=this.statsFor(hero).attack*(1+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*(support?.43*(1+this.rank('echo')*.35+this.rank('starBlade')*.2):1);
+    const heroId=HEROES[hero].id;let damage=this.statsFor(hero).attack*(1+this.rank('prismBond')*.15+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*(support?.43*(1+this.rank('echo')*.35+this.rank('starBlade')*.2):1);
     const crit=this.rng()<.05+this.effectRank('crit')*.15;if(crit)damage*=2+this.rank('preciseAim')*.25;
     this.emit('attack',{x:source.x,z:source.z,angle,hero,support,range,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor});
     if(hero===3){
@@ -250,7 +256,7 @@ export class Adventure {
       const id=this.ids++;this.projectiles.push({id,owner:'player',kind:'gun',heroId,x:source.x,z:source.z,vx:Math.sin(angle)*28,vz:Math.cos(angle)*28,speed:28,life:(range+2)/28,damage,crit,radius:.23,pierce:stats.pierce,hitIds:[]});
     }else{
       const reach=range;
-      for(const target of [...this.enemies]){const dx=target.x-source.x,dz=target.z-source.z,d=Math.hypot(dx,dz);if(target.hp>0&&d-target.radius<=reach&&(d<.01||(dx*Math.sin(angle)+dz*Math.cos(angle))/d>=MELEE_MIN_DOT)){const dealt=this.hit(target,damage*(1+(hero===4?this.effectRank('shizukuPower')*.2:this.effectRank('saberPower')*.22)),source.x,source.z,crit,false,heroId);if(hero===4)drainShizuku(this,dealt);}}
+      for(const target of [...this.enemies]){const dx=target.x-source.x,dz=target.z-source.z,d=Math.hypot(dx,dz);if(target.hp>0&&d-target.radius<=reach&&(d<.01||(dx*Math.sin(angle)+dz*Math.cos(angle))/d>=MELEE_MIN_DOT)){const dealt=this.hit(target,damage*(1+(hero===5?this.effectRank('primPower')*.2:hero===4?this.effectRank('shizukuPower')*.2:this.effectRank('saberPower')*.22)),source.x,source.z,crit,false,heroId);if(hero===4)drainShizuku(this,dealt);}}
     }
     return true;
   }
@@ -282,11 +288,12 @@ export class Adventure {
   }
   hurt(amount,x,z){
     const p=this.player;if(p.invincible>0||this.phase!=='playing'||this.exitOpen||this.travelOpen||this.tutorial?.active)return false;
+    if(this.mount.active){const other=this.partnerHero,health=this.healthFor(other);const damage=amount*Math.pow(.85,this.rank('ward')+this.effectRank('saberGuard'))*100/(100+this.statsFor(other).defense);health.hp=Math.max(0,health.hp-damage);this.emit('hurt',{damage:Math.round(damage),hero:other,x,z});if(health.hp<=0){const heroId=this.heroId(other);this.emit('heroDown',{hero:other,heroId});this.ultimateEffects=this.ultimateEffects.filter(e=>e.heroId!==heroId&&!e.heroIds?.includes(heroId));for(const bullet of this.projectiles)if(bullet.heroId===heroId)bullet.life=0;endMount(this);}}
     const damage=amount*(p.hero===4?Math.pow(.9,this.rank('shizukuMercy')):1)*Math.pow(.85,(this.rank('ward')+this.effectRank('saberGuard')))*100/(100+this.statsFor(p.hero).defense);p.hp=Math.max(0,p.hp-damage);p.invincible=.8+this.rank('counterGuard')*.2;this.combo=0;if(damage>0){this.stageTrial.hits++;this.runHits++;}
     this.emit('hurt',{damage:Math.round(damage),hero:p.hero,x,z});
     if(p.hp<=0){
-      const heroId=this.heroId(p.hero);this.emit('heroDown',{hero:p.hero,heroId});
-      this.ultimateEffects=this.ultimateEffects.filter(effect=>effect.heroId!==heroId);
+      endMount(this);const heroId=this.heroId(p.hero);this.emit('heroDown',{hero:p.hero,heroId});
+      this.ultimateEffects=this.ultimateEffects.filter(effect=>effect.heroId!==heroId&&!effect.heroIds?.includes(heroId));
       // Mark in-flight shots too: a knockout can happen during the projectile loop.
       for(const bullet of this.projectiles)if(bullet.owner==='player'&&bullet.heroId===heroId)bullet.life=0;
       this.projectiles=this.projectiles.filter(bullet=>bullet.life>0);
@@ -319,12 +326,12 @@ export class Adventure {
   tick(dt,input={x:0,z:0}){
     if(this.phase!=='playing')return;const training=this.tutorial?.active;
     if(training&&!this.tutorial.practicing)return;
-    dt=clamp(dt,0,.05);if(!training)this.time+=dt;
+    dt=clamp(dt,0,.05);if(!training)this.time+=dt;tickMount(this,dt);
     for(const e of this.enemies)this.expireGoldenSlime(e);
     if(this.rescue?.active){this.rescue.remaining=Math.max(0,this.rescue.remaining-dt);if(this.rescue.remaining<=0){this.phase='defeat';this.ultimateEffects=[];this.projectiles=[];this.hazards=[];this.emit('defeat',{reason:'rescueTimeout'});return;}}
     const p=this.player,fromX=p.x,fromZ=p.z;
     for(const prop of ['attack','dashCooldown','invincible','switchCooldown'])p[prop]=Math.max(0,p[prop]-dt);
-    let dx=input.x||0,dz=input.z||0;const speed=(HEROES[p.hero].moveSpeed??5.6)*(1+this.rank('stride')*.12);const length=Math.hypot(dx,dz);if(length>1){dx/=length;dz/=length;}
+    let dx=input.x||0,dz=input.z||0;const speed=(this.mount.active?PRIM_MOUNT.speed:HEROES[p.hero].moveSpeed??5.6)*(1+this.rank('stride')*.12);const length=Math.hypot(dx,dz);if(length>1){dx/=length;dz/=length;}
     if(p.dash>0){p.dash=Math.max(0,p.dash-dt);dx=p.dx;dz=p.dz;p.x+=dx*(p.dashSpeed??24)*dt;p.z+=dz*(p.dashSpeed??24)*dt;}else{p.x+=dx*speed*dt;p.z+=dz*speed*dt;}
     if(Math.hypot(dx,dz)>.05)p.face=Math.atan2(dx,dz);p.moving=Math.hypot(dx,dz)>.05;
     Object.assign(p,moveWithin(this.walkLayout,{x:fromX,z:fromZ},p.x,p.z));
@@ -332,6 +339,7 @@ export class Adventure {
     const partnerFrom={x:partner.x,z:partner.z};
     if(this.hasLivingPartner){if(!clearPath(this.walkLayout,partner,{x:targetX,z:targetZ},.55)){const d=navigation(this.walkLayout,partner,{x:targetX,z:targetZ}),length=Math.hypot(d.x,d.z)||1;partner.x+=d.x/length*6*dt;partner.z+=d.z/length*6*dt;}partner.moving=Math.hypot(partner.x-targetX,partner.z-targetZ)>.3;partner.x+=(targetX-partner.x)*Math.min(1,dt*5);partner.z+=(targetZ-partner.z)*Math.min(1,dt*5);partner.attack=Math.max(0,partner.attack-dt);}else partner.moving=false;
     Object.assign(partner,moveWithin(this.walkLayout,partnerFrom,partner.x,partner.z,.55));
+    if(this.mount.active)Object.assign(partner,{x:p.x,z:p.z,face:p.face,moving:p.moving});
     if(training){this.observeTutorial('move',Math.hypot(p.x-fromX,p.z-fromZ));if(this.tutorial.step.id!=='attack')return;}
     if(this.travelOpen){
       if(this.pendingBlessings>0){this.offerSkills();return;}
@@ -343,7 +351,7 @@ export class Adventure {
     }
     if(!training)tickUltimates(this,dt);
     if(p.attack<=0&&this.attackFrom(p,p.hero))p.attack=this.attackProfile(p.hero).interval*Math.pow(.85,this.effectRank('haste'));
-    if(this.hasLivingPartner&&partner.attack<=0&&this.attackFrom(partner,this.partnerHero,true))partner.attack=this.partnerHero===3?this.attackProfile(3).supportInterval:this.attackProfile(this.partnerHero).interval*2.6*Math.pow(.85,this.effectRank('haste'));
+    if(this.hasLivingPartner&&partner.attack<=0&&this.attackFrom(partner,this.partnerHero,!this.mount.active))partner.attack=this.partnerHero===3?this.attackProfile(3).supportInterval:this.attackProfile(this.partnerHero).interval*(this.mount.active?1:2.6)*Math.pow(.85,this.effectRank('haste'));
     if(!training){this.spawnTimer-=dt;if(this.waveSpawned<this.waveGoal&&this.spawnTimer<=0){this.spawn();this.spawnTimer=this.wave===6?100:Math.max(.43,1.15-this.wave*.10)*(this.actConfig.extra?extraCombatFor(this.actConfig).spawnScale:1);}}
     for(const e of this.enemies){
       if(e.hp<=0)continue;e.mochiFrozen=mochiFrozen(this,e);if(e.mochiFrozen){e.hit=Math.max(0,e.hit-dt);continue;}if(e.mochiWeakenUntil<=this.time){e.mochiAttackDown=0;e.mochiDefenseDown=0;}const enemyFrom={x:e.x,z:e.z};e.navTimer-=dt;e.age+=dt;e.hit=Math.max(0,e.hit-dt);e.attack-=dt*(this.actConfig.extra?extraCombatFor(this.actConfig).cooldownRate:1);
@@ -389,5 +397,5 @@ export class Adventure {
     }
     if(this.pendingBlessings>0){this.offerSkills();return;}
   }
-  snapshot(){return {goldenSlimeKills:this.goldenSlimeKills,goldenSlime:this.goldenSlime?{...this.goldenSlime}:null,earnedRareStones:this.earnedRareStones,earnedWeaponTickets:this.earnedWeaponTickets,heroHealth:Object.fromEntries(this.party.map(id=>[id,{...this.heroHealth[id]}])),rescue:this.rescue?{...this.rescue}:null,layout:this.layout.id,travelOpen:this.travelOpen,travelTargets:this.travelTargets,route:this.route,routeRewards:[...this.routeRewards],act:this.act,actTitle:this.actConfig.title,phase:this.phase,ultimateCharges:{...this.ultimateCharges},ultimateEffects:this.ultimateEffects.map(e=>({...e})),tutorial:this.tutorial?{active:this.tutorial.active,step:this.tutorial.step.id,distance:this.tutorial.distance}:null,guestHeroId:this.guestHeroId,recruitedHeroId:this.recruitedHeroId,party:[...this.party],partnerHero:this.partnerHero,skillPool:this.skillPool.map(s=>s.id),exitOpen:this.exitOpen,stagesCleared:this.stagesCleared,wave:this.wave,area:this.area,kills:this.kills,time:this.time,characterLevels:Object.fromEntries(HEROES.map((h,i)=>[h.id,{...this.progressFor(i)}])),earnedXp:{...this.earnedXp},stageCrystals:this.stageCrystals,crystalGoal:this.crystalGoal,blessingTier:this.blessingTier,blessingsTaken:this.blessingsTaken,player:{...this.player},enemyCount:this.enemies.length,projectiles:this.projectiles.length,earnedMissions:[...this.earnedMissions],skills:{...this.skills},offers:this.offers.map(s=>s.id),boss:this.enemies.find(e=>e.type==='boss')?.hp||0};}
+  snapshot(){return {mount:{...this.mount},goldenSlimeKills:this.goldenSlimeKills,goldenSlime:this.goldenSlime?{...this.goldenSlime}:null,earnedRareStones:this.earnedRareStones,earnedWeaponTickets:this.earnedWeaponTickets,heroHealth:Object.fromEntries(this.party.map(id=>[id,{...this.heroHealth[id]}])),rescue:this.rescue?{...this.rescue}:null,layout:this.layout.id,travelOpen:this.travelOpen,travelTargets:this.travelTargets,route:this.route,routeRewards:[...this.routeRewards],act:this.act,actTitle:this.actConfig.title,phase:this.phase,ultimateCharges:{...this.ultimateCharges},ultimateEffects:this.ultimateEffects.map(e=>({...e})),tutorial:this.tutorial?{active:this.tutorial.active,step:this.tutorial.step.id,distance:this.tutorial.distance}:null,guestHeroId:this.guestHeroId,recruitedHeroId:this.recruitedHeroId,party:[...this.party],partnerHero:this.partnerHero,skillPool:this.skillPool.map(s=>s.id),exitOpen:this.exitOpen,stagesCleared:this.stagesCleared,wave:this.wave,area:this.area,kills:this.kills,time:this.time,characterLevels:Object.fromEntries(HEROES.map((h,i)=>[h.id,{...this.progressFor(i)}])),earnedXp:{...this.earnedXp},stageCrystals:this.stageCrystals,crystalGoal:this.crystalGoal,blessingTier:this.blessingTier,blessingsTaken:this.blessingsTaken,player:{...this.player},enemyCount:this.enemies.length,projectiles:this.projectiles.length,earnedMissions:[...this.earnedMissions],skills:{...this.skills},offers:this.offers.map(s=>s.id),boss:this.enemies.find(e=>e.type==='boss')?.hp||0};}
 }

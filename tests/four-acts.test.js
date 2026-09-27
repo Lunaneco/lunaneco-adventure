@@ -11,7 +11,7 @@ import {trialInput} from './country-bot.js';
 const gate=(g,area)=>{g.phase='playing';g.area=area;g.wave=area*2+2;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.equal(g.crossExit(),true);};
 test('old chapter clear preserves recruitment but only completes act one, including on repeated migration',()=>{
  const p=normalizeProgression({story:{chapterOneCleared:true},characters:{tsukineko:{level:17,xp:4}},inventory:{limitStone:3}},HEROES);
- assert.deepEqual(p.story.actClears,[true,...Array(15).fill(false)]);assert.equal(p.story.chapterOneCleared,false);assert.equal(isHeroUnlocked(p,'tsukineko'),true);assert.equal(nextAct(p),1);
+ assert.deepEqual(p.story.actClears,[true,...Array(19).fill(false)]);assert.equal(p.story.chapterOneCleared,false);assert.equal(isHeroUnlocked(p,'tsukineko'),true);assert.equal(nextAct(p),1);
  assert.deepEqual(normalizeProgression(p,HEROES,{chapterOneCleared:true}),p);assert.equal(p.characters.tsukineko.level,17);assert.equal(p.inventory.limitStone,3);
 });
 test('act locks and completion cannot skip ahead; tutorial always starts at act one',()=>{
@@ -57,7 +57,7 @@ for(const difficulty of ['normal','hard'])for(const seed of [1,3,17])test(`all 2
   assert.equal(g.phase,'victory',`act ${act+1}, wave ${g.wave}, HP ${g.player.hp}`);assert.equal(g.kills,ACTS[act].counts.reduce((a,b)=>a+b));assert.equal(met,act===3);assert.equal(g.progression.story.chapterOneCleared,act===3);assert.equal(isHeroUnlocked(g.progression,'tsukineko'),act===3);
   assert.ok(g.earnedMissions.length>=9);assert.ok(g.blessingsTaken>=4);total+=g.kills;profile=JSON.parse(JSON.stringify(g.progression));
  }
- assert.equal(total,426);assert.deepEqual(profile.story.actClears,[...Array(4).fill(true),...Array(12).fill(false)]);
+ assert.equal(total,426);assert.deepEqual(profile.story.actClears,[...Array(4).fill(true),...Array(16).fill(false)]);
 });
 for(const [act,seed] of [[0,1],[1,3],[2,5],[3,2]])test(`all difficult missions are reachable in act ${act+1} without changing enemy stats or clocks`,()=>{
  const p=normalizeProgression({story:{version:2,actClears:[true,true,true,true],tsukinekoUnlocked:true},characters:{nyanluna:{level:20},tsukineko:{level:20}}},HEROES);

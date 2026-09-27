@@ -8,7 +8,7 @@ import {ultimateFor,ULTIMATES} from '../src/abilities.js';
 import {mochiCryHit} from '../src/mochi-combat.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function game(hero,skill,rank=1){
- const g=new Adventure({seed:41,hero,party:hero===3?['mochinyafe','nyanluna']:[HEROES[hero].id],progression:{story:{version:2,actClears:Array(16).fill(true)}}});
+ const g=new Adventure({seed:41,hero,party:hero===3?['mochinyafe','nyanluna']:[HEROES[hero].id],progression:{story:{version:2,actClears:Array(20).fill(true)}}});
  g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.player.attack=g.partner.attack=999;g.player.invincible=0;g.rng=()=>1;if(skill)g.skills[skill]=rank;return g;
 }
 function target(g,x=0,z=2,type='moss'){
@@ -16,7 +16,7 @@ function target(g,x=0,z=2,type='moss'){
 }
 const upgrades=SKILLS.filter(s=>s.upgrades);
 test('every tree blessing upgrades exactly one original of the same hero and retains at least its maximum rank',()=>{
- assert.equal(upgrades.length,15);assert.equal(new Set(upgrades.map(s=>s.upgrades)).size,15);
+ assert.equal(upgrades.length,18);assert.equal(new Set(upgrades.map(s=>s.upgrades)).size,18);
  for(const s of upgrades){const base=SKILLS.find(b=>b.id===s.upgrades);assert.ok(base&&!base.unlockNode);assert.deepEqual(base.requires,s.requires);assert.ok(s.max>=base.max);assert.ok(skillUpgradeLabel(s).includes(base.name));}
 });
 test('base and upgraded effects use the higher acquired rank without changing raw levels, in either acquisition order',()=>{

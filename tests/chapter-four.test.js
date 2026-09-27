@@ -40,7 +40,7 @@ function gate(g){g.phase='playing';g.area=2;g.wave=6;g.exitOpen=true;g.exitDelay
 
 test('fourth chapter follows the old save, is playable at 50, and recruits Shizuku only on the final gate',()=>{
  const old=profile(12,50);assert.equal(old.story.chapterFourCleared,false);assert.equal(isHeroUnlocked(old,'shizuku'),false);assert.ok(isActUnlocked(old,12));assert.equal(isActUnlocked(old,13),false);
- assert.deepEqual(old.story.extraClears,[false,false,false]);assert.deepEqual(EXTRA_ACTS.map(a=>a.id),[16,17,18]);
+ assert.deepEqual(old.story.extraClears,[false,false,false]);assert.deepEqual(EXTRA_ACTS.map(a=>a.id),[20,21,22]);
  for(let act=12;act<16;act++){
   const g=quiet({act,progression:old,party:['nyanluna'],hero:0});assert.equal(g.act,act);assert.equal(g.player.hero,0);assert.equal(ACTS[act].recommendedLevel,60);
   const boss=g.spawnEnemy('boss',0,-5);g.hit(boss,1e9,0,0);assert.equal(isHeroUnlocked(g.progression,'shizuku'),false);gate(g);
@@ -59,7 +59,7 @@ test('Lv.50 to 60 already requires rarity 3; no earlier limit step consumes it; 
  const locked=profile(11,50);Object.assign(locked.inventory,LEVEL_AWAKENING_COSTS[3]);assert.equal(breakthroughStatus(locked,'nyanluna').chapterMet,false);
 });
 test('rarity 3 drops start in chapter four, persist through defeat, and fund the third ability tier',()=>{
- for(const act of [0,4,8,16,17,18]){const drops=enemyMaterials({type:'boss',hp:0},act,'hard',()=>0);assert.equal(drops.bloodCrystal??0,0);assert.equal(drops.demonHeart??0,0);}
+ for(const act of [0,4,8,20,21,22]){const drops=enemyMaterials({type:'boss',hp:0},act,'hard',()=>0);assert.equal(drops.bloodCrystal??0,0);assert.equal(drops.demonHeart??0,0);}
  const g=quiet({party:['nyanluna'],hero:0,progression:profile(12,50)});g.materialRng=()=>0;
  g.hit(g.spawnEnemy('demonImp',8,8),1e9,0,0);assert.equal(g.earnedMaterials.bloodCrystal,1);g.hit(g.spawnEnemy('boss',8,8),1e9,0,0);assert.equal(g.earnedMaterials.demonHeart,2);
  g.player.invincible=0;g.hurt(1e9,0,0);const saved=normalizeProgression(g.progression,HEROES);assert.equal(saved.inventory.demonHeart,2);
@@ -85,7 +85,7 @@ test('close friends receive their exact bonus, and the two-gauge duet consumes a
  const fallen=quiet({party:['nyanluna','shizuku'],hero:0});fallen.ultimateCharges.nyanluna=fallen.ultimateCharges.shizuku=100;fallen.healthFor(4).hp=0;assert.equal(fallen.duetReady,false);assert.ok(fallen.ultimate());assert.equal(fallen.ultimateEffects[0].kind,'sanctuary');
 });
 test('seven demons and four different bosses expose warnings and every boss enters its expanded phase',()=>{
- assert.equal(enemyRosterForAct(12).length,7);assert.equal(new Set(ACTS.slice(12).map(a=>a.bossId)).size,4);
+ assert.equal(enemyRosterForAct(12).length,7);assert.equal(new Set(ACTS.slice(12,16).map(a=>a.bossId)).size,4);
  for(let act=12;act<16;act++)for(let action=0;action<3;action++){
   const g=quiet({act}),e=g.spawnEnemy('boss',0,-5);e.special=0;e.action=action;tickEnemyBehavior(g,e,1/60);assert.ok(g.hazards.length);assert.ok(g.hazards.every(h=>h.total>=.65));assert.ok(e.cast.waves>1||e.demonFollowup||g.hazards.length>=3);
   const before=structuredClone(e.cast);g.pause();tickEnemyBehavior(g,e,1);assert.deepEqual(e.cast,before);g.resume();e.hp=e.maxHp*.4;tickEnemyBehavior(g,e,.01);assert.ok(e.enraged);assert.equal(g.drainEvents().filter(e=>e.type==='bossPhase').length,1);
@@ -102,7 +102,7 @@ test('enraged demon king completes all three telegraphed rushes before the next 
  for(let i=0;i<480;i++){tickEnemyBehavior(g,e,1/60);if(e.rush&&!previous)rushes++;previous=!!e.rush;if(rushes===3&&!e.rush)break;}
  assert.equal(rushes,3);assert.equal(e.demonFollowup,null);assert.equal(e.action,3);
 });
-for(const act of ACTS.slice(12))test(`Lv.60 pair completes ${act.title} with normal attack patterns and actual rewards`,()=>{
+for(const act of ACTS.slice(12,16))test(`Lv.60 pair completes ${act.title} with normal attack patterns and actual rewards`,()=>{
  const g=new Adventure({act:act.id,progression:profile(act.id),party:['nyanluna','tsukineko'],hero:1,seed:1});
  for(let frame=0;frame<60*600;frame++){while(g.phase==='upgrade')g.chooseSkill(chooseOffer(g));if(g.phase==='transition')g.advanceStage();if(g.phase!=='playing')break;g.tick(1/60,trialInput(g));g.drainEvents();}
  assert.equal(g.phase,'victory',JSON.stringify({act:g.act,wave:g.wave,hp:g.player.hp,time:g.time}));assert.ok(g.earnedMaterials.bloodCrystal>0&&g.earnedMaterials.demonHeart>=2);

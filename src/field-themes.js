@@ -29,4 +29,5 @@ export const FIELD_THEMES = [
     ['mochi-palace',0x6c5276,0xd9bdcf,0xffc1df,0xffd6d0],
   ].map(([mochi,fog,ground,accent,sky])=>({mochi,focus:.5,image:publicUrl(`assets/fields/${mochi}.jpg`),fog,ground,grass:0xd4b2bd,stone:ground,tint:sky,sky,bounce:0x66546d,sun:0xffd8c9,fill:0xc5c4ff,portal:0xffd8e9,motes:0xffd8eb,accent,sunPower:1.7,exposure:.94})),
   ...['demon-gate','demon-canal','demon-town','demon-palace'].map((demon,i)=>({demon,focus:.5,image:publicUrl('assets/fields/demon-country-v1.webp'),fog:[0x40364f,0x302c48,0x45273d,0x312638][i],ground:0x9e91a8,grass:0x716778,stone:0x95849f,tint:0xdbcee9,sky:0xbca7de,bounce:0x453d58,sun:0xffc1cb,fill:0xb7bfff,portal:0xffbacc,motes:0xf4bcd4,accent:0xda708c,sunPower:1.7,exposure:.96})),
+  ...[0x273754,0x264658,0x3a3c65,0x354b68].map((fog,i)=>({prism:true,focus:.5,image:publicUrl('assets/fields/prism-realm-v1.webp'),fog,ground:0xa8cde3,grass:0xa6cce0,stone:0xc2d9ed,tint:0xd9eaff,sky:0xa6c8ed,bounce:0x344970,sun:0xe1eaff,fill:0xc9b8ff,portal:0xffd6ef,motes:0xa8fff1,accent:[0x8fe4ff,0x99ffde,0xcbbaff,0xffbce5][i],sunPower:1.7,exposure:.96})),
 ];

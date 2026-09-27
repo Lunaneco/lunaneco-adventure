@@ -9,7 +9,7 @@ import {normalizeProgression} from '../src/progression.js';
 
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function battle(act,action=0,low=false){
- const progression=normalizeProgression({story:{version:2,actClears:Array(16).fill(true)},tutorial:{firstBattleCompleted:true}},HEROES);
+ const progression=normalizeProgression({story:{version:2,actClears:Array(20).fill(true)},tutorial:{firstBattleCompleted:true}},HEROES);
  const g=new Adventure({act,seed:5,progression});g.enemies=[];g.hazards=[];g.projectiles=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;
  Object.assign(g.player,{x:0,z:0,attack:999,invincible:999});g.partner.attack=999;
  const e=g.spawnEnemy('boss',0,-7);Object.assign(e,{special:0,attack:999,speed:0,action});if(low)e.hp*=.49;g.drainEvents();
@@ -21,13 +21,13 @@ const dispose=m=>m.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});
 
 test('all fifteen boss encounters have distinct geometry and chained attacks, with faster cooldowns',()=>{
  const signatures=[];
- for(const act of [...Array(12).keys(),16,17,18]){
+ for(const act of [...Array(12).keys(),20,21,22]){
   const actions=[];
   for(let action=0;action<3;action++){
    const {g,e}=battle(act,action),warnings=g.hazards;
    assert.ok(warnings.length>=2,`${act}/${action} must have follow-ups`);
    assert.ok(warnings.every(h=>h.total>=.65&&Number.isFinite(h.damage)));
-   assert.ok(e.special<(act===18?2.4:act>=16?3.7:act>=8?3:act>=4?4.2:5.1));
+   assert.ok(e.special<(act===22?2.4:act>=20?3.7:act>=8?3:act>=4?4.2:5.1));
    // Every promised attack has either delayed damaging geometry or repeated shots.
    assert.ok(new Set(warnings.map(h=>h.timer)).size>1||e.cast.waves>1);
    actions.push(warnings.map(h=>[h.shape??'circle',h.x,h.z,h.radius,h.innerRadius,h.angle,h.width,h.timer,h.damage>0]));
@@ -74,7 +74,7 @@ test('multi-shot fans follow every original warning even if caster and player mo
  }
 });
 test('all radial salvos aim at the player and show the real escape gap for every round',()=>{
- for(const act of [2,3,7,11,16,17,18])for(const low of [false,true]){
+ for(const act of [2,3,7,11,20,21,22])for(const low of [false,true]){
   const run=battle(act,1,low),{g,e}=run,c=structuredClone(e.cast),warnings=g.hazards.filter(h=>h.kind==='volley');
   assert.equal(warnings.length,c.waves);castDone(run);
   for(let round=0;round<c.waves;round++){
@@ -91,7 +91,7 @@ test('all radial salvos aim at the player and show the real escape gap for every
 });
 test('boss follow-ups freeze for pause and blessing choices; defeat, gates and kills stop new shots',()=>{
  for(const end of ['pause','upgrade','kill','gate','defeat']){
-  const run=battle(18,1,true),{g,e}=run;castDone(run);assert.ok(e.salvo);const count=g.projectiles.length,queued=structuredClone(e.salvo),hazards=structuredClone(g.hazards);
+  const run=battle(22,1,true),{g,e}=run;castDone(run);assert.ok(e.salvo);const count=g.projectiles.length,queued=structuredClone(e.salvo),hazards=structuredClone(g.hazards);
   if(end==='pause')g.pause();if(end==='upgrade'){g.pendingBlessings=1;g.offerSkills();}
   if(end==='kill')g.hit(e,1e9,0,0);
   if(end==='gate')g.openExit();

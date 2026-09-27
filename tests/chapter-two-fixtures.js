@@ -5,7 +5,7 @@ import {FIRST_TIER_NODES} from '../src/talents.js';
 import {botInput,chooseOffer} from './bot.js';
 
 export function levelThirtyProfile({level=30,tree=false,cleared=7}={}){
- return normalizeProgression({story:{version:2,actClears:Array.from({length:16},(_,i)=>i<cleared),tsukinekoUnlocked:cleared>=4},characters:Object.fromEntries(['nyanluna','tsukineko','omsolo'].map(id=>[id,{level,breaks:level>=30?1:0,tree:tree?FIRST_TIER_NODES.map(n=>n.id):[]}]))},HEROES);
+ return normalizeProgression({story:{version:2,actClears:Array.from({length:20},(_,i)=>i<cleared),tsukinekoUnlocked:cleared>=4},characters:Object.fromEntries(['nyanluna','tsukineko','omsolo'].map(id=>[id,{level,breaks:level>=30?1:0,tree:tree?FIRST_TIER_NODES.map(n=>n.id):[]}]))},HEROES);
 }
 export function playRun(game,limit=550){
  for(let f=0;f<60*limit;f++){

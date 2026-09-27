@@ -1,6 +1,9 @@
 import {publicUrl} from './public-url.js';
 // The narrator is represented by the lost moonlight already present in the story.
 export const STORY_CAST=Object.freeze({
+  primRaging:Object.freeze({name:'プリズムドラゴン',role:'あふれる光に苦しむ、結晶の竜',image:publicUrl('assets/story/prim-raging-v1.webp'),alt:'暴走する青い結晶の鱗と虹の翼を持つプリズムドラゴン',color:'#97dfff'}),
+  prim:Object.freeze({name:'プリム',role:'キュ〜で心を伝える、七彩の小竜',image:publicUrl('assets/story/prim-story-v1.webp'),alt:'真珠色の鱗と虹の翼、青い瞳の小さな竜プリム',color:'#bceaff'}),
+  primDuet:Object.freeze({name:'つきねこ ＆ プリム',role:'同じ光を見ていた二人',image:publicUrl('assets/ultimates/tsukineko-prim-duet-v1.webp'),alt:'大きくなったプリムにつきねこが乗り、星銃とブレスを合わせる',color:'#bceaff'}),
   shizuku:Object.freeze({name:'雫',role:'不器用な、紅月の守り手',image:publicUrl('assets/story/shizuku-reference-v1.webp'),alt:'雫 — 黒銀の大鎌、黒いレースのドレスと赤い瞳の少女',color:'#e7a3c2'}),
   shizukuDuet:Object.freeze({name:'にゃんるな ＆ 雫',role:'大の仲良し',image:publicUrl('assets/ultimates/nyanluna-shizuku-duet-v1.webp'),alt:'月光と鎌を重ねる親友',color:'#e6b9ff'}),
   demonking:Object.freeze({name:'悪魔大王',role:'国を守ろうとして暴走した王',image:publicUrl('assets/story/demon-king.png'),alt:'暴走の紅霧に包まれた悪魔大王',color:'#ffa3af'}),

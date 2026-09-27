@@ -1,3 +1,5 @@
+import {createPrimClaw} from './prim-visuals.js';
+import {PRIM_MOUNT} from './prim-combat.js';
 import {createShizukuScythe} from './shizuku-weapon.js';
 import {publicUrl} from './public-url.js';
 import * as THREE from 'three';
@@ -7,7 +9,7 @@ import { ATTACK_DURATION } from './model.js';
 import {createWeaponVariant} from './weapon-models.js';
 import {mochiSlimePose} from './mochi-motion.js';
 
-const files = ['nyanluna', 'tsukineko', 'omsolo', 'mochinyafe', 'shizuku'];
+const files = ['nyanluna', 'tsukineko', 'omsolo', 'mochinyafe', 'shizuku', 'prim'];
 const axisX = new THREE.Vector3(1, 0, 0);
 const axisY = new THREE.Vector3(0, 1, 0);
 const axisZ = new THREE.Vector3(0, 0, 1);
@@ -37,6 +39,7 @@ function starGeometry(radius) {
 }
 
 function createWeapon(hero) {
+  if(hero===5)return createPrimClaw();
   if(hero===4)return createShizukuScythe();
   const weapon = new THREE.Group();
   const gold = 0xd2ad6b;
@@ -76,10 +79,10 @@ function createWeapon(hero) {
 }
 
 export function setHeroWeapon(root,item){
-  const d=root.userData;if(!item)return;const key=d.hero===4?item.id:item.weapon.id,current=d.hero===4?d.weapon.userData.variantId:d.weapon.userData.family;if(current===key)return;
+  const d=root.userData;if(!item)return;const key=[4,5].includes(d.hero)?item.id:item.weapon.id,current=[4,5].includes(d.hero)?d.weapon.userData.variantId:d.weapon.userData.family;if(current===key)return;
   d.weaponCache??=new Map([[current,d.weapon]]);
   let next=d.weaponCache.get(key);
-  if(!next){next=![3,4].includes(d.hero)&&item.weapon.style==='均衡型'?createWeapon(d.hero):createWeaponVariant(item);d.weaponCache.set(key,next);}
+  if(!next){next=![3,4,5].includes(d.hero)&&item.weapon.style==='均衡型'?createWeapon(d.hero):createWeaponVariant(item);d.weaponCache.set(key,next);}
   if(d.hero===3){next.position.set(.75,.95,.2);next.scale.setScalar(.75);}
   d.rig.remove(d.weapon);d.rig.add(next);d.weapon=next;
 }
@@ -95,7 +98,7 @@ function createHero(asset, hero) {
   const bounds = new THREE.Box3().setFromObject(model, true);
   const height = bounds.max.y - bounds.min.y;
   if (!Number.isFinite(height) || height < .1) throw new Error(`Invalid character bounds: ${files[hero]}`);
-  const scale = (hero===3?1.55:hero===2?2.8:3.1) / height;
+  const scale = (hero===5?3.8:hero===3?1.55:hero===2?2.8:3.1) / height;
   model.scale.multiplyScalar(scale);
   model.position.set(-(bounds.min.x + bounds.max.x) * .5 * scale, -bounds.min.y * scale,
     -(bounds.min.z + bounds.max.z) * .5 * scale);
@@ -162,6 +165,21 @@ function pose(data, name, x = 0, y = 0, z = 0) {
 
 export function animateHero(root, state, time, dt, active) {
   const d = root.userData;
+  if(d.hero===5){
+    root.position.set(state.x,0,state.z);root.scale.setScalar(state.mounted?PRIM_MOUNT.scale:1);
+    root.rotation.y+=Math.atan2(Math.sin(state.face-root.rotation.y),Math.cos(state.face-root.rotation.y))*Math.min(1,dt*14);
+    d.movement=THREE.MathUtils.damp(d.movement,state.moving?1:0,13,dt);d.attackTime=Math.max(0,d.attackTime-dt);
+    const stride=Math.sin(time*10)*d.movement,attack=d.attackTime>0?Math.sin(d.attackTime/ATTACK_DURATION*Math.PI):0;
+    d.rig.position.y=(state.mounted?.45:.02)+Math.abs(stride)*.035;d.rig.rotation.x=state.mounted?.85:0;
+    pose(d,'upper_arm.L',-.12,0,-.55);pose(d,'upper_arm.R',-.12-attack*.6,attack*.2,.55-attack*.2);
+    pose(d,'forearm.L',-.28);pose(d,'forearm.R',-.28-attack*.3);
+    pose(d,'thigh.L',stride*.2);pose(d,'thigh.R',-stride*.2);pose(d,'shin.L',Math.max(0,-stride)*.1);pose(d,'shin.R',Math.max(0,stride)*.1);
+    pose(d,'head',Math.sin(time*2)*.018);pose(d,'chest',0,attack*-.13,0);
+    for(const side of ['L','R'])pose(d,`wing_base.${side}`,0,0,Math.sin(time*2.5)*(side==='L'?-1:1)*.08);
+    for(let i=1;i<=8;i++)pose(d,`tail.${String(i).padStart(2,'0')}`,0,Math.sin(time*2-i*.5)*.045,0);
+    root.updateMatrixWorld(true);d.bones.get('hand.R').bone.getWorldPosition(handPosition);d.rig.worldToLocal(handPosition);d.weapon.position.copy(handPosition);d.weapon.rotation.set(.15-attack*.5,0,.1);
+    d.rig.visible=true;d.ring.position.y=.03;d.ring.material.opacity=active?.6:.22;return;
+  }
   if(d.hero===3){
     root.position.set(state.x,0,state.z);
     root.rotation.y+=Math.atan2(Math.sin(state.face-root.rotation.y),Math.cos(state.face-root.rotation.y))*Math.min(1,dt*14);
@@ -204,6 +222,7 @@ export function animateHero(root, state, time, dt, active) {
     pose(d,'tail.01',0,Math.sin(time*2)*.07);
   }
   if(d.hero===4){pose(d,'upper_arm.R',-.35-attack*.65,attack*.5,1.05-attack*.42);pose(d,'forearm.R',-.32);pose(d,'chest',0,attack*-.28,0);for(const side of ['L','R']){pose(d,`skirt.front.${side}`,Math.max(0,side==='L'?stride:-stride)*.16);pose(d,`wing.${side}`,0,Math.sin(time*2)*.03,0);}}
+  if(state.riding){pose(d,'thigh.L',-1.2,0,-.42);pose(d,'thigh.R',-1.2,0,.42);pose(d,'shin.L',1.4);pose(d,'shin.R',1.4);d.rig.position.y=0;}
   for (const side of ['L', 'R', 'back']) {
     pose(d, `hair_mid.${side}`, Math.sin(time * 2.8 + (side === 'R' ? 1 : 0)) * .014 + stride * .018);
     pose(d, `hair_tip.${side}`, Math.sin(time * 3.2) * .02);

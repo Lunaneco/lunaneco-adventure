@@ -1,3 +1,4 @@
+import {buildPrismLandmarks} from './prim-visuals.js';
 import {buildMochiLandmarks} from './mochi-country.js';
 import {buildDemonLandmarks} from './demon-country.js';
 import * as THREE from 'three';
@@ -57,6 +58,7 @@ export class FieldEnvironment {
   createLandmarks(){
     return FIELD_THEMES.map((theme,index)=>{
       const group=new THREE.Group();group.name=`Field ${index+1} landmarks`;this.world.scene.add(group);
+      if(theme.prism){buildPrismLandmarks(group);bakeGroup(group);return group;}
       if(theme.demon){buildDemonLandmarks(group,theme.demon);bakeGroup(group);return group;}
       if(theme.mochi){buildMochiLandmarks(group,theme.mochi);bakeGroup(group);return group;}
       if(theme.country){buildCountryLandmarks(group,theme.country);bakeGroup(group);return group;}

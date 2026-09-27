@@ -8,8 +8,8 @@ import {MATERIAL_DROPS} from '../src/talents.js';
 import {createEnemy,animateEnemy} from '../src/characters.js';
 function quiet(act=0,party){const g=new Adventure({seed:4,act,party,progression:{story:{version:2,actClears:[true,true,true,true],tsukinekoUnlocked:true}}});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;}
 const tick=(g,seconds)=>{for(let i=0;i<Math.ceil(seconds*60)&&g.phase==='playing';i++)g.tick(1/60);};
-test('twenty-six regular enemy types have unique roles and complete XP, crystal and material rewards',()=>{
- assert.equal(Object.values(ENEMY_TYPES).filter(s=>!s.rare).length,26);
+test('twenty-eight regular enemy types have unique roles and complete XP, crystal and material rewards',()=>{
+ assert.equal(Object.values(ENEMY_TYPES).filter(s=>!s.rare).length,28);
  for(const [type,spec] of Object.entries(ENEMY_TYPES).filter(([,s])=>!s.rare)){
   assert.equal(ENEMY_REWARDS[type].xp,spec.xp);assert.equal(MATERIAL_DROPS[type].starBud,spec.buds);
   const g=quiet(),e=g.spawnEnemy(type,10,10);g.materialRng=()=>0;g.hit(e,9999,0,0,false,false,'tsukineko');assert.equal(g.earnedXp.tsukineko,spec.xp);assert.equal(g.earnedXp.nyanluna,spec.xp/2);assert.equal(g.orbs[0].value,spec.crystals);assert.equal(g.earnedMaterials.starBud,spec.buds);
@@ -74,9 +74,9 @@ test('all enemy model silhouettes have valid finite geometry within mobile rende
  for(const [type,bossId] of shapes){
   const model=createEnemy(type,bossId),bounds=new Box3().setFromObject(model);let triangles=0,meshes=0;
   model.traverse(o=>{if(o.isMesh){meshes++;triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;for(const n of o.geometry.attributes.position.array)assert.ok(Number.isFinite(n));}});
-  assert.ok(triangles<16000&&meshes<30,`${type}/${bossId}: ${triangles} triangles, ${meshes} draws`);assert.ok(bounds.max.y>1&&bounds.max.y<(bossId==='colossus'?7:5)&&bounds.max.x-bounds.min.x<7);
+  assert.ok(triangles<16000&&meshes<30,`${type}/${bossId}: ${triangles} triangles, ${meshes} draws`);assert.ok(bounds.max.y>1&&bounds.max.y<(bossId==='colossus'||bossId?.startsWith('prism')?7:5)&&bounds.max.x-bounds.min.x<(bossId?.startsWith('prism')?11:7));
   animateEnemy(model,{x:0,z:0,face:0,type,bossId,id:1,speed:1,hit:0,cast:{kind:'chant'}},1);assert.ok(model.children.length);
   if(type==='boss')bossBounds.push([bounds.max.x-bounds.min.x,bounds.max.y,bounds.max.z-bounds.min.z].map(n=>n.toFixed(2)).join(','));
  }
- assert.equal(new Set(bossBounds).size,16);
+ assert.equal(new Set(bossBounds).size,20);
 });

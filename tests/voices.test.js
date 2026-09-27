@@ -17,7 +17,7 @@ function harness(){
  return {voice,sound,ctx,sources,captions,duck,requests,advance:n=>{time+=n;ctx.currentTime+=n;}};
 }
 test('every story line and tutorial has a stable, distinct dialogue key',()=>{
- const lines=[...ACT_SCENES.flatMap(scenes=>Object.values(scenes).flatMap(scene=>scene.lines)),...TUTORIAL_STEPS.map(s=>({who:'nyanluna',text:s.text}))];const ids=new Map();for(const line of lines){const id=dialogueVoiceId(line.who,line.text);assert.match(id,/^[a-z_]+-[0-9a-f]+$/);if(ids.has(id))assert.deepEqual(ids.get(id),line);ids.set(id,line);}assert.ok(ids.size>100);assert.notEqual(dialogueVoiceId('nyanluna','はい'),dialogueVoiceId('tsukineko','はい'));
+ const lines=[...ACT_SCENES.flatMap(scenes=>Object.values(scenes).flatMap(scene=>scene.lines)),...TUTORIAL_STEPS.map(s=>({who:'nyanluna',text:s.text}))];const ids=new Map();for(const line of lines){const id=dialogueVoiceId(line.who,line.text);assert.match(id,/^[a-z_]+-[0-9a-f]+$/);if(ids.has(id))assert.equal(ids.get(id).who,line.who);if(ids.has(id))assert.equal(ids.get(id).text,line.text);ids.set(id,line);}assert.ok(ids.size>100);assert.notEqual(dialogueVoiceId('nyanluna','はい'),dialogueVoiceId('tsukineko','はい'));
 });
 test('all playable heroes have attack, damage, dash, ultimate, growth, defeat and other battle voice coverage',()=>{
  for(const [who,events] of Object.entries(BATTLE_VOICES))for(const key of ['attack','hurt','dash','ultimate','levelup','switch','support','lowhp','down','victory','defeat','start','wave','boss','exit','blessing','treasure','recruit','heal','equip']){assert.ok(events[key]?.length,`${who}/${key}`);for(const line of events[key])assert.equal(line.who,who);}

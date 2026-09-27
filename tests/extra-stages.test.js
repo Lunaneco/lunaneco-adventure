@@ -21,9 +21,9 @@ function attack(act,type='boss',action=0){
 
 test('chapter one and two extras unlock after chapter two; the new extra requires chapter three final gate',()=>{
  for(let cleared=0;cleared<12;cleared++)for(const act of EXTRA_ACTS){const p=profile(cleared),ready=cleared>act.unlockAfterAct;assert.equal(isActUnlocked(p,act.id),ready);if(!ready)assert.equal(new Adventure({act:act.id,progression:p}).act,0);}
- for(const [finalAct,extras] of [[7,[16,17]],[11,[16,17,18]]]){
+ for(const [finalAct,extras] of [[7,[20,21]],[11,[20,21,22]]]){
   const g=new Adventure({act:finalAct,progression:profile(finalAct)});g.wave=5;g.startWave();g.lootRng=()=>1;g.hit(g.enemies.find(e=>e.type==='boss'),1e6,0,0);
-  assert.equal(isActUnlocked(g.progression,finalAct===7?16:18),false);gate(g,2);for(const act of extras)assert.equal(isActUnlocked(g.progression,act),true);
+  assert.equal(isActUnlocked(g.progression,finalAct===7?20:22),false);gate(g,2);for(const act of extras)assert.equal(isActUnlocked(g.progression,act),true);
  }
  const existing=profile(8);assert.deepEqual(existing.story.extraClears,[false,false,false]);assert.equal(existing.inventory.weaponTicket,0);
  for(const cleared of [7,8,11,12]){const corrupt=profile(cleared);corrupt.story.extraClears=[true,true,true];assert.deepEqual(normalizeProgression(corrupt,HEROES).story.extraClears,[cleared>=8,cleared>=8,cleared>=12]);}
@@ -32,7 +32,7 @@ test('chapter one and two extras unlock after chapter two; the new extra require
 });
 test('each extra awards ten tickets first, two on repeats, once at the final gate and across reloads',()=>{
  let p=profile(),total=0;
- for(const [act,expected] of [[17,10],[16,10],[18,10],[17,2],[16,2],[18,2],[16,2]]){
+ for(const [act,expected] of [[21,10],[20,10],[22,10],[21,2],[20,2],[22,2],[20,2]]){
   const g=new Adventure({act,progression:p});const before=structuredClone(g.progression.missions),storyClears=[...p.story.actClears];
   g.trackMission('kills',100);g.trackMission('crystals',100);gate(g,0);gate(g,1);assert.equal(g.earnedWeaponTickets,0);
   gate(g,2);total+=expected;assert.equal(g.clearRewardTickets,expected);assert.equal(g.progression.inventory.weaponTicket,total);assert.equal(g.recruitedHeroId,null);
@@ -59,7 +59,7 @@ test('extra encounters have chapter-specific rosters, valid unique terrain and n
  }
 });
 test('extra difficulty cannot be lowered and increases actual HP, damage, cadence, movement and projectiles',()=>{
- for(const [act,story,type] of [[16,3,'archer'],[17,7,'matchlock']]){
+ for(const [act,story,type] of [[20,3,'archer'],[21,7,'matchlock']]){
   assert.equal(new Adventure({act,progression:profile(),difficulty:'normal'}).difficulty,'hard');
   const base=attack(story,type),extra=attack(act,type);assert.ok(extra.e.hp>base.e.hp);assert.ok(extra.e.damage>base.e.damage);assert.ok(extra.e.speed>base.e.speed);assert.ok(extra.e.cast.total<base.e.cast.total);
   assert.equal(extra.e.cast.total,extra.g.hazards[0].total);

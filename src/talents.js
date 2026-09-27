@@ -6,8 +6,8 @@ import {SKILL_TALENT_NODES} from './skill-tree.js';
 import {personalSkills} from './blessings.js';
 export {SKILL_TALENT_NODES} from './skill-tree.js';
 export const MATERIALS=Object.freeze({
-  bloodCrystal:{rarity:3,name:'紅月の結晶',icon:'crystal',source:'第4章の敵・月の門',note:'悪魔の国の通常敵の素材抽選に当選すると1個、各月の門から3個。3段目の成長ツリーとLv.60・70・80への覚醒に使用。'},
-  demonHeart:{rarity:3,name:'魔心の宝珠',icon:'heart',source:'第4章のボス・試練',note:'悪魔の国のボスから毎回2個、強ボスから3個。3段目の成長ツリーとLv.60・70・80への覚醒に使用。'},
+  bloodCrystal:{rarity:3,name:'紅月の結晶',icon:'crystal',source:'第4・5章の敵・月の門',note:'悪魔の国・プリズムの国の通常敵の素材抽選に当選すると1個、各月の門から3個。3段目の成長ツリーとLv.60・70・80への覚醒に使用。'},
+  demonHeart:{rarity:3,name:'魔心の宝珠',icon:'heart',source:'第4・5章のボス・試練',note:'悪魔の国・プリズムの国のボスから毎回2個、強ボスから3個。3段目の成長ツリーとLv.60・70・80への覚醒に使用。'},
   starBud:{rarity:1,name:'星の芽',icon:'spark',source:'敵撃破',note:'通常敵から50%で1〜4個、ボスから確定で3個。成長ツリーの強化に使用。'},
   moonDew:{rarity:1,name:'月のしずく',icon:'moon',source:'月の門を突破',note:'各幕の月の門から1個ずつ、全3個。1段目とLv.30へのレベル覚醒に使用。'},
   wardenCore:{rarity:1,name:'守護者の欠片',icon:'star',source:'ボス撃破',note:'各幕のボスを倒すと1個。1段目の最後の星とLv.30へのレベル覚醒に使用。'},
@@ -21,9 +21,9 @@ export const MATERIAL_DROP_CHANCE=.5;
 export function enemyMaterials(enemy,act,difficulty,random=Math.random){
   if(enemy.type===GOLDEN_SLIME.type)return {...GOLDEN_SLIME.materials};
   if(enemy.type!=='boss'&&random()>=MATERIAL_DROP_CHANCE)return {};
-  return {...MATERIAL_DROPS[enemy.type],...(actFor(act)?.chapter===3?(enemy.type==='boss'?{demonHeart:enemy.elite?3:2}:{bloodCrystal:1}):{}),...(enemy.type==='boss'&&(act>=4||difficulty==='hard'||enemy.elite)?{astralCore:1}:{})};
+  return {...MATERIAL_DROPS[enemy.type],...(actFor(act)?.chapter>=3?(enemy.type==='boss'?{demonHeart:enemy.elite?3:2}:{bloodCrystal:1}):{}),...(enemy.type==='boss'&&(act>=4||difficulty==='hard'||enemy.elite)?{astralCore:1}:{})};
 }
-export function gateMaterials(area,act,difficulty){return {moonDew:1,...(actFor(act)?.chapter===3?{bloodCrystal:3}:{}),...(act>=4||difficulty==='hard'?{moonPrism:1}:{})};}
+export function gateMaterials(area,act,difficulty){return {moonDew:1,...(actFor(act)?.chapter>=3?{bloodCrystal:3}:{}),...(act>=4||difficulty==='hard'?{moonPrism:1}:{})};}
 export function resourceLabel(id){const m=TREE_RESOURCES[id];return `${m.rarity?`★${m.rarity} `:''}${m.name}`;}
 export function tierMaterialCost(nodes){const total={};for(const node of nodes)for(const [id,n] of Object.entries(node.cost))total[id]=(total[id]??0)+n;return total;}
 // Ordered by prerequisites; both the graph and saved-data validation use this order.
@@ -80,6 +80,8 @@ export function talentNode(id,heroId){
   if(id==='awakening'&&heroId==='nyanluna')return {...node,name:'月光の極意',bonus:{hp:20,attack:.12,defense:4}};
   if(id==='awakening'&&heroId==='tsukineko')return {...node,name:'星影の極意',bonus:{hp:36,attack:.08,defense:8}};
   if(id==='awakening'&&heroId==='omsolo')return {...node,name:'翠刃の極意',bonus:{hp:44,attack:.10,defense:10}};
+  if(heroId==='prim'&&id==='ultimateArt')return {...node,name:'虹を貫く息吹',bonus:{ultimateRange:4,ultimateDamage:.2}};
+  if(heroId==='prim'&&id==='transcendence')return {...node,name:'七彩の目覚め',bonus:{...node.bonus,ultimatePulses:2}};
   if(heroId==='shizuku'&&id==='ultimateArt')return {...node,name:'刈り取るのは痛みだけ',bonus:{ultimateHeal:18,ultimateRadius:1}};
   if(heroId==='shizuku'&&id==='transcendence')return {...node,name:'雫・紅月の目覚め',bonus:{...node.bonus,ultimatePulses:2}};
   if(id==='ultimateArt'){

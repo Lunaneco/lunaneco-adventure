@@ -8,7 +8,7 @@ import {createSanctuary,updateSanctuary} from '../src/ultimate-effects.js';
 
 const first=FIRST_TIER_NODES.map(n=>n.id),all=TALENT_NODES.map(n=>n.id);
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
-const profile=(id='nyanluna',tree=first,level=50)=>normalizeProgression({story:{version:2,actClears:Array(16).fill(true)},characters:{[id]:{level,breaks:3,tree}},inventory:{starBud:10000,moonDew:1000,wardenCore:100,moonPrism:1000,astralCore:100,limitStone:3}},HEROES);
+const profile=(id='nyanluna',tree=first,level=50)=>normalizeProgression({story:{version:2,actClears:Array(20).fill(true)},characters:{[id]:{level,breaks:3,tree}},inventory:{starBud:10000,moonDew:1000,wardenCore:100,moonPrism:1000,astralCore:100,limitStone:3}},HEROES);
 const quiet=(heroId='nyanluna',tree=all)=>{
   const hero=HEROES.findIndex(h=>h.id===heroId),partner=heroId==='nyanluna'?'tsukineko':'nyanluna';
   const g=new Adventure({hero,progression:profile(heroId,tree),party:[heroId,partner],seed:47});

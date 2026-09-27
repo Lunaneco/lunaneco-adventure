@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {buildPrismEnemy,PRISM_ENEMIES,PRISM_BOSSES} from './chapter-five-enemies.js';
 import {buildDemonEnemy,DEMON_ENEMIES,DEMON_BOSSES} from './chapter-four-enemies.js';
 import {buildMochiEnemy,MOCHI_ENEMIES,MOCHI_BOSSES} from './chapter-three-enemies.js';
 import {buildChapterTwoBoss} from './chapter-two-bosses.js';
@@ -20,7 +21,8 @@ export function bakeGroup(group){
 }
 export function createEnemy(type,bossId='eclipse'){
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);let wings=[],rotors=[],focus=null;
-  if(DEMON_ENEMIES[type]||type==='boss'&&DEMON_BOSSES[bossId]){({focus,wings,rotors}=buildDemonEnemy(type,bossId,root,body,{part,ball,tube}));
+  if(PRISM_ENEMIES[type]||type==='boss'&&PRISM_BOSSES[bossId]){({focus,wings,rotors}=buildPrismEnemy(type,bossId,root,body,{part,ball,tube,bakeGroup}));
+  }else if(DEMON_ENEMIES[type]||type==='boss'&&DEMON_BOSSES[bossId]){({focus,wings,rotors}=buildDemonEnemy(type,bossId,root,body,{part,ball,tube}));
   }else if(type==='goldenSlime'||MOCHI_ENEMIES[type]||type==='boss'&&MOCHI_BOSSES[bossId]){({focus,wings,rotors}=buildMochiEnemy(type,bossId,root,body,{part,ball,tube}));
   }else if(CHAPTER_TWO_ENEMIES.includes(type)){
     ({focus,wings,rotors}=buildCountryEnemy(type,root,body,{part,ball,tube,bakeGroup}));
@@ -139,7 +141,7 @@ export function createEnemy(type,bossId='eclipse'){
   if(focus)focus.userData.baseScale=focus.scale.clone();bakeGroup(body);root.userData={demonScale:root.userData.demonScale,body,wings,rotors,focus,statusRing,type,bossId:type==='boss'?bossId:null};return root;
 }
 export function animateEnemy(root,e,time){
-  const d=root.userData,flying=e.type==='bat'||ENEMY_TYPES[e.type]?.flying||e.bossId==='chronarch'||e.bossId==='tempest';
+  const d=root.userData,flying=e.type==='bat'||ENEMY_TYPES[e.type]?.flying||e.bossId==='chronarch'||e.bossId==='tempest'||Boolean(PRISM_BOSSES[e.bossId]);
   root.position.set(e.x,0,e.z);root.rotation.y=e.face;
   d.statusRing.scale.setScalar(e.type==='boss'?e.radius*1.15:1);d.statusRing.visible=!!e.mochiFrozen||e.mochiAttackDown>0;d.statusRing.material.opacity=.45+Math.sin(time*4)*.18;
   if(e.mochiFrozen)return;

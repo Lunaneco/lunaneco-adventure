@@ -8,7 +8,7 @@ import {enemySpeedScale} from '../src/ultimate-combat.js';
 import {talentView} from '../src/talent-ui.js';
 import {partyView} from '../src/party-ui.js';
 import {botInput} from './bot.js';
-const story={version:2,actClears:Array(16).fill(true)},first=FIRST_TIER_NODES.map(n=>n.id),tree=[...first,'ascension',...SKILL_TALENT_NODES.map(n=>n.id)];
+const story={version:2,actClears:Array(20).fill(true)},first=FIRST_TIER_NODES.map(n=>n.id),tree=[...first,'ascension',...SKILL_TALENT_NODES.map(n=>n.id)];
 const profile=(options={})=>normalizeProgression({story,characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:35,breaks:2,tree}])),inventory:{starBud:1000,moonDew:100,wardenCore:10,moonPrism:100,astralCore:10},...options},HEROES);
 const ids=pool=>pool.map(s=>s.id).sort();
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
@@ -23,7 +23,7 @@ function ticks(g,n,targets=[]){for(let i=0;i<n;i++){for(const [e,z] of targets)O
 test('old saves preserve every earned value and retain original candidates without unlocking new skills',()=>{
  const raw=profile({characters:{nyanluna:{level:20,xp:72,tree:first},tsukineko:{level:15,xp:19}},blessingLoadouts:undefined});
  const {blessingLoadouts,...legacy}=raw,restored=normalizeProgression(legacy,HEROES);
- assert.deepEqual(restored,raw);assert.deepEqual(restored.blessingLoadouts,{nyanluna:['nova','orbit','reach'],tsukineko:['haste','focus','crit'],omsolo:['saberPower','saberReach','saberGuard'],mochinyafe:['mochiLull','mochiReach','mochiMend'],shizuku:['shizukuPower','shizukuDrain','shizukuReach']});
+ assert.deepEqual(restored,raw);assert.deepEqual(restored.blessingLoadouts,{nyanluna:['nova','orbit','reach'],tsukineko:['haste','focus','crit'],omsolo:['saberPower','saberReach','saberGuard'],mochinyafe:['mochiLull','mochiReach','mochiMend'],shizuku:['shizukuPower','shizukuDrain','shizukuReach'],prim:['primPower','primReach','primFocus']});
  assert.equal(skillsForParty(['nyanluna'],restored).length,7);assert.equal(skillsForParty(['nyanluna','tsukineko'],restored).length,12);
 });
 test('invalid, locked, duplicate, foreign and pair candidates are repaired to three owned personal slots',()=>{
