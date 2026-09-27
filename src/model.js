@@ -1,3 +1,4 @@
+import {advanceFloors,tickFloors,floorMovementScale} from './special-floors.js';
 import {PRIM_BOND,PRIM_MOUNT,PRIM_DUET,hasPrimBond,canPrimDuet,canMount,startMount,endMount,tickMount} from './prim-combat.js';
 import {SHIZUKU_BOND,hasShizukuBond,canShizukuDuet,SHIZUKU_DUET,drainShizuku} from './shizuku-combat.js';
 import {GOLDEN_SLIME,goldenSlimeWave,guaranteedExtraRareWave} from './golden-slime.js';
@@ -53,7 +54,7 @@ export class Adventure {
     });
     this.ultimateCharges=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.ultimateEffects=[];
     Object.defineProperty(this.player,'charge',{enumerable:true,get:()=>this.chargeFor(this.player.hero),set:value=>{this.ultimateCharges[this.heroId(this.player.hero)]=Number.isFinite(value)?clamp(value,0,100):0;}});
-    this.mount={active:false,remaining:0,cooldown:0};this.partner={x:-1.7,z:4.5,attack:0,face:Math.PI};this.enemies=[];this.projectiles=[];this.orbs=[];this.hazards=[];
+    this.floorRooms=new Map();this.mount={active:false,remaining:0,cooldown:0};this.partner={x:-1.7,z:4.5,attack:0,face:Math.PI};this.enemies=[];this.projectiles=[];this.orbs=[];this.hazards=[];
     this.skills={};this.offers=[];this.pendingBlessings=0;this.blessingTier=0;this.stageCrystals=0;this.crystalGoal=8;this.totalCrystals=0;this.blessingsTaken=0;this.time=0;this.kills=0;this.combo=0;this.comboTimer=0;this.maxCombo=0;this.damageDealt=0;
     this.stageTrial={startedAt:0,hits:0};this.runHits=0;this.seenEnemyTypes=new Set();
     this.travelOpen=null;this.travelDelay=0;this.route=null;this.routeRewards=[];this.wave=0;this.spawnTimer=0;this.waveSpawned=0;this.waveGoal=0;this.waveBreak=0;this.orbitTimer=0;this.exitOpen=false;this.exitDelay=0;this.stagesCleared=0;this.refreshStats();this.player.hp=this.player.maxHp;this.startWave();
@@ -329,9 +330,10 @@ export class Adventure {
     dt=clamp(dt,0,.05);if(!training)this.time+=dt;tickMount(this,dt);
     for(const e of this.enemies)this.expireGoldenSlime(e);
     if(this.rescue?.active){this.rescue.remaining=Math.max(0,this.rescue.remaining-dt);if(this.rescue.remaining<=0){this.phase='defeat';this.ultimateEffects=[];this.projectiles=[];this.hazards=[];this.emit('defeat',{reason:'rescueTimeout'});return;}}
+    advanceFloors(this,dt);
     const p=this.player,fromX=p.x,fromZ=p.z;
     for(const prop of ['attack','dashCooldown','invincible','switchCooldown'])p[prop]=Math.max(0,p[prop]-dt);
-    let dx=input.x||0,dz=input.z||0;const speed=(this.mount.active?PRIM_MOUNT.speed:HEROES[p.hero].moveSpeed??5.6)*(1+this.rank('stride')*.12);const length=Math.hypot(dx,dz);if(length>1){dx/=length;dz/=length;}
+    let dx=input.x||0,dz=input.z||0;const speed=(this.mount.active?PRIM_MOUNT.speed:HEROES[p.hero].moveSpeed??5.6)*(1+this.rank('stride')*.12)*floorMovementScale(this,p);const length=Math.hypot(dx,dz);if(length>1){dx/=length;dz/=length;}
     if(p.dash>0){p.dash=Math.max(0,p.dash-dt);dx=p.dx;dz=p.dz;p.x+=dx*(p.dashSpeed??24)*dt;p.z+=dz*(p.dashSpeed??24)*dt;}else{p.x+=dx*speed*dt;p.z+=dz*speed*dt;}
     if(Math.hypot(dx,dz)>.05)p.face=Math.atan2(dx,dz);p.moving=Math.hypot(dx,dz)>.05;
     Object.assign(p,moveWithin(this.walkLayout,{x:fromX,z:fromZ},p.x,p.z));
@@ -349,13 +351,14 @@ export class Adventure {
       if(this.pendingBlessings>0){this.offerSkills();return;}
       this.exitDelay=Math.max(0,this.exitDelay-dt);this.crossExit();return;
     }
+    tickFloors(this,dt);if(this.phase!=='playing')return;
     if(!training)tickUltimates(this,dt);
     if(p.attack<=0&&this.attackFrom(p,p.hero))p.attack=this.attackProfile(p.hero).interval*Math.pow(.85,this.effectRank('haste'));
     if(this.hasLivingPartner&&partner.attack<=0&&this.attackFrom(partner,this.partnerHero,!this.mount.active))partner.attack=this.partnerHero===3?this.attackProfile(3).supportInterval:this.attackProfile(this.partnerHero).interval*(this.mount.active?1:2.6)*Math.pow(.85,this.effectRank('haste'));
     if(!training){this.spawnTimer-=dt;if(this.waveSpawned<this.waveGoal&&this.spawnTimer<=0){this.spawn();this.spawnTimer=this.wave===6?100:Math.max(.43,1.15-this.wave*.10)*(this.actConfig.extra?extraCombatFor(this.actConfig).spawnScale:1);}}
     for(const e of this.enemies){
       if(e.hp<=0)continue;e.mochiFrozen=mochiFrozen(this,e);if(e.mochiFrozen){e.hit=Math.max(0,e.hit-dt);continue;}if(e.mochiWeakenUntil<=this.time){e.mochiAttackDown=0;e.mochiDefenseDown=0;}const enemyFrom={x:e.x,z:e.z};e.navTimer-=dt;e.age+=dt;e.hit=Math.max(0,e.hit-dt);e.attack-=dt*(this.actConfig.extra?extraCombatFor(this.actConfig).cooldownRate:1);
-      if(!e.training)tickEnemyBehavior(this,e,dt,enemySpeedScale(this,e));
+      if(!e.training)tickEnemyBehavior(this,e,dt,enemySpeedScale(this,e)*floorMovementScale(this,e,{enemy:true}));
       e.x+=e.knockX*dt;e.z+=e.knockZ*dt;e.knockX*=Math.max(0,1-dt*7);e.knockZ*=Math.max(0,1-dt*7);
       Object.assign(e,moveWithin(this.walkLayout,enemyFrom,e.x,e.z,Math.min(.8,e.radius)));
       if(!e.rare&&Math.hypot(p.x-e.x,p.z-e.z)<e.radius+.7&&e.attack<=0){this.hurt(mochiIncomingDamage(this,e.damage,e.id),e.x,e.z);e.attack=1.2;if(this.phase==='defeat')return;}

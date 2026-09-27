@@ -1,3 +1,4 @@
+import {buildSpecialFloors,updateSpecialFloors} from './special-floor-world.js';
 import {dressPrismTerrain} from './prim-visuals.js';
 import {MOCHI_PALETTES} from './mochi-country.js';
 import {publicUrl} from './public-url.js';
@@ -59,7 +60,7 @@ export class TerrainWorld{
   }else this.closedGate=null;
   if(layout.prism)this.materials.push(dressPrismTerrain(edges,layout,contains));
   dressCountryTerrain(edges,layout);this.countryProps=edges.userData.countryProps??[];
-  bakeGroup(edges);
+  bakeGroup(edges);this.specialFloors=buildSpecialFloors(this,layout);
   const portals=layout.stairs?[{id:'stairs',...layout.stairPoint,color:0x9cdcff}]:layout.id.endsWith('fork')?ROUTE_PORTALS:[];
   for(const portal of portals){const group=new THREE.Group();group.userData.portal=portal;group.position.set(portal.x,heightAt(layout,portal.x,portal.z)+.14,portal.z);this.markers.add(group);
    const ring=new THREE.Mesh(new THREE.TorusGeometry(portal.radius,.075,7,40),new THREE.MeshBasicMaterial({color:portal.color}));ring.rotation.x=-Math.PI/2;group.add(ring);
@@ -71,6 +72,7 @@ export class TerrainWorld{
  update(game,time){
   if(!game){this.root.visible=false;this.markers.visible=false;return;}
   if(this.id!==game.layout.id)this.build(game.layout);this.root.visible=true;this.markers.visible=true;
+  updateSpecialFloors(this.specialFloors??[],game);
   if(this.closedGate)this.closedGate.visible=!game.travelOpen;
   for(const group of this.markerGroups){const active=game.travelTargets.some(t=>t.id===group.userData.portal.id);group.scale.setScalar(active?1:.85);group.children.forEach(m=>{m.material.transparent=true;m.material.opacity=active?1:.28;});const star=group.children.at(-1);star.rotation.y=this.world.settings.motion===false?0:time;}
  }

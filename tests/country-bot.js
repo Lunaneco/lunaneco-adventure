@@ -1,4 +1,5 @@
 import {distanceToHazard} from '../src/enemies.js';
+import {FLOOR_TYPES,floorPatchesFor,floorPhase,floorMovementScale} from '../src/special-floors.js';
 // A challenge pilot uses visible telegraphs and shots, walking direction, dash,
 // switching and both earned ultimates. It never changes stats or simulation time.
 export function trialInput(g){
@@ -10,7 +11,8 @@ export function trialInput(g){
  const enemy=g.nearest(p.x,p.z,100);let x=0,z=0;
  if(enemy){const dx=enemy.x-p.x,dz=enemy.z-p.z,d=Math.hypot(dx,dz)||.01,desired=p.hero===2?enemy.radius+1.85:enemy.type==='boss'?8:p.hero===1?7:5.7,radial=(d-desired)*.7;x=dx/d*radial-dz/d*.9;z=dz/d*radial+dx/d*.9;}
  if(Math.hypot(p.x,p.z)>14){x-=p.x*.3;z-=p.z*.3;}
- const angle=Math.atan2(x,z),speed=5.6*(1+g.rank('stride')*.12),shots=g.projectiles.filter(b=>b.owner==='enemy');
+ const angle=Math.atan2(x,z),speed=5.6*(1+g.rank('stride')*.12)*floorMovementScale(g,p),shots=g.projectiles.filter(b=>b.owner==='enemy');
+ const floorWarnings=floorPatchesFor(g.layout).filter(f=>FLOOR_TYPES[f.type].kind==='damage'&&['warning','active'].includes(floorPhase(g,f).phase));
  const score=(a,dash=false)=>{
   const vx=Math.sin(a),vz=Math.cos(a);let risk=0;
   for(const t of [.12,.28,.48,.75,1.05]){
@@ -18,6 +20,7 @@ export function trialInput(g){
    const qx=p.x+vx*travel,qz=p.z+vz*travel;
    if(!g.canWalk(qx,qz)){risk+=80;continue;}
    const immune=t<(dash?.5:p.invincible);
+   for(const f of floorWarnings)if(Math.hypot(qx-f.x,qz-f.z)<f.radius+.65)risk+=immune?0:100;
    for(const h of g.hazards){
     if(h.timer<t-.2||h.timer>t+.25)continue;
     const gap=distanceToHazard(qx,qz,h);

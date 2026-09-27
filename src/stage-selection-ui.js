@@ -2,6 +2,9 @@ import {ACTS,EXTRA_ACTS,CHAPTERS,actFor,actLabel,isActUnlocked,isActCleared,clea
 import {STAGE_MISSIONS} from './missions.js';
 import {icon} from './icons.js';
 import {requiredPartyMember} from './party.js';
+import {fieldFor} from './terrain.js';
+import {mapSvg} from './terrain-ui.js';
+import {FLOOR_TYPES,floorPatchesFor} from './special-floors.js';
 
 export function stageSelectionView(chapterId,profile){
   const chapter=CHAPTERS[chapterId],acts=ACTS.filter(a=>a.chapter===chapterId),extra=EXTRA_ACTS.find(a=>a.chapter===chapterId);
@@ -27,6 +30,7 @@ export function stageBriefingView(actId,difficulty,profile){
       <section class="brief-objective" aria-labelledby="brief-objective-title"><h3 id="brief-objective-title">${icon('compass')} ミッション</h3><p>魔物を倒して、月の門を進もう。</p><strong>「${act.boss}」を倒し、最後の門へ。</strong></section>
       ${requiredPartyMember(profile,actId)?`<section class="brief-objective brief-party-rule" aria-label="編成条件"><h3>${icon('lock')} 初回クリアまでの編成</h3><strong>${act.chapter===4?'つきねこ単独で出撃':'にゃんるな必須（先頭・援護どちらでも可）'}</strong><p>${act.chapter===4?'つきねこ1人の編成に自動で切り替わります。':'にゃんるなを自動で編成に加えます。'}この幕をクリアすると、自由に編成できます。</p></section>`:''}
       <div class="brief-route" aria-label="進行ルート">${act.stages.map((s,i)=>`<span><b>${i+1}</b>${s.name}</span>`).join('')}</div>
+      <section class="brief-terrain" aria-label="地形と特殊床"><h3>地形と特殊床</h3><div>${act.stages.map((s,i)=>{const f=fieldFor(actId,i),l=f.rooms[0];return `<article>${mapSvg(l)}<strong>${l.shapeLabel}</strong><small>${{single:'ひとつの広場',floors:'階段でつながる2フロア',branch:'通常・強敵の分岐'}[f.kind]}</small><p>${floorPatchesFor(l).map(p=>FLOOR_TYPES[p.type].name).join('・')}</p></article>`;}).join('')}</div><p>×の床は予告後に噴出。＋は回復、≈は減速、»は加速。安全な道を選んで進もう。</p></section>
       <section id="stage-difficulty" class="brief-difficulty" aria-label="難易度">${act.extra?`<strong>${icon('star')} ${act.apex?'全EX最難関':'エクストラ・最高難度'}</strong><span>適正 Lv.50</span>`:`<div class="brief-modes" role="group" aria-label="難易度"><button data-difficulty="normal" aria-pressed="${difficulty==='normal'}">冒険</button><button data-difficulty="hard" aria-pressed="${difficulty==='hard'}">チャレンジ</button></div><p>${difficulty==='hard'?'手強い敵と戦い、特別な素材を集めよう。':'物語を楽しみながら、仲間を育てよう。'}</p>`}</section>
       <div class="brief-reward">${icon('star')}<span>クリア報酬</span><b>武器ガチャ券 ×${clearTicketReward(profile,actId)}</b>${act.extra&&!cleared?'<small>初回</small>':''}</div>
       ${trial?`<button class="brief-missions-link" data-show-mission="${trial.id}">素材・試練の報酬 ${icon('chevron')}</button>`:''}
