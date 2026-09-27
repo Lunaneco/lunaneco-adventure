@@ -104,7 +104,7 @@ $('#app').innerHTML=`
     <div class="key-art" aria-hidden="true"><div class="title-backdrop"></div><div class="title-film"><img src="${publicUrl('assets/title/adventure-poster.jpg')}" alt="" fetchpriority="high"><video id="title-video" data-src="${publicUrl('assets/title/adventure-loop.mp4')}" poster="${publicUrl('assets/title/adventure-poster.jpg')}" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1"></video></div></div><div class="home-shade"></div><div class="dust dust-one"></div><div class="dust dust-two"></div>
     <div class="title-lockup"><span class="title-orbit" aria-hidden="true">☾</span><p class="title-kicker">LUNANECO ADVENTURE</p><h1 class="game-title"><span>ルナネコの</span><span>不思議な冒険</span></h1><p class="title-caption">月明かりが、ふたりを導く。</p></div>
     <div class="title-entry"><button id="start" class="title-start"><span>冒険をはじめる</span>${icon('arrow')}</button></div>
-    <footer class="title-footer"><span>月と星をめぐる、小さな冒険。</span><span class="version">Ver. 1.68.0</span></footer>
+    <footer class="title-footer"><span>月と星をめぐる、小さな冒険。</span><span class="version">Ver. 1.69.0</span></footer>
   </section>
   <section id="chapter-menu" class="chapter-menu menu-light hidden" tabindex="-1" aria-label="冒険メニュー"></section>
   <section id="hud" class="hud hidden" aria-label="戦闘情報">

@@ -9,6 +9,22 @@ import {ACT_SCENES} from '../src/chapter.js';
 import {TUTORIAL_STEPS} from '../src/tutorial.js';
 import {BATTLE_VOICES,dialogueVoiceId} from '../src/voice-catalog.js';
 import {voicePlaybackGain} from '../src/voice-policy.js';
+import {FIFTH_CHAPTER_SCENES} from '../src/chapter-five-story.js';
+
+test('all sixteen raging dragon lines use distinct monster roars, while purified Prim and the duet keep their accepted calls',()=>{
+ const lines=FIFTH_CHAPTER_SCENES.flatMap(act=>Object.values(act).flatMap(scene=>scene.lines)).filter(line=>line.who==='prim');
+ const raging=lines.filter(line=>line.portrait==='primRaging'),friendly=lines.filter(line=>line.portrait!=='primRaging');
+ assert.equal(raging.length,16);assert.equal(friendly.length,5);
+ const roarFiles=new Set(raging.map(line=>{
+  assert.match(line.text,/^グオオオ[ッ！…。]*$/);
+  const clip=VOICE_MANIFEST[dialogueVoiceId(line.who,line.text)];assert.ok(clip);assert.equal(clip.kind,'story');assert.ok(clip.duration>=2&&clip.duration<=4);return clip.file;
+ }));
+ assert.equal(roarFiles.size,3);
+ const accepted={happy:'assets/voices/prim/prim-happy-dbe331ddc7e2.mp3',power:'assets/voices/prim/prim-power-fd751e6ff09b.mp3',hurt:'assets/voices/prim/prim-hurt-9e50b2c328aa.mp3'};
+ for(const line of friendly){assert.match(line.text,/^キュ〜/);const clip=VOICE_MANIFEST[dialogueVoiceId(line.who,line.text)];assert.equal(clip.file,line.text.includes('っ')?accepted.power:accepted.happy);assert.ok(!roarFiles.has(clip.file));}
+ for(const [event,entries] of Object.entries(BATTLE_VOICES.prim))for(const line of entries){const clip=VOICE_MANIFEST[line.id];assert.equal(clip.file,['hurt','lowhp','down','defeat'].includes(event)?accepted.hurt:event==='ultimate'?accepted.power:accepted.happy);}
+ assert.equal(VOICE_MANIFEST[PRIM_DUET_VOICE.id].file,'assets/voices/tsukineko/tsukineko-prim-duet-c65672872b44.mp3');
+});
 
 test('all remaining battle clips have measured levels and the unwanted grunt is not shipped',()=>{
  const battle=Object.values(VOICE_MANIFEST).filter(v=>v.kind==='battle');assert.equal(battle.length,142);

@@ -1,4 +1,4 @@
-// Original Prim creature calls; Tsukineko continues the accepted v145 reference.
+// Enemy dragon roars and friendly Prim calls are separate; Tsukineko retains the accepted v145 voice.
 export const CHAPTER_FIVE_VOICE_MANIFEST={
   "tsukineko-8afb64b": {
     "id": "tsukineko-8afb64b",
@@ -7,14 +7,6 @@ export const CHAPTER_FIVE_VOICE_MANIFEST={
     "kind": "story",
     "file": "assets/voices/tsukineko/tsukineko-8afb64b-b134ff418608.mp3",
     "duration": 5.3
-  },
-  "prim-1d58b183": {
-    "id": "prim-1d58b183",
-    "who": "prim",
-    "text": "キュ〜……。",
-    "kind": "story",
-    "file": "assets/voices/prim/prim-hurt-9e50b2c328aa.mp3",
-    "duration": 0.908
   },
   "tsukineko-49396cdf": {
     "id": "tsukineko-49396cdf",
@@ -103,14 +95,6 @@ export const CHAPTER_FIVE_VOICE_MANIFEST={
     "kind": "story",
     "file": "assets/voices/tsukineko/tsukineko-9d6fe563-2cae59566ebf.mp3",
     "duration": 3.848
-  },
-  "prim-d0bcec7b": {
-    "id": "prim-d0bcec7b",
-    "who": "prim",
-    "text": "キュ〜。",
-    "kind": "story",
-    "file": "assets/voices/prim/prim-soft-7dcb73575747.mp3",
-    "duration": 1.34
   },
   "tsukineko-97d4c8d5": {
     "id": "tsukineko-97d4c8d5",
@@ -519,5 +503,29 @@ export const CHAPTER_FIVE_VOICE_MANIFEST={
     "kind": "duet",
     "file": "assets/voices/tsukineko/tsukineko-prim-duet-c65672872b44.mp3",
     "duration": 3.818
+  },
+  "prim-b7c5ede1": {
+    "id": "prim-b7c5ede1",
+    "who": "prim",
+    "text": "グオオオ……。",
+    "kind": "story",
+    "file": "assets/voices/prim/prim-b7c5ede1-acb2bc92d486.mp3",
+    "duration": 2.506
+  },
+  "prim-714f4740": {
+    "id": "prim-714f4740",
+    "who": "prim",
+    "text": "グオオオ！",
+    "kind": "story",
+    "file": "assets/voices/prim/prim-714f4740-f40b42e2d2d9.mp3",
+    "duration": 2.701
+  },
+  "prim-5cfb2565": {
+    "id": "prim-5cfb2565",
+    "who": "prim",
+    "text": "グオオオッ！",
+    "kind": "story",
+    "file": "assets/voices/prim/prim-5cfb2565-53e9924d7881.mp3",
+    "duration": 2.928
   }
 };

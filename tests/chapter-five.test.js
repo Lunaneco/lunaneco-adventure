@@ -33,7 +33,7 @@ test('chapter five migrates existing saves, enforces each first-clear solo, and 
 });
 test('chapter five uses two story voices and the reference dragon purification, with level-60 chapter-four stats and drops',()=>{
  for(const a of ACTS.slice(16)){assert.equal(a.recommendedLevel,60);assert.deepEqual(a.counts,ACTS[a.id-4].counts);assert.equal(a.bossHp,ACTS[a.id-4].bossHp);assert.match(a.boss,/プリズムドラゴン/);assert.ok(enemyMaterials({type:'boss',hp:0},a.id,'normal',()=>0).demonHeart>0);}
- const lines=FIFTH_CHAPTER_SCENES.flatMap(a=>Object.values(a).flatMap(s=>s.lines));assert.deepEqual([...new Set(lines.map(l=>l.who))].sort(),['prim','tsukineko']);for(const l of lines.filter(l=>l.who==='prim'))assert.match(l.text,/^キュ〜[っ！♪…。]*$/);
+ const lines=FIFTH_CHAPTER_SCENES.flatMap(a=>Object.values(a).flatMap(s=>s.lines));assert.deepEqual([...new Set(lines.map(l=>l.who))].sort(),['prim','tsukineko']);for(const l of lines.filter(l=>l.who==='prim'))assert.match(l.text,l.portrait==='primRaging'?/^グオオオ[ッ！…。]*$/:/^キュ〜[っ！♪…。]*$/);
  assert.ok(FIFTH_CHAPTER_SCENES[3].ending.lines.some(l=>l.text.includes('小さくなった')));assert.ok(FIFTH_CHAPTER_SCENES[3].ending.lines.some(l=>l.text.includes('きみの名前')));assert.equal(Object.keys(PRISM_ENEMIES).length,7);
 });
 test('ten generated claws and four distinct trial relics remain obtainable and persist',()=>{
