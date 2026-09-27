@@ -1,5 +1,5 @@
 import {PRISM_ENEMIES} from './chapter-five-enemies.js';
-import {prismBossAttack,prismEnemyMove} from './chapter-five-combat.js';
+import {prismBossAttack,prismEnemyAttack,prismFollowup} from './chapter-five-combat.js';
 import {demonEnemyAttack,demonBossAttack,demonFollowup} from './chapter-four-combat.js';
 import {BOSSES,ELITE_BOSS_MULTIPLIER} from './enemies.js';
 import {GOLDEN_SLIME,fleeGoldenSlime} from './golden-slime.js';
@@ -84,9 +84,10 @@ export function tickEnemyBehavior(g,e,dt,slow=1){
  // Follow-up timing includes the preceding cast and recovery. Reserve the chain
  // until it ends so a new boss cycle cannot overwrite its final rush.
  if(e.demonFollowup)e.demonFollowup.due-=dt;
+ if(e.prismFollowup)e.prismFollowup.due-=dt;
  if(e.type===GOLDEN_SLIME.type){fleeGoldenSlime(g,e,dt,slow);return;}
  const p=g.player,dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz)||.01,angle=Math.atan2(dx,dz),route=g.steerEnemy(e);
- if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;g.emit('bossPhase',{label:g.actConfig?.chapter===4?'虹光の暴走 — 拡散弾が五方向、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
+ if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;g.emit('bossPhase',{label:g.actConfig?.chapter===4?'虹光の暴走 — 五方向弾・三連撃、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
  if(e.type==='boss'&&g.actConfig?.apex&&!e.apexAwakened&&e.hp<=e.maxHp*.5){e.apexAwakened=true;g.emit('bossPhase',{label:'夢蝕覚醒 — 包囲魔法と星弾が増加'});}
  if(e.rush){const rush=e.rush;e.face=rush.angle;move(e,Math.sin(rush.angle),Math.cos(rush.angle),rush.speed*slow,Math.min(dt,rush.remaining));rush.remaining-=dt;if(rush.remaining<=0){e.rush=null;e.recovery=.8;}return;}
  if(e.cast){e.cast.remaining-=dt;if(e.cast.remaining<=0){const cast=e.cast;e.cast=null;finishCast(g,e,cast);}return;}
@@ -107,11 +108,12 @@ export function tickEnemyBehavior(g,e,dt,slow=1){
  if(e.recovery>0){e.recovery=Math.max(0,e.recovery-dt*cadence(g));return;}
  e.face=angle;
  if(g.actConfig?.chapter>=3&&e.demonFollowup){demonFollowup(g,e,dt,{angle,circle,charge});return;}
+ if(e.prismFollowup){prismFollowup(g,e,{angle,circle,charge});return;}
  if(e.type==='boss'){
   e.special-=dt*cadence(g);if(e.special<=0){bossAttack(g,e);return;}
   const preferred=g.actConfig?.chapter===4?9:e.bossId==='chronarch'?7:0;if(d>Math.max(preferred,e.radius+.6))move(e,route.x,route.z,e.speed*slow,dt);return;
  }
- if(PRISM_ENEMIES[e.type]){prismEnemyMove(g,e,{d,route,dt,slow,move});return;}
+ if(PRISM_ENEMIES[e.type]){prismEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}
  if(e.type.startsWith('demon')){demonEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}
  if(e.type.startsWith('mochi')){
   mochiEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,charge,lockCast,cooldownRate:cadence(g)});return;

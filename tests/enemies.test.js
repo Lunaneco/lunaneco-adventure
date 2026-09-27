@@ -8,8 +8,8 @@ import {MATERIAL_DROPS} from '../src/talents.js';
 import {createEnemy,animateEnemy} from '../src/characters.js';
 function quiet(act=0,party){const g=new Adventure({seed:4,act,party,progression:{story:{version:2,actClears:[true,true,true,true],tsukinekoUnlocked:true}}});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;}
 const tick=(g,seconds)=>{for(let i=0;i<Math.ceil(seconds*60)&&g.phase==='playing';i++)g.tick(1/60);};
-test('twenty-eight regular enemy types have unique roles and complete XP, crystal and material rewards',()=>{
- assert.equal(Object.values(ENEMY_TYPES).filter(s=>!s.rare).length,28);
+test('thirty-three regular enemy types have unique roles and complete XP, crystal and material rewards',()=>{
+ assert.equal(Object.values(ENEMY_TYPES).filter(s=>!s.rare).length,33);
  for(const [type,spec] of Object.entries(ENEMY_TYPES).filter(([,s])=>!s.rare)){
   assert.equal(ENEMY_REWARDS[type].xp,spec.xp);assert.equal(MATERIAL_DROPS[type].starBud,spec.buds);
   const g=quiet(),e=g.spawnEnemy(type,10,10);g.materialRng=()=>0;g.hit(e,9999,0,0,false,false,'tsukineko');assert.equal(g.earnedXp.tsukineko,spec.xp);assert.equal(g.earnedXp.nyanluna,spec.xp/2);assert.equal(g.orbs[0].value,spec.crystals);assert.equal(g.earnedMaterials.starBud,spec.buds);
