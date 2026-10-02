@@ -30,7 +30,7 @@ test('each of the three paths grows independently and awakening needs all three'
 });
 test('different awakenings apply the advertised permanent bonuses without stacking twice',()=>{
  for(const hero of HEROES.filter(h=>h.id!=='mochinyafe')){const p=profile();for(const n of TALENT_NODES)unlockTalent(p,hero.id,n.id);const character=p.characters[hero.id],bonus=talentBonuses(character,hero.id),stats=characterStats(hero,character);
-  assert.equal(bonus.hp,hero.id==='nyanluna'?96:hero.id==='tsukineko'?112:['shizuku','prim'].includes(hero.id)?104:120);assert.equal(bonus.defense,hero.id==='nyanluna'?15:hero.id==='tsukineko'?19:['shizuku','prim'].includes(hero.id)?17:21);assert.equal(Math.round(bonus.attack*100),hero.id==='nyanluna'?27:hero.id==='tsukineko'?23:hero.id==='shizuku'?25:25);
+  assert.equal(bonus.hp,hero.id==='nyanluna'?96:hero.id==='tsukineko'?112:['shizuku','prim','hehereal'].includes(hero.id)?104:120);assert.equal(bonus.defense,hero.id==='nyanluna'?15:hero.id==='tsukineko'?19:['shizuku','prim','hehereal'].includes(hero.id)?17:21);assert.equal(Math.round(bonus.attack*100),hero.id==='nyanluna'?27:hero.id==='tsukineko'?23:hero.id==='shizuku'?25:25);
   assert.equal(stats.maxHp,hero.baseHp+14*6+bonus.hp);assert.equal(stats.defense,hero.baseDefense+14+bonus.defense);assert.ok(Math.abs(stats.attack-hero.damage*(1+14*.045)*(1+bonus.attack))<1e-8);
   const restored=normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES);assert.deepEqual(characterStats(hero,restored.characters[hero.id]),stats);assert.equal(unlockTalent(restored,hero.id,'awakening'),false);
  }

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Adventure,HEROES,SKILLS} from '../src/model.js';
-const story={version:2,actClears:Array(20).fill(true)};
+const story={version:2,actClears:Array(28).fill(true)};
 function quiet(party=['nyanluna','tsukineko'],hero=0){
  const g=new Adventure({seed:31,party,hero,progression:{story}});
  g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.enemies=[];g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;

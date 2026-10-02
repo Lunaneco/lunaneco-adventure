@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {HEHE_ENEMIES,HEHE_BOSSES,GOLDEN_HEHE,buildHeheEnemy} from './chapter-six-enemies.js';
 import {buildPrismEnemy,PRISM_ENEMIES,PRISM_BOSSES} from './chapter-five-enemies.js';
 import {buildDemonEnemy,DEMON_ENEMIES,DEMON_BOSSES} from './chapter-four-enemies.js';
 import {buildMochiEnemy,MOCHI_ENEMIES,MOCHI_BOSSES} from './chapter-three-enemies.js';
@@ -21,7 +22,8 @@ export function bakeGroup(group){
 }
 export function createEnemy(type,bossId='eclipse'){
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);let wings=[],rotors=[],focus=null;
-  if(PRISM_ENEMIES[type]||type==='boss'&&PRISM_BOSSES[bossId]){({focus,wings,rotors}=buildPrismEnemy(type,bossId,root,body,{part,ball,tube,bakeGroup}));
+  if(HEHE_ENEMIES[type]||type===GOLDEN_HEHE.type||type==='boss'&&HEHE_BOSSES[bossId]){({focus,wings,rotors}=buildHeheEnemy(type,bossId,root,body,{part,ball,tube}));
+  }else if(PRISM_ENEMIES[type]||type==='boss'&&PRISM_BOSSES[bossId]){({focus,wings,rotors}=buildPrismEnemy(type,bossId,root,body,{part,ball,tube,bakeGroup}));
   }else if(DEMON_ENEMIES[type]||type==='boss'&&DEMON_BOSSES[bossId]){({focus,wings,rotors}=buildDemonEnemy(type,bossId,root,body,{part,ball,tube}));
   }else if(type==='goldenSlime'||MOCHI_ENEMIES[type]||type==='boss'&&MOCHI_BOSSES[bossId]){({focus,wings,rotors}=buildMochiEnemy(type,bossId,root,body,{part,ball,tube}));
   }else if(CHAPTER_TWO_ENEMIES.includes(type)){

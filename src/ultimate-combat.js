@@ -2,8 +2,15 @@ import {canPrimDuet,beamContains} from './prim-combat.js';
 import {canShizukuDuet,SHIZUKU_DUET,healHero,drainShizuku} from './shizuku-combat.js';
 import {mochiCryHit} from './mochi-combat.js';
 const EPSILON=1e-8;
+const PULSE_KINDS=['prismBeam','sanctuary','bladeDance','mochiLullaby','scytheDance','moonDrop','predationDance'];
 
 function pulse(game,effect){
+  if(effect.kind==='predationDance'){
+    const source=game.sourceFor(effect.heroId);effect.x=source.x;effect.z=source.z;
+    game.emit('predationPulse',{x:effect.x,z:effect.z,radius:effect.radius,heroId:effect.heroId});
+    for(const enemy of [...game.enemies])if(enemy.hp>0&&Math.hypot(enemy.x-effect.x,enemy.z-effect.z)<=effect.radius+enemy.radius)game.hit(enemy,game.skillDamage(effect.heroId,effect.spec.baseDamage),effect.x,effect.z,true,false,effect.heroId,false);
+    effect.pulsesLeft--;return;
+  }
   if(effect.kind==='prismBeam'){
     const source=game.sourceFor(effect.heroId);effect.x=source.x;effect.z=source.z;source.face=effect.angle;
     game.emit('prismBeam',{x:effect.x,z:effect.z,angle:effect.angle,range:effect.spec.range,width:effect.spec.width,duet:!!effect.heroIds});
@@ -21,7 +28,7 @@ function pulse(game,effect){
 function shoot(game,effect){
   const spec=effect.spec,source=game.sourceFor(effect.heroId),target=game.nearest(source.x,source.z,spec.range);
   const angle=target?Math.atan2(target.x-source.x,target.z-source.z):source.face;source.face=angle;
-  game.projectiles.push({id:game.ids++,owner:'player',kind:'gun',ultimate:true,heroId:effect.heroId,x:source.x,z:source.z,vx:Math.sin(angle)*spec.speed,vz:Math.cos(angle)*spec.speed,speed:spec.speed,life:(spec.range+2)/spec.speed,damage:effect.damage,crit:true,radius:.32,pierce:spec.pierce,hitIds:[]});
+  game.projectiles.push({id:game.ids++,owner:'player',kind:spec.kind==='homingBarrage'?'magicArrow':'gun',target:target?.id,color:spec.color,ultimate:true,heroId:effect.heroId,x:source.x,z:source.z,vx:Math.sin(angle)*spec.speed,vz:Math.cos(angle)*spec.speed,speed:spec.speed,life:(spec.range+2)/spec.speed,damage:effect.damage,crit:true,radius:.32,pierce:spec.pierce,hitIds:[]});
   game.emit('ultimateShot',{x:source.x,z:source.z,angle,heroId:effect.heroId});effect.shotsLeft--;
 }
 export function canCastUltimate(game){
@@ -35,7 +42,7 @@ export function castUltimate(game,{voicePresented=false}={}){
   const duration=spec.duration??spec.shots*spec.interval;
   const effect={id:game.ids++,kind:spec.kind,heroId,spec,duration,x:p.x,z:p.z,angle,damage:duet?heroIds.reduce((total,id)=>total+game.skillDamage(id,spec.baseDamage),0)*(primDuet?1:.7):game.skillDamage(heroId,spec.baseDamage),...(duet?{heroIds}:{}),due:spec.interval,remaining:duration,interval:spec.interval};
   game.emit('ultimate',{x:p.x,z:p.z,hero:p.hero,heroId,abilityId:spec.id,abilityName:spec.name,duet,duetKind:primDuet?'prim':duet?'shizuku':null,voicePresented});
-  if(['prismBeam','sanctuary','bladeDance','mochiLullaby','scytheDance','moonDrop'].includes(spec.kind)){Object.assign(effect,{radius:spec.radius,pulsesLeft:spec.pulses});game.ultimateEffects.push(effect);if(duet){for(const id of heroIds)healHero(game,id,spec.heal??0);}else if(spec.heal)game.heal(spec.heal);pulse(game,effect);}
+  if(PULSE_KINDS.includes(spec.kind)){Object.assign(effect,{radius:spec.radius,pulsesLeft:spec.pulses});game.ultimateEffects.push(effect);if(duet){for(const id of heroIds)healHero(game,id,spec.heal??0);}else if(spec.heal)game.heal(spec.heal);pulse(game,effect);}
   else{effect.shotsLeft=spec.shots;game.ultimateEffects.push(effect);shoot(game,effect);}
   return true;
 }
@@ -43,10 +50,10 @@ export function tickUltimates(game,dt){
   for(const effect of game.ultimateEffects){
     effect.remaining-=dt;effect.due-=dt;
     while(effect.due<=EPSILON&&(effect.pulsesLeft>0||effect.shotsLeft>0)){
-      if(['prismBeam','sanctuary','bladeDance','mochiLullaby','scytheDance','moonDrop'].includes(effect.kind))pulse(game,effect);else shoot(game,effect);effect.due+=effect.interval;
+      if(PULSE_KINDS.includes(effect.kind))pulse(game,effect);else shoot(game,effect);effect.due+=effect.interval;
     }
   }
-  game.ultimateEffects=game.ultimateEffects.filter(effect=>effect.remaining>EPSILON&&(['prismBeam','sanctuary','bladeDance','mochiLullaby','scytheDance','moonDrop'].includes(effect.kind)||effect.shotsLeft>0));
+  game.ultimateEffects=game.ultimateEffects.filter(effect=>effect.remaining>EPSILON&&(PULSE_KINDS.includes(effect.kind)||effect.shotsLeft>0));
 }
 export function enemySpeedScale(game,enemy){
   let scale=enemy.frostUntil>game.time?1-enemy.frostSlow*(enemy.type==='boss'?.5:1):1;

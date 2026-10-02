@@ -6,7 +6,7 @@ import {UNIQUE_EQUIPMENT,equipUnique} from '../src/equipment.js';
 import {WEAPON_CATALOG,equipWeapon,drawWeapon} from '../src/weapons.js';
 import {equipmentView} from '../src/rewards-ui.js';
 
-const profile=()=>normalizeProgression({story:{version:2,actClears:Array(20).fill(true)},inventory:{starBud:75,weaponTicket:1},weapons:{version:2,owned:WEAPON_CATALOG.flatMap(w=>[w.id,w.id])},equipment:{owned:UNIQUE_EQUIPMENT.flatMap(w=>[w.id,w.id])}},HEROES);
+const profile=()=>normalizeProgression({story:{version:2,actClears:Array(28).fill(true)},inventory:{starBud:75,weaponTicket:1},weapons:{version:2,owned:WEAPON_CATALOG.flatMap(w=>[w.id,w.id])},equipment:{owned:UNIQUE_EQUIPMENT.flatMap(w=>[w.id,w.id])}},HEROES);
 const ids=(html,attribute)=>[...html.matchAll(new RegExp(`${attribute}="([^"]+)"`,'g'))].map(m=>m[1]);
 
 test('all 60 weapon variants and 22 relics coexist once each through equip, transfer and save reload',()=>{

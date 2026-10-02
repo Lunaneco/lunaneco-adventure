@@ -1,4 +1,4 @@
-export const HERO_MODEL_NAMES = ['nyanluna', 'tsukineko', 'omsolo', 'mochinyafe', 'shizuku', 'prim'];
+export const HERO_MODEL_NAMES = ['nyanluna', 'tsukineko', 'omsolo', 'mochinyafe', 'shizuku', 'prim', 'hehereal'];
 
 // Build-time content hashes change the pathname, so even an older offline
 // worker with ignoreSearch:true cannot return an outdated character model.

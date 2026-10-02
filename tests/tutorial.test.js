@@ -22,7 +22,7 @@ test('introduction freezes enemies, movement and time; practice leaves damage, m
   assert.deepEqual(g.party,['nyanluna']);assert.equal(g.player.hero,0);tick(g,600,{x:1,z:1});assert.equal(g.player.x,0);assert.equal(g.time,0);assert.equal(g.enemies.length,0);assert.equal(g.dash(1,0),false);
   g.player.invincible=0;assert.equal(g.hurt(999,0,0),false);g.player.charge=100;assert.equal(g.ultimate(),false);g.player.charge=0;
   practiceToAttack(g);assert.equal(g.enemies.length,1);assert.equal(g.enemies[0].training,true);tick(g,200);assert.equal(g.tutorial.step.id,'crystals');
-  assert.equal(g.time,0);assert.equal(g.kills,0);assert.equal(g.damageDealt,0);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);assert.equal(g.player.charge,0);assert.equal(g.orbs.length,0);assert.deepEqual(g.earnedXp,{nyanluna:0,tsukineko:0,omsolo:0,mochinyafe:0,shizuku:0,prim:0});assert.deepEqual(g.progression,before);
+  assert.equal(g.time,0);assert.equal(g.kills,0);assert.equal(g.damageDealt,0);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);assert.equal(g.player.charge,0);assert.equal(g.orbs.length,0);assert.deepEqual(g.earnedXp,{nyanluna:0,tsukineko:0,omsolo:0,mochinyafe:0,shizuku:0,prim:0,hehereal:0});assert.deepEqual(g.progression,before);
 });
 test('pause suspends tutorial actions and completion starts a clean, normally timed first wave',()=>{
   const g=new Adventure({tutorial:true,seed:21});g.pause();assert.equal(g.advanceTutorial(),false);assert.equal(g.skipTutorial(),false);g.resume();practiceToAttack(g);tick(g,200);g.advanceTutorial();g.pause();g.advanceTutorial();assert.equal(g.tutorial.step.id,'ready');g.resume();assert.equal(g.advanceTutorial(),true);

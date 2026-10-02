@@ -24,8 +24,26 @@ function glb(name) {
   return { doc, read, bytes: file.length };
 }
 
-for(const name of ['nyanluna','tsukineko','mochinyafe'])test(`${name}: published metadata contains no private workstation paths`,()=>{
+for(const name of ['nyanluna','tsukineko','mochinyafe','hehereal'])test(`${name}: published metadata contains no private workstation paths`,()=>{
   assert.doesNotMatch(JSON.stringify(glb(name).doc),/\/Users\/|\/private\//);
+});
+
+test('hehereal: portable 64-bone bow heroine preserves reference eyes, opaque hair and valid mobile skin weights',()=>{
+ const {doc,read,bytes}=glb('hehereal');assert.equal(doc.skins.length,1);assert.equal(doc.skins[0].joints.length,64);assert.ok(doc.meshes.length<=50);assert.ok(doc.materials.length<=10);assert.ok(bytes<12*1048576);
+ assert.equal(doc.images.length,2);assert.ok(doc.images.every(i=>i.bufferView!==undefined&&!i.uri));assert.ok(doc.nodes.some(n=>n.extras?.game_rig_version==='renewal-20261001'));
+ let triangles=0;
+ for(const p of doc.meshes.flatMap(m=>m.primitives)){
+  const positions=read(p.attributes.POSITION),normals=read(p.attributes.NORMAL),weights=read(p.attributes.WEIGHTS_0),joints=read(p.attributes.JOINTS_0),indices=read(p.indices);triangles+=indices.length/3;
+  for(const [index] of indices)assert.ok(index>=0&&index<positions.length);
+  for(let i=0;i<positions.length;i++){
+   assert.ok(positions[i].every(Number.isFinite));assert.ok(normals[i].every(Number.isFinite));
+   assert.ok(weights[i].every(w=>Number.isFinite(w)&&w>=0&&w<=1));assert.ok(Math.abs(weights[i].reduce((a,b)=>a+b,0)-1)<.0001);assert.ok(joints[i].every(j=>j>=0&&j<64));
+  }
+ }
+ assert.equal(triangles,169647);assert.ok(triangles<180000);for(const name of ['head','upper_arm.L','upper_arm.R','forearm.L','forearm.R','hand.L','hand.R','thigh.L','thigh.R'])assert.ok(doc.nodes.some(n=>n.name===name));
+ for(const side of ['L','R'])assert.ok(doc.nodes.some(n=>n.name===`Eye_reference_${side}`));
+ for(const n of doc.nodes.filter(n=>n.mesh!==undefined&&/HAIR/i.test(n.name)))for(const p of doc.meshes[n.mesh].primitives){const m=doc.materials[p.material];assert.ok(!m.alphaMode||m.alphaMode==='OPAQUE');assert.equal(m.pbrMetallicRoughness.baseColorFactor?.[3]??1,1);}
+ for(const matrix of read(doc.skins[0].inverseBindMatrices))assert.ok(matrix.every(Number.isFinite));
 });
 
 for (const name of ['nyanluna', 'tsukineko', 'omsolo']) {

@@ -1,6 +1,8 @@
 import {publicUrl} from './public-url.js';
 
 export const ULTIMATE_ART=Object.freeze({
+  hehehe:Object.freeze({file:'assets/ultimates/hehe-predation-dance-v1.png',accent:'#ff9dc9',label:'PREDATION DANCE',alt:'スキンヘッドと黒い眼鏡のへへへに変身したへへりある'}),
+  hehereal:Object.freeze({file:'assets/ultimates/hehereal-sakura-promise-v1.png',accent:'#ff9dc9',label:'SAKURA PROMISE',alt:'桜の魔法弓を構えるへへりある'}),
   prim:Object.freeze({file:'assets/ultimates/prim-prism-breath-v1.webp',accent:'#bceaff',label:'PRISM BREATH',alt:'プリムが口から一直線に七色のブレスを吐く'}),
   primDuet:Object.freeze({file:'assets/ultimates/tsukineko-prim-duet-v1.webp',accent:'#ccefff',label:'PRISM & COMET · OUR WAY HOME',alt:'大きくなったプリムの背中につきねこが乗り、銃とブレスを合わせる'}),
   shizuku:Object.freeze({file:'assets/ultimates/shizuku-crimson-mercy-v2.webp',accent:'#e7a3c2',label:'CRIMSON MERCY',alt:'雫が黒銀の大鎌を振るい、紅い光を吸収する'}),

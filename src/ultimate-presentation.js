@@ -1,7 +1,7 @@
+import {battleVoiceLines} from './hehe-form-voice.js';
 import {PRIM_DUET_VOICE} from './prim-combat.js';
 import {DUET_VOICE} from './shizuku-combat.js';
 import {canCastUltimate} from './ultimate-combat.js';
-import {BATTLE_VOICES} from './voice-catalog.js';
 
 // Combat remains frozen until the actual voice finishes, including after a pause.
 export class UltimatePresentation{
@@ -9,10 +9,10 @@ export class UltimatePresentation{
   get active(){return !!this.current;}
   start(game){
     if(this.active||!canCastUltimate(game))return false;
-    const hero=game.player.hero,heroId=game.heroId(hero),line=game.duetKind==='prim'?PRIM_DUET_VOICE:game.duetReady?DUET_VOICE:BATTLE_VOICES[heroId].ultimate[0];
+    const hero=game.player.hero,heroId=game.heroId(hero),line=game.duetKind==='prim'?PRIM_DUET_VOICE:game.duetReady?DUET_VOICE:battleVoiceLines(heroId,'ultimate',game)[0];
     const state={game,hero,heroId,line,elapsed:0,voiceElapsed:0,stall:0,ready:false,requested:false,started:false,ended:false,paused:false,release:null};
     this.current=state;game.phase='ultimateIntro';this.voice.setMode('ultimate');
-    Promise.resolve(this.view.show(game.duetKind==='prim'?'primDuet':game.duetReady?'shizukuDuet':heroId,line,game.ultimateSpec(hero))).catch(()=>{}).then(()=>{if(this.current===state)state.ready=true;});
+    Promise.resolve(this.view.show(game.duetKind==='prim'?'primDuet':game.duetReady?'shizukuDuet':game.predation?.active?'hehehe':heroId,line,game.ultimateSpec(hero))).catch(()=>{}).then(()=>{if(this.current===state)state.ready=true;});
     return true;
   }
   pause(){const s=this.current;if(!s||s.paused)return false;s.paused=true;this.view.pause(true);this.voice.suspend();return true;}

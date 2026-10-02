@@ -10,7 +10,7 @@ const gate=(game,area)=>{game.area=area;game.wave=area*2+2;game.exitOpen=true;ga
 const kill=game=>{const e=game.spawnEnemy('moss',10,10);game.hit(e,999,0,0);return e;};
 test('legacy progression gains empty mission and equipment records without losing character or material data',()=>{
   const raw={characters:{nyanluna:{level:20,xp:123,breaks:0,tree:['origin']},future:{level:3,xp:4}},inventory:{limitStone:2,starBud:8}};
-  const p=normalizeProgression(raw,HEROES);assert.equal(p.characters.nyanluna.xp,123);assert.equal(p.characters.future.level,3);assert.equal(p.inventory.limitStone,2);assert.deepEqual(p.equipment,{owned:[],loadout:{}});assert.deepEqual(p.missions.claimed,[]);assert.equal(STAGE_MISSIONS.length,269);assert.equal(Object.keys(WEAPONS).length,6);
+  const p=normalizeProgression(raw,HEROES);assert.equal(p.characters.nyanluna.xp,123);assert.equal(p.characters.future.level,3);assert.equal(p.inventory.limitStone,2);assert.deepEqual(p.equipment,{owned:[],loadout:{}});assert.deepEqual(p.missions.claimed,[]);assert.equal(STAGE_MISSIONS.length,325);assert.equal(Object.keys(WEAPONS).length,7);
 });
 test('stage hunt progress accumulates across runs, remains separate by stage, and grants its reward only once',()=>{
   let g=quiet(new RecruitedAdventure());for(let i=0;i<12;i++)kill(g);assert.equal(g.progression.inventory.starBud,12);const prior=structuredClone(g.progression);

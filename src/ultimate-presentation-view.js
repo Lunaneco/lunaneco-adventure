@@ -4,7 +4,7 @@ import {ULTIMATE_ART,ultimateArtUrl} from './ultimate-art.js';
 export class UltimatePresentationView{
   constructor(root){this.root=root;}
   async show(heroId,line,spec){
-    const speaker=storySpeaker(heroId),art=ULTIMATE_ART[heroId],root=this.root;
+    const speaker=heroId==='hehehe'?{name:'へへへ',role:'へへりある · オムソロ取り込み中'}:storySpeaker(heroId),art=ULTIMATE_ART[heroId],root=this.root;
     root.dataset.hero=heroId;root.dataset.phase='enter';root.classList.remove('hidden','is-speaking','is-paused');
     root.style.setProperty('--cutin-color',art.accent);
     root.querySelector('.cutin-hero').textContent=speaker.name;

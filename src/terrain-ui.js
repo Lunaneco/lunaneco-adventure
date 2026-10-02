@@ -15,7 +15,7 @@ function updateMapEnemies(layer,enemies){
  const alive=new Set();let bosses=0,rare=0;
  for(const enemy of enemies){
   if(!(enemy.hp>0)||!Number.isFinite(enemy.x)||!Number.isFinite(enemy.z))continue;
-  alive.add(enemy.id);const boss=enemy.type==='boss';if(boss)bosses++;const gold=enemy.type==='goldenSlime';if(gold)rare++;
+  alive.add(enemy.id);const boss=enemy.type==='boss';if(boss)bosses++;const gold=enemy.type==='goldenSlime'||enemy.type==='goldenHehe';if(gold)rare++;
   let marker=markers.get(enemy.id);
   if(!marker||marker.boss!==boss||marker.gold!==gold){
    marker?.node.remove();const node=layer.ownerDocument.createElementNS('http://www.w3.org/2000/svg',boss||gold?'path':'circle');
@@ -39,7 +39,7 @@ export function updateTerrainUi(game){
  else{status.textContent='床の色とマークで効果を確認';status.dataset.kind='';status.dataset.phase='';}
  const counts=updateMapEnemies(map.querySelector('#map-enemies'),game.enemies);
  map.querySelector('.map-key-rare').classList.toggle('hidden',!counts.rare);
- const description=`${l.name}の地図：現在地、敵${counts.enemies}体、ボス${counts.bosses}体${counts.rare?`、金色のスライム${counts.rare}体`:''}、開いている出口`;
+ const description=`${l.name}の地図：現在地、敵${counts.enemies}体、ボス${counts.bosses}体${counts.rare?`、${game.actConfig.chapter===5?'黄金のへへへ':'金色のスライム'}${counts.rare}体`:''}、開いている出口`;
  if(map.getAttribute('aria-label')!==description)map.setAttribute('aria-label',description);
  const player=map.querySelector('#map-player');player.setAttribute('cx',game.player.x);player.setAttribute('cy',game.player.z);
  const targets=game.exitOpen?[{...game.exitPoint,color:0xffe6a0}]:game.travelTargets;

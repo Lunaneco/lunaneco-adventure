@@ -34,7 +34,7 @@ test('same-family rarity switches update the held model and reuse the right cach
 });
 test('all gacha scythes can be acquired, equipped after recruitment, and retained in a save',()=>{
  const p=normalizeProgression({story:{version:2,actClears:Array(20).fill(true)},inventory:{weaponTicket:20}},HEROES);
- for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[4.5/6,rarity,family];const draw=drawWeapon(p,()=>rolls.shift());assert.equal(draw.item.heroId,'shizuku');assert.equal(draw.duplicate,false);assert.ok(equipWeapon(p,'shizuku',draw.item.id));}
+ for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[4.5/7,rarity,family];const draw=drawWeapon(p,()=>rolls.shift());assert.equal(draw.item.heroId,'shizuku');assert.equal(draw.duplicate,false);assert.ok(equipWeapon(p,'shizuku',draw.item.id));}
  assert.equal(p.weapons.owned.filter(id=>id.includes('scythe')).length,10);const saved=normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES);assert.equal(equippedWeapon(saved,'shizuku').id,equippedWeapon(p,'shizuku').id);
  const html=shizukuScytheCollection(saved);assert.equal([...html.matchAll(/data-scythe=/g)].length,10);assert.match(html,/魔王の護鎌・おかえり/);assert.match(html,/★1〜★4/);
 });

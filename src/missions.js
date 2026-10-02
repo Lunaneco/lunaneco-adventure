@@ -34,7 +34,7 @@ export function trialStatus(mission,game){
   return {seconds,hits,hard:game.difficulty==='hard',withinTime:seconds<=rule.seconds,withinHits:hits<=rule.hits,eligible:game.difficulty==='hard'&&seconds<=rule.seconds&&hits<=rule.hits};
 }
 export function normalizeMissions(raw){
-  const stages=Array.from({length:ACTS.length*3},(_,i)=>Object.fromEntries(missionsFor(i%3,Math.floor(i/3)).map(m=>{const source=raw?.version!==2&&m.id==='chapter-master'?2:i,n=raw?.stages?.[source]?.[m.metric];return [m.metric,Number.isFinite(n)&&n>=0?Math.min(m.goal,Math.floor(n)):0];})));
+  const stages=Array.from({length:(Math.max(...ACTS.map(a=>a.id))+1)*3},(_,i)=>Object.fromEntries(missionsFor(i%3,Math.floor(i/3)).map(m=>{const source=raw?.version!==2&&m.id==='chapter-master'?2:i,n=raw?.stages?.[source]?.[m.metric];return [m.metric,Number.isFinite(n)&&n>=0?Math.min(m.goal,Math.floor(n)):0];})));
   const claimed=STAGE_MISSIONS.filter(m=>Array.isArray(raw?.claimed)&&raw.claimed.includes(m.id)&&stages[missionIndex(m.act,m.area)][m.metric]>=m.goal).map(m=>m.id);
   return {version:2,stages,claimed};
 }

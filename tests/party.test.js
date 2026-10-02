@@ -8,7 +8,7 @@ import {botInput,chooseOffer} from './bot.js';
 const ids=pool=>pool.map(skill=>skill.id).sort();
 const both=HEROES.slice(0,2).map(hero=>hero.id);
 test('deployment accepts one or two distinct roster members and repairs invalid saved parties',()=>{
-  assert.equal(HEROES.length,6);assert.equal(PARTY_LIMIT,2);
+  assert.equal(HEROES.length,7);assert.equal(PARTY_LIMIT,2);
   for(const raw of [null,[],['unknown'],{},['__proto__']])assert.deepEqual(normalizeParty(raw,HEROES),both);
   assert.deepEqual(normalizeParty(['tsukineko','tsukineko','unknown'],HEROES),['tsukineko']);
   const roster=[...HEROES,{id:'test-only-third'}];assert.deepEqual(normalizeParty([...both,'test-only-third'],roster),both);

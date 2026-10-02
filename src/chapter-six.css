@@ -1,0 +1,7 @@
+.portrait.hehereal{background-image:url('/assets/portraits/hehereal-face-v1.png');background-size:112%;background-position:50% 35%;background-color:#674153}
+.portrait.hehereal.hehe-form{background-image:url('/assets/portraits/hehe-form-face-v1.png');background-size:100% auto;background-position:50% 50%;background-color:#ece8e3}
+.predation-button{position:absolute;bottom:calc(100% + 100px);right:0;min-width:120px;min-height:50px;border-radius:16px;border:1px solid #ffc0da;background:linear-gradient(120deg,#493848,#64506a);color:#fff;display:flex;align-items:center;gap:6px;padding:8px 10px;touch-action:manipulation;box-shadow:0 3px 18px #101c3944}.predation-button .portrait{width:27px;height:27px;flex-shrink:0}.predation-button span{font-size:14px;font-weight:750}.predation-button small{font-size:11px}.predation-button:disabled{opacity:.65}.predation-button.consumed{border-color:#ffe1a0}
+[data-hero="hehehe"] .cutin-face{object-fit:contain;object-position:center}
+@media(max-width:480px){.predation-button{bottom:calc(100% + 105px);min-height:45px;min-width:112px}.predation-button kbd{display:none}}
+@media(max-height:500px) and (orientation:landscape){.predation-button{right:calc(100% + 8px);bottom:0;min-width:90px;max-width:120px;min-height:50px;gap:3px;flex-wrap:wrap}.predation-button kbd{display:none}}
+.chapter-six-brief{border:1px solid #ffc0da66;background:#ffafd412;padding:14px;border-radius:8px;color:#ffdfed;line-height:1.8;margin:12px 0}

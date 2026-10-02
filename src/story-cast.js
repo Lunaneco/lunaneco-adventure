@@ -1,6 +1,7 @@
 import {publicUrl} from './public-url.js';
 // The narrator is represented by the lost moonlight already present in the story.
 export const STORY_CAST=Object.freeze({
+  hehereal:Object.freeze({name:'へへりある',role:'おなかいっぱいで、街を守る花弓使い',image:publicUrl('assets/story/hehereal-story-v1.png'),alt:'ピンクのツインテールとメガネ、2743の飾り、桜の魔法弓を持つへへりある',color:'#ff9dc9'}),
   primRaging:Object.freeze({name:'プリズムドラゴン',role:'あふれる光に苦しむ、結晶の竜',image:publicUrl('assets/story/prim-raging-v1.webp'),alt:'暴走する青い結晶の鱗と虹の翼を持つプリズムドラゴン',color:'#97dfff'}),
   prim:Object.freeze({name:'プリム',role:'キュ〜で心を伝える、七彩の小竜',image:publicUrl('assets/story/prim-story-v1.webp'),alt:'真珠色の鱗と虹の翼、青い瞳の小さな竜プリム',color:'#bceaff'}),
   primDuet:Object.freeze({name:'つきねこ ＆ プリム',role:'同じ光を見ていた二人',image:publicUrl('assets/ultimates/tsukineko-prim-duet-v1.webp'),alt:'大きくなったプリムにつきねこが乗り、星銃とブレスを合わせる',color:'#bceaff'}),

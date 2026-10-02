@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {Adventure,HEROES} from '../src/model.js';
 import {ACTS,CHAPTERS,actLabel,completeAct,nextAct} from '../src/acts.js';
-import {ACT_SCENES} from '../src/chapter.js';
+import {storyScenesFor,ACT_SCENES} from '../src/chapter.js';
 import {STORY_CAST} from '../src/story-cast.js';
 import {BOSSES,BOSS_IDS} from '../src/enemies.js';
 import {FIELD_LAYOUTS} from '../src/terrain.js';
@@ -27,8 +27,8 @@ test('chapter one saves keep every value and unlock only the second chapter, nev
  const corrupt=normalizeProgression({story:{...story(3),actClears:[true,true,true,false,true,true,true,true],omsoloUnlocked:true}},HEROES);assert.equal(isHeroUnlocked(corrupt,'omsolo'),false);assert.equal(corrupt.story.chapterTwoCleared,false);
 });
 test('twenty sequential acts have matching story, terrains, distinct bosses and illustrated equipment',()=>{
- assert.equal(CHAPTERS.length,5);assert.equal(ACTS.length,20);assert.equal(ACT_SCENES.length,20);assert.deepEqual(ACTS.map(a=>a.bossId),BOSS_IDS);assert.equal(new Set(FIELD_LAYOUTS.flat().flatMap(f=>f.rooms).map(r=>r.id)).size,100);
- for(const act of ACTS){assert.equal(actLabel(act.id),`第${act.chapter+1}章・第${act.number}幕`);assert.ok(BOSSES[act.bossId]);for(const scene of Object.values(ACT_SCENES[act.id]))for(const line of scene.lines)assert.ok(STORY_CAST[line.who],line.who);}
+ assert.equal(CHAPTERS.length,6);assert.equal(ACTS.length,24);assert.equal(ACT_SCENES.length,20);assert.deepEqual(ACTS.map(a=>a.bossId),BOSS_IDS);assert.equal(new Set(FIELD_LAYOUTS.flat().flatMap(f=>f.rooms).map(r=>r.id)).size,100);
+ for(const act of ACTS){assert.equal(actLabel(act.id),`第${act.chapter+1}章・第${act.number}幕`);assert.ok(BOSSES[act.bossId]);for(const scene of Object.values(storyScenesFor(act.id)))for(const line of scene.lines)assert.ok(STORY_CAST[line.who],line.who);}
  for(const id of ['komusubi','omsolo','omsolo_hurt'])assert.ok(existsSync('public'+STORY_CAST[id].image));
  for(const item of UNIQUE_EQUIPMENT.filter(e=>e.act>=4)){assert.ok(existsSync('public'+equipmentImage(item.id)));const m=STAGE_MISSIONS.find(m=>m.equipment===item.id);assert.equal(m.act,item.act);assert.ok(m.trial);}
  assert.ok(ACT_SCENES[4].opening.lines.some(l=>l.who==='komusubi'&&l.text.includes('お父さん')));assert.ok(ACT_SCENES[7].guardian.lines.some(l=>l.text.includes('180秒')));

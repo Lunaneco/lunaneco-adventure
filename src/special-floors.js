@@ -4,13 +4,14 @@ const damage=(name,color,power)=>({name,color,kind:'damage',power,period:6.6,war
 const slow=(name,color)=>({name,color,kind:'slow',speed:.72,note:'移動速度が28%低下。敵も減速する。回避の速さは変わらない。'});
 const heal=(name,color)=>({name,color,kind:'heal',charges:3,note:'1秒ごとに最大HPの6%を回復。この床は1回の冒険で3回まで。'});
 export const FLOOR_TYPES=Object.freeze({
+ hehefire:damage('へへ炎の噴出口',0xffad77,64),ricewell:heal('おむすびの泉',0xffc9dc),hehewind:{name:'花弓の風路',color:0xffb0d4,kind:'boost',speed:1.3,note:'上を歩く間、移動速度が30%上昇。回避の速さは変わらない。'},
  starfall:damage('星屑の噴出口',0xf59e69,12),moonwell:heal('月光の泉',0x8bf0ba),
  bramble:damage('茨の芽吹き',0xf49357,28),water:slow('浅い用水路',0x65cced),tailwind:{name:'穂風の道',color:0xa9e7bd,kind:'boost',speed:1.3,note:'上を歩く間、移動速度が30%上昇。回避の速さは変わらない。'},
  nightmare:damage('夢蝕の染み',0xe776ba,42),caramel:slow('ねばねば蜜',0xeac16d),teawell:heal('癒しのミルクティー',0xb5eda5),
  hellfire:damage('魔炎の噴出口',0xff8067,64),seal:slow('重力の魔法陣',0xae8cf3),
  prism:damage('結晶の光脈',0xffa5b5,64),frost:slow('青晶の霜',0x89ddff),aurora:{name:'虹風の流路',color:0x9df5df,kind:'boost',speed:1.3,note:'上を歩く間、移動速度が30%上昇。回避の速さは変わらない。'},
 });
-export const CHAPTER_FLOORS=Object.freeze([['starfall','moonwell'],['bramble','water','tailwind'],['nightmare','caramel','teawell'],['hellfire','seal','moonwell'],['prism','frost','aurora']]);
+export const CHAPTER_FLOORS=Object.freeze([['starfall','moonwell'],['bramble','water','tailwind'],['nightmare','caramel','teawell'],['hellfire','seal','moonwell'],['prism','frost','aurora'],['hehefire','ricewell','hehewind']]);
 const patches=new Map(),paths=new Map();
 const nearest=(nodes,point)=>nodes.reduce((best,n)=>Math.hypot(n.x-point.x,n.z-point.z)<Math.hypot(best.x-point.x,best.z-point.z)?n:best,nodes[0]);
 // Reserve a corridor along the actual navigation graph, including both fork exits.

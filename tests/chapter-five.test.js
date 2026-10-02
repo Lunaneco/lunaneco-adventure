@@ -32,13 +32,13 @@ test('chapter five migrates existing saves, enforces each first-clear solo, and 
  }
 });
 test('chapter five uses two story voices and the reference dragon purification, with level-60 chapter-four stats and drops',()=>{
- for(const a of ACTS.slice(16)){assert.equal(a.recommendedLevel,60);assert.deepEqual(a.counts,ACTS[a.id-4].counts);assert.equal(a.bossHp,ACTS[a.id-4].bossHp);assert.match(a.boss,/プリズムドラゴン/);assert.ok(enemyMaterials({type:'boss',hp:0},a.id,'normal',()=>0).demonHeart>0);}
+ for(const a of ACTS.filter(a=>a.chapter===4)){assert.equal(a.recommendedLevel,60);assert.deepEqual(a.counts,ACTS[a.id-4].counts);assert.equal(a.bossHp,ACTS[a.id-4].bossHp);assert.match(a.boss,/プリズムドラゴン/);assert.ok(enemyMaterials({type:'boss',hp:0},a.id,'normal',()=>0).demonHeart>0);}
  const lines=FIFTH_CHAPTER_SCENES.flatMap(a=>Object.values(a).flatMap(s=>s.lines));assert.deepEqual([...new Set(lines.map(l=>l.who))].sort(),['prim','tsukineko']);for(const l of lines.filter(l=>l.who==='prim'))assert.match(l.text,l.portrait==='primRaging'?/^グオオオ[ッ！…。]*$/:/^キュ〜[っ！♪…。]*$/);
  assert.ok(FIFTH_CHAPTER_SCENES[3].ending.lines.some(l=>l.text.includes('小さくなった')));assert.ok(FIFTH_CHAPTER_SCENES[3].ending.lines.some(l=>l.text.includes('きみの名前')));assert.equal(Object.keys(PRISM_ENEMIES).length,7);
 });
 test('ten generated claws and four distinct trial relics remain obtainable and persist',()=>{
  const claws=WEAPON_CATALOG.filter(w=>w.heroId==='prim');assert.equal(claws.length,10);assert.deepEqual([1,2,3,4].map(r=>claws.filter(w=>w.rarity.rank===r).length),[1,3,3,3]);assert.equal(new Set(claws.map(weaponImage)).size,10);
- const p=profile();p.inventory.weaponTicket=9;for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[5.5/6,rarity,family],r=drawWeapon(p,()=>rolls.shift());assert.equal(r.item.heroId,'prim');assert.equal(r.duplicate,false);assert.ok(equipWeapon(p,'prim',r.item.id));}
+ const p=profile();p.inventory.weaponTicket=9;for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[5.5/7,rarity,family],r=drawWeapon(p,()=>rolls.shift());assert.equal(r.item.heroId,'prim');assert.equal(r.duplicate,false);assert.ok(equipWeapon(p,'prim',r.item.id));}
  for(const item of claws){const bytes=readFileSync('public'+weaponImage(item));assert.equal(bytes.toString('ascii',8,12),'WEBP');}
  const relics=UNIQUE_EQUIPMENT.filter(r=>r.act>=16);assert.equal(relics.length,4);for(const r of relics){assert.ok(existsSync('public'+equipmentImage(r.id)));assert.ok(STAGE_MISSIONS.some(m=>m.act===r.act&&m.equipment===r.id&&m.trial));}
  assert.equal(normalizeProgression(p,HEROES).weapons.owned.filter(id=>id.includes('claw')).length,10);

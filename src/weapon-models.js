@@ -1,3 +1,4 @@
+import {createHeherealBow} from './hehereal-visuals.js';
 import {createPrimClaw} from './prim-visuals.js';
 import {createShizukuScythe} from './shizuku-weapon.js';
 import * as THREE from 'three';
@@ -5,6 +6,7 @@ import {part,bakeGroup} from './characters.js';
 
 // Every model keeps the grip at (0, 0, 0), matching the existing hand attachment.
 export function createWeaponVariant(item){
+ if(item.heroId==='hehereal')return createHeherealBow(item.weapon.id,item.rarity.rank);
  if(item.heroId==='prim')return createPrimClaw(item.weapon.id,item.rarity.rank);
  if(item.heroId==='shizuku')return createShizukuScythe(item.weapon.id,item.rarity.rank);
  const id=item.weapon.id,weapon=new THREE.Group(),gold=0xe0bd78,silver=0xd6e8ed;

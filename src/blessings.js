@@ -2,6 +2,12 @@ import {SKILL_TALENT_NODES} from './skill-tree.js';
 import {isHeroUnlocked} from './recruitment.js';
 export const SKILL_SLOTS=3;
 export const SKILLS = [
+ {id:'sakuraPower',requires:['hehereal'],name:'桜心の矢',icon:'spark',type:'弓術',text:'へへりあるの通常追尾矢ダメージ +20%',max:3},
+ {id:'sakuraReach',requires:['hehereal'],name:'遠くの誰かへ',icon:'wind',type:'弓術',text:'へへりあるの弓の射程 +2',max:3},
+ {id:'sakuraFocus',requires:['hehereal'],name:'いただきますの力',icon:'star',type:'必殺',text:'へへりあるの必殺ゲージ獲得 +20%',max:3},
+ {id:'sakuraTempo',requires:['hehereal'],upgrades:'sakuraPower',unlockNode:'blessing1',name:'花びらの連射',icon:'spark',type:'弓術',text:'追尾矢の威力+20%を継承。さらに攻撃間隔8%短縮',max:3},
+ {id:'sakuraFar',requires:['hehereal'],upgrades:'sakuraReach',unlockNode:'blessing2',name:'まっすぐな約束',icon:'wind',type:'弓術',text:'弓の射程+2を継承。さらに必殺技の射程+2',max:3},
+ {id:'sakuraBrave',requires:['hehereal'],upgrades:'sakuraFocus',unlockNode:'blessing3',name:'半分の勇気',icon:'star',type:'必殺',text:'ゲージ獲得+20%を継承。さらに本人の必殺技威力+15%',max:3},
  {id:'primPower',requires:['prim'],name:'虹晶の爪研ぎ',icon:'sword',type:'爪術',text:'プリムの通常爪攻撃ダメージ +20%',max:3},
  {id:'primReach',requires:['prim'],name:'小竜の踏み込み',icon:'wind',type:'爪術',text:'プリムの爪の範囲 +0.4',max:3},
  {id:'primFocus',requires:['prim'],name:'七彩の息づかい',icon:'star',type:'必殺',text:'プリムの必殺ゲージ獲得 +20%',max:3},
@@ -54,7 +60,7 @@ export const SKILLS = [
 const UPGRADE_FOR=Object.freeze(Object.fromEntries(SKILLS.filter(s=>s.upgrades).map(s=>[s.upgrades,s.id])));
 export function skillEffectRank(ranks,id){return Math.max(ranks[id]??0,ranks[UPGRADE_FOR[id]]??0);}
 export function skillUpgradeLabel(skill){const base=SKILLS.find(s=>s.id===skill.upgrades);return base?`上位版 · ${base.name}`:'';}
-export const PERSONAL_SKILLS=Object.freeze(Object.fromEntries(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim'].map(id=>[id,SKILLS.filter(s=>s.requires?.length===1&&s.requires[0]===id)])));
+export const PERSONAL_SKILLS=Object.freeze(Object.fromEntries(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal'].map(id=>[id,SKILLS.filter(s=>s.requires?.length===1&&s.requires[0]===id)])));
 export function personalSkills(heroId){return Object.hasOwn(PERSONAL_SKILLS,heroId)?PERSONAL_SKILLS[heroId]:[];}
 export function defaultSkills(heroId){return personalSkills(heroId).filter(s=>!s.unlockNode).map(s=>s.id);}
 export function isSkillAvailable(profile,heroId,skillId){
