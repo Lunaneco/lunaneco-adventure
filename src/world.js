@@ -3,6 +3,8 @@ import {publicUrl} from './public-url.js';
 import {TerrainWorld} from './terrain-world.js';
 import {createSwordSlash,updateSwordSlash} from './attack-effects.js';
 import {heightAt} from './terrain.js';
+import {riceTargets} from './rice-combat.js';
+import {distanceToHazard} from './enemies.js';
 import {createHostileProjectile,updateHostileProjectile,createTelegraph,updateTelegraph} from './enemy-effects.js';
 import {createSanctuary,updateSanctuary} from './ultimate-effects.js';
 import * as THREE from 'three';
@@ -40,6 +42,7 @@ export class World {
     this.fill=new THREE.DirectionalLight(0xb3cdff,.45);this.fill.position.set(15,12,-12);this.scene.add(this.fill);
     const previous=new Set(this.scene.children);this.environment();this.legacyArena=[...this.scene.children].filter(o=>!previous.has(o)&&o!==this.portal&&o!==this.motes);this.legacyArena.forEach(o=>o.visible=false);this.terrain=new TerrainWorld(this);this.fields=new FieldEnvironment(this);this.stageGate=new StageGate(this);this.heroes=[];this.rescueDome=new THREE.Mesh(new THREE.SphereGeometry(2.2,24,16),new THREE.MeshBasicMaterial({color:0xddc8ff,transparent:true,opacity:.14,depthWrite:false}));this.rescueDome.scale.set(1,.8,1);this.rescueDome.visible=false;this.scene.add(this.rescueDome);this.assetsReady=false;this.ready=Promise.all([loadHeroes(),this.fields.ready,this.terrain.ready]).then(([heroes])=>{this.heroes=heroes;heroes.forEach(h=>this.scene.add(h));this.assetsReady=true;});
     this.fx=new THREE.Group();this.scene.add(this.fx);this.makeParticles();this.orbit=[];
+    this.riceRing=new THREE.Mesh(new THREE.TorusGeometry(1,.045,6,40),new THREE.MeshBasicMaterial({color:0xaaffba,transparent:true,opacity:.9,depthWrite:false}));this.riceRing.rotation.x=-Math.PI/2;this.riceRing.visible=false;this.scene.add(this.riceRing);
     for(let i=0;i<3;i++){const s=new THREE.Mesh(new THREE.OctahedronGeometry(.16),material(0xe9cfff,1));this.scene.add(s);s.visible=false;this.orbit.push(s);}
     this.composer=new EffectComposer(this.renderer);this.composer.addPass(new RenderPass(this.scene,this.camera));this.bloom=new UnrealBloomPass(new THREE.Vector2(1,1),.36,.48,.9);this.composer.addPass(this.bloom);this.composer.addPass(new OutputPass());this.resize();
   }
@@ -113,6 +116,7 @@ export class World {
   handle(events,game){
     if(game){this.surface=game.layout;this.terrain.update(game,this.time);}
     for(const e of events){
+      if(e.type==='riceGrab'||e.type==='riceImpact'){this.ring(e.x,e.z,0xaaffba,e.type==='riceImpact'?2.1:1.2,.35);this.burst(e.x,e.z,0xcaffb9,12,2);}
       if(e.type==='attack'){const hero=this.heroes[e.hero];hero.userData.attackTime=ATTACK_DURATION;if(e.hero===1)this.burst(e.x+Math.sin(e.angle)*1.05,e.z+Math.cos(e.angle)*1.05,0xb8f4ff,7,2);if(e.hero===2||e.hero===4||e.hero===5){const slash=createSwordSlash({...e,color:e.color??(e.hero===4?0xf2a6c7:0x85ffae),name:e.hero===4?'shizuku-scythe-slash':'omsolo-saber-slash'});slash.mesh.position.y+=game.layout.height;this.fx.add(slash.mesh);this.rings.push(slash);}}
       if(e.type==='hit'){this.burst(e.x,e.z,e.crit?0xffdd99:0xc8eef5,e.crit?12:5,2.4);this.numbers.push({x:e.x,y:(this.surface?.height??0)+2.25,z:e.z,text:e.damage,crit:e.crit,life:.7,max:.7});if(this.numbers.length>40)this.numbers.shift();}
       if(e.type==='death'){this.burst(e.x,e.z,e.enemyType==='boss'||e.enemyType==='goldenSlime'?0xffe3a8:0xb6ead3,e.enemyType==='boss'?150:23,4);this.ring(e.x,e.z,0xc8f5d3,1.1,.35);}
@@ -179,6 +183,8 @@ export class World {
       resizeFieldCamera(this.camera,this.canvas.clientWidth,this.canvas.clientHeight,this.tutorialFraming);
     }
     this.fields.update(dt,this.cameraTarget,this.settings.motion!==false);this.stageGate.update(game,t);
+    const held=game?.rice?.held;this.riceRing.visible=!!held;
+    if(held){const object=held.object;this.riceRing.position.set(object.x,heightAt(game.layout,object.x,object.z)+.25,object.z);this.riceRing.scale.setScalar(Math.max(.65,object.radius??.65)+.3);if(held.kind==='enemy'){const mesh=this.entities.get(object.id);if(mesh)mesh.position.y+=.4;}}
     if(this.grassShader)this.grassShader.uniforms.uTime.value=t;this.portalCore.rotation.y=t*.7;this.portalCore.position.y=3.45+Math.sin(t*1.5)*.18;this.portalGlow.rotation.z=t*.1;this.motes.rotation.y=t*.008;
     for(let i=this.rings.length-1;i>=0;i--){const r=this.rings[i];if(r.kind==='sword-slash')updateSwordSlash(r,dt);else if(r.prism){const dragon=this.heroes[5];dragon.updateMatrixWorld(true);dragon.userData.bones.get('head').bone.getWorldPosition(r.mesh.position);r.mesh.position.add(new THREE.Vector3(0,-.18,.65).multiplyScalar(dragon.scale.x).applyAxisAngle(new THREE.Vector3(0,1,0),r.mesh.rotation.y));r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.65;});}else if(r.kind==='shockwave'){r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.7;});}else{r.life-=dt;r.mesh.material.opacity=Math.max(0,r.life/r.max)*.8;r.mesh.scale.setScalar(.7+(1-r.life/r.max)*.65);}if(r.life<=0){r.mesh.removeFromParent();r.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.rings.splice(i,1);}}
     for(let i=0;i<this.capacity;i++){const p=this.particleData[i];p.life-=dt;if(p.life>0){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=5*dt;this.particlePositions[i*3]=p.x;this.particlePositions[i*3+1]=p.y;this.particlePositions[i*3+2]=p.z;}else this.particlePositions[i*3+1]=-100;}
@@ -187,9 +193,26 @@ export class World {
     if(this.settings.quality==='low')this.renderer.render(this.scene,this.camera);else this.composer.render();
   }
   project(x,y,z){const v=new THREE.Vector3(x,y,z).project(this.camera);return {x:(v.x*.5+.5)*this.canvas.clientWidth,y:(-v.y*.5+.5)*this.canvas.clientHeight,visible:v.z<1};}
+  stagePoint(clientX,clientY,game,lift=1.3){
+    const rect=this.canvas.getBoundingClientRect();if(!rect.width||!rect.height)return null;
+    const ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((clientX-rect.left)/rect.width*2-1,-(clientY-rect.top)/rect.height*2+1),this.camera);
+    const point=ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-(game.layout.height+lift)),new THREE.Vector3());
+    return point?{x:point.x,z:point.z}:null;
+  }
+  pickRice(clientX,clientY,game){
+    const rect=this.canvas.getBoundingClientRect(),x=clientX-rect.left,y=clientY-rect.top,ground=this.stagePoint(clientX,clientY,game,0),candidates=[];
+    for(const target of riceTargets(game)){
+      const {kind,object}=target,centre=this.project(object.x,game.layout.height+(kind==='enemy'?(object.type==='boss'?2:1.2):kind==='bullet'?.9:.12),object.z);
+      if(!centre.visible)continue;
+      const edge=this.project(object.x+(object.radius??.4),game.layout.height+1.2,object.z),radius=kind==='enemy'?Math.max(26,Math.abs(edge.x-centre.x)*1.15):23,distance=Math.hypot(x-centre.x,y-centre.y);
+      if(kind==='hazard'){if(ground&&distanceToHazard(ground.x,ground.z,object)<.25)candidates.push({...target,score:2+distance/1000});}
+      else if(distance<=radius)candidates.push({...target,score:distance/radius+(kind==='enemy'?.1:0)});
+    }
+    return candidates.sort((a,b)=>a.score-b.score)[0]??null;
+  }
   resize(){const w=Math.max(1,this.canvas.clientWidth),h=Math.max(1,this.canvas.clientHeight);this.renderer.setSize(w,h,false);resizeFieldCamera(this.camera,w,h,this.tutorialFraming);this.composer?.setSize(w,h);}
   setQuality(quality){this.settings.quality=quality;this.renderer.setPixelRatio(Math.min(devicePixelRatio,quality==='low'?1:1.65));this.renderer.shadowMap.enabled=quality!=='low';this.resize();}
-  reset(){this.rescueDome.visible=false;this.terrain.update(null,0);for(const map of [this.entities,this.bullets,this.orbMeshes,this.hazardMeshes,this.ultimateMeshes])this.syncMap(map,[],()=>{},()=>{});for(const r of this.rings){r.mesh.removeFromParent();r.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}this.rings=[];this.numbers=[];this.particleData.forEach(p=>p.life=0);this.cameraTarget.set(0,0,0);this.area=-1;this.fields.setArea(0,{immediate:true});this.stageGate.update(null,0);this.orbit.forEach(o=>o.visible=false);this.heroes.forEach(h=>{h.visible=true;h.scale.setScalar(1);h.userData.rig.visible=true;h.userData.attackTime=0;h.userData.movement=0;});}
+  reset(){this.riceRing.visible=false;this.rescueDome.visible=false;this.terrain.update(null,0);for(const map of [this.entities,this.bullets,this.orbMeshes,this.hazardMeshes,this.ultimateMeshes])this.syncMap(map,[],()=>{},()=>{});for(const r of this.rings){r.mesh.removeFromParent();r.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}this.rings=[];this.numbers=[];this.particleData.forEach(p=>p.life=0);this.cameraTarget.set(0,0,0);this.area=-1;this.fields.setArea(0,{immediate:true});this.stageGate.update(null,0);this.orbit.forEach(o=>o.visible=false);this.heroes.forEach(h=>{h.visible=true;h.scale.setScalar(1);h.userData.rig.visible=true;h.userData.attackTime=0;h.userData.movement=0;});}
   stats(){return {calls:this.renderer.info.render.calls,triangles:this.renderer.info.render.triangles,geometries:this.renderer.info.memory.geometries,textures:this.renderer.info.memory.textures};}
 }
 function materialsShared(mat){return mat instanceof THREE.MeshStandardMaterial;}

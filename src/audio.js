@@ -83,8 +83,8 @@ export class Soundscape {
     if(name==='collect')this.tone(1300,.09,'sine',.035);
     if(name==='dash')this.tone(300,.2,'sine',.16,0,950);
     if(name==='hurt'){
-      // Keep Tsukineko's light damage reaction clear of the low, rough hit sound.
-      if(detail?.hero===1)this.tone(560,.075,'sine',.075,0,330);
+      // Keep Nyanluna and Tsukineko's damage voices clear of the rough hit sound.
+      if(detail?.hero===0||detail?.hero===1)this.tone(560,.075,'sine',.075,0,330);
       else this.tone(125,.2,'sawtooth',.14,0,48);
     }
     if(name==='switch'){[440,660,880].forEach((n,i)=>this.tone(n,.22,'sine',.13,i*.055));}

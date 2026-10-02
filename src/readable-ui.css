@@ -19,17 +19,17 @@ body.playing :is(#hud,#wave-banner,#ultimate-banner,#toast,#voice-caption,#joyst
 #hud .acquired{left:176px;bottom:40px;max-width:calc(100vw - 460px)}
 @media(max-width:760px){
  /* Phone boss fights used to hide the whole stage row, including WAVE. Keep WAVE under the HP. */
- #hud .stage-hud,#hud:has(.boss-hud:not(.hidden)) .stage-hud,#hud:has(#exit-guide:not(.hidden)) .stage-hud{display:block;top:calc(max(18px,env(safe-area-inset-top,0px)) + 78px);left:16px;right:auto;transform:none;text-align:left;z-index:4}
+ #hud .stage-hud,#hud:has(.boss-hud:not(.hidden)) .stage-hud,#hud:has(#exit-guide:not(.hidden)) .stage-hud{display:block;top:calc(var(--hud-top) + 78px);left:16px;right:auto;transform:none;text-align:left;z-index:4}
  #hud .wave-row{font-size:12px;color:#f7f3e4}
- #hud .objective{top:calc(max(18px,env(safe-area-inset-top,0px)) + 108px)}
- #hud:has(.boss-hud:not(.hidden)) .boss-hud{top:calc(max(18px,env(safe-area-inset-top,0px)) + 112px)}
- #hud:has(.boss-hud:not(.hidden)) .objective{top:calc(max(18px,env(safe-area-inset-top,0px)) + 156px)}
- #hud #stage-crystal-hud{top:calc(max(18px,env(safe-area-inset-top,0px)) + 140px);left:19px;gap:6px;padding:7px 10px 7px 0}
+ #hud .objective{top:calc(var(--hud-top) + 108px)}
+ #hud:has(.boss-hud:not(.hidden)) .boss-hud{top:calc(var(--hud-top) + 112px)}
+ #hud:has(.boss-hud:not(.hidden)) .objective{top:calc(var(--hud-top) + 156px)}
+ #hud #stage-crystal-hud{top:calc(var(--hud-top) + 140px);left:19px;gap:6px;padding:7px 10px 7px 0}
  #hud #stage-crystal-hud>.icon{width:14px;height:14px}
  #hud #stage-crystal-hud>div{gap:6px}
  #hud #stage-crystal-hud span{font-size:max(8px,var(--ui-min-font,0px))}
  #hud #stage-crystal-hud strong{font-size:max(9px,var(--ui-min-font,0px));margin-left:4px}
- #hud:has(.boss-hud:not(.hidden)) #stage-crystal-hud{top:calc(max(18px,env(safe-area-inset-top,0px)) + 188px)}
+ #hud:has(.boss-hud:not(.hidden)) #stage-crystal-hud{top:calc(var(--hud-top) + 188px)}
  #hud .switch-action{right:6px}
  #hud .field-map,#hud .acquired{bottom:max(45px,calc(env(safe-area-inset-bottom) + 25px))}
  #hud .acquired{left:124px;max-width:calc(100vw - 310px)}

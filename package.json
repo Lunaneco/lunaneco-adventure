@@ -1,6 +1,6 @@
 {
   "name": "lunaneco-adventure",
-  "version": "2.0.1",
+  "version": "2.0.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,8 @@
     "preview:lan": "vite preview --host 0.0.0.0",
     "build:pages": "vite build --base=/lunaneco-adventure/ --outDir=dist-pages",
     "preview:pages": "vite preview --base=/lunaneco-adventure/ --outDir=dist-pages",
-    "audit:pages-build": "node tests/pages-build-audit.mjs"
+    "audit:pages-build": "node tests/pages-build-audit.mjs",
+    "audit:model-cache": "node tests/model-cache-audit.mjs"
   },
   "dependencies": {
     "three": "^0.186.0"

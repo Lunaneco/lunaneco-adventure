@@ -18,7 +18,9 @@
 
 .menu-light{--ink:#24364b;--soft-ink:#4d5b70;--paper:#eeebe3;--rule:#d3d0c7;--accent:#425a78;background:radial-gradient(ellipse at 96% 0,#fcfaf3 0,transparent 50%),#e9e7e0;color:var(--ink);font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
 .menu-light::before{content:"";position:fixed;width:700px;height:700px;right:-360px;top:40%;border:1px solid #b5ae9630;border-radius:50%;box-shadow:0 0 0 70px #b5ae9609,0 0 0 140px #b5ae9609;pointer-events:none}
-.menu-light .chapter-shell{max-width:1280px;min-height:100dvh;padding:36px 56px 20px;display:flex;flex-direction:column}
+.chapter-menu.menu-light{display:flex;flex-direction:column}
+/* Auto margins center shorter menus and collapse when the content needs scrolling. */
+.menu-light .chapter-shell{width:100%;max-width:1280px;flex:none;margin:auto;padding:36px 56px 20px;display:flex;flex-direction:column}
 .journey-header{display:flex;align-items:center;justify-content:space-between;gap:22px;margin-bottom:25px}
 .journey-heading{display:flex;gap:17px;align-items:center}
 .journey-heading>.icon{width:39px;height:39px;color:#89734e;stroke-width:1.4}
@@ -143,7 +145,7 @@
  .title-caption{font-size:max(10px,var(--ui-min-font,0px));letter-spacing:2px;margin-top:20px}
  .title-entry{left:10%;bottom:12%;width:80%}.title-start{padding:17px 22px;font-size:14px}
  .title-footer{left:7%;right:7%;bottom:max(22px,env(safe-area-inset-bottom));font-size:max(7px,var(--ui-min-font,0px));letter-spacing:1px}.title-footer .version{font-size:max(8px,var(--ui-min-font,0px))}
- .menu-light .chapter-shell{padding:calc(22px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));min-height:100dvh}
+ .menu-light .chapter-shell{padding:calc(22px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
  .journey-header{gap:8px;margin-bottom:16px}.journey-heading{gap:9px}.journey-heading>.icon{width:25px;height:25px}.journey-heading small{font-size:max(6px,var(--ui-min-font,0px));letter-spacing:1px}.journey-heading h1{font-size:18px;letter-spacing:1px;margin-top:4px}
  .journey-tools{gap:7px}.journey-tools .icon-button{width:34px;height:34px}.journey-tools .icon-button .icon{width:16px;height:16px}
  .journey-party{padding:0 4px;gap:4px;font-size:max(10px,var(--ui-min-font,0px));min-height:44px}.journey-party>.icon,#journey-party-faces{display:none}

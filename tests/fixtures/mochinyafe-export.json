@@ -1,21 +1,43 @@
 {
-  "source": "user-provided mochinyafe.blend",
-  "sourceSHA256": "33c5c2f68ad62a583c8f0e633eb126bda31ad12e9a3b05fc289ee6678b9b2fd9",
-  "status": "poseable_runtime_slime",
-  "units": "metres; runtime avatar height 1.55 game units",
-  "front": "Blender -Y / glTF +Z",
-  "pivot": "body base at ground; runtime centres XZ",
-  "vertices": 5628,
-  "triangles": 10848,
-  "materials": 4,
-  "animation": "runtime volume-preserving squash/stretch, hop, landing and cry; no skeletal rig",
-  "reference": "user-provided original model; user-requested limbless slime adaptation",
-  "removedParts": [
-    "Mochi_Tiny_Paw.012",
-    "Mochi_Tiny_Paw.013",
-    "Mochi_Tiny_Paw.014",
-    "Mochi_Tiny_Paw.015"
-  ],
-  "limbCount": 0,
-  "target": "mobile WebGL; one avatar / maximum two deployed heroes"
+  "character": "mochinyafe",
+  "status": "engine_candidate",
+  "asset_class": "poseable",
+  "rig_version": "renewal-20261001",
+  "source_sha256": "24ddd9414068ec1ccf4b1f8cdcc7fb7486405d60ad7d9b49805bd8bc2c3a096d",
+  "export_sha256": "5159c4afcbb0e52bbbcd04811670398388727bfaf3e1fdc306d5371f9fbe28e7",
+  "triangles": 32600,
+  "bytes": 1467844,
+  "bones": 8,
+  "unweighted_vertices": 0,
+  "limbCount": 4,
+  "meshes": [
+    {
+      "source_mesh": "mochinyafe_BODY",
+      "game_triangles": 26000
+    },
+    {
+      "source_mesh": "mochinyafe_EAR.L",
+      "game_triangles": 1100
+    },
+    {
+      "source_mesh": "mochinyafe_EAR.R",
+      "game_triangles": 1100
+    },
+    {
+      "source_mesh": "mochinyafe_PAW.back.L",
+      "game_triangles": 1100
+    },
+    {
+      "source_mesh": "mochinyafe_PAW.back.R",
+      "game_triangles": 1100
+    },
+    {
+      "source_mesh": "mochinyafe_PAW.front.L",
+      "game_triangles": 1100
+    },
+    {
+      "source_mesh": "mochinyafe_PAW.front.R",
+      "game_triangles": 1100
+    }
+  ]
 }

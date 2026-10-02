@@ -3,7 +3,8 @@ import {FOURTH_CHAPTER_SCENES} from './chapter-four-story.js';
 import {THIRD_CHAPTER_SCENES} from './chapter-three-story.js';
 import {SECOND_CHAPTER_SCENES} from './chapter-two-story.js';
 import {storySpeaker,preloadStoryCast} from './story-cast.js';
-import {ACTS,actLabel} from './acts.js';
+import {ACTS,actFor,actLabel} from './acts.js';
+import {RICE_QUEST_ID,RICE_SCENES} from './rice-awakening.js';
 export const CHAPTER={title:'迷子の月と、ふたりの約束',summary:'大の仲良しの二人が、一緒に迷い込んだ月の世界。はぐれた親友を探す、全4幕の物語。',stages:ACTS[0].stages};
 const line=(who,text,voiced)=>({who,text,voiced});
 const scene=(act,area,kicker,title,next,lines,voiced=false)=>({act,area,kicker:`ACT 0${act+1} · ${kicker}`,title,next,lines:lines.map(([who,text])=>line(who,text,voiced))});
@@ -107,6 +108,7 @@ export const ACT_SCENES=[{
  ],true),
 },...SECOND_CHAPTER_SCENES,...THIRD_CHAPTER_SCENES,...FOURTH_CHAPTER_SCENES,...FIFTH_CHAPTER_SCENES];
 export const SCENES=ACT_SCENES[0];
+export const storyScenesFor=act=>act===RICE_QUEST_ID?RICE_SCENES:ACT_SCENES[act];
 export class ChapterStory{
   constructor(){
     preloadStoryCast();
@@ -117,7 +119,7 @@ export class ChapterStory{
   show(scene,onFinish){this.scene=scene;this.index=0;this.onFinish=onFinish;this.render();if(!this.dialog.open)this.dialog.showModal();this.dialog.querySelector('#story-next').focus();}
   render(){
     const entry=this.scene.lines[this.index],speaker=storySpeaker(entry.portrait??entry.who),last=this.index===this.scene.lines.length-1;
-    this.dialog.style.setProperty('--story-image',`url('${ACTS[entry.act??this.scene.act??0].stages[entry.area??this.scene.area].image}')`);
+    this.dialog.style.setProperty('--story-image',`url('${actFor(entry.act??this.scene.act??0).stages[entry.area??this.scene.area].image}')`);
     this.dialog.style.setProperty('--speaker-color',speaker.color);this.dialog.dataset.speaker=entry.who;
     this.dialog.innerHTML=`<div class="story-art"></div><div class="story-vignette"></div><header class="story-header"><span>${this.scene.kicker}</span><button id="story-skip">会話をスキップ</button></header><div class="story-title-block"><small>${actLabel(entry.act??this.scene.act??0)}</small><h2 id="story-title">${this.scene.title}</h2></div><div class="story-body"><figure class="story-cast ${entry.who}"><img class="story-character-image" src="${speaker.image}" alt="${speaker.alt}" decoding="sync" width="1024" height="1536"></figure><section class="story-dialogue" aria-live="polite"><div class="story-speaker ${entry.who}"><span class="speaker-light" aria-hidden="true"></span><div><small>${speaker.role}</small><strong>${speaker.name}</strong></div></div><p tabindex="0" aria-label="会話文">${entry.text}</p>${entry.voiced?`<button id="story-voice" class="story-voice" aria-label="${speaker.name}の台詞をもう一度聞く">♪ もう一度聞く</button>`:''}<footer><span class="story-progress">${String(this.index+1).padStart(2,'0')} <i>/</i> ${String(this.scene.lines.length).padStart(2,'0')}</span><button id="story-next">${last?this.scene.next:'つづきを読む'} <span aria-hidden="true">→</span></button></footer></section></div>`;
     this.onVoice?.(entry,this.scene.lines.slice(this.index+1,this.index+3).filter(line=>line.voiced));

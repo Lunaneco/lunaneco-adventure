@@ -1,0 +1,9 @@
+.rice-quest .journey-act{border-color:#8dcaa6;background:linear-gradient(110deg,#193a30,#122d29)}
+.rice-quest-note{margin:10px 6px;color:#c5dfc9;font-size:12px;line-height:1.7}
+.rice-reward{border-color:#8dcaa6}
+.rice-reward small{display:block;line-height:1.7;color:#668274}
+.rice-result{margin:14px 0;padding:16px;border:1px solid #84ba94;border-radius:8px;background:#1d3a30;color:#ddf6d9;line-height:1.8}
+.rice-result strong{display:block;font-size:18px}
+.rice-control-hint{position:absolute;bottom:calc(125px + var(--safe-bottom,0px));right:20px;max-width:min(320px,calc(100% - 180px));padding:8px 11px;border:1px solid #99d4a4;border-radius:7px;background:#102d29e8;color:#e4ffe5;font-size:12px;line-height:1.6;pointer-events:none}
+@media(max-width:600px){.rice-control-hint{right:12px;bottom:calc(120px + var(--safe-bottom,0px));max-width:calc(100% - 160px);font-size:11px}.rice-quest-note{font-size:11px}}
+@media(max-height:500px) and (orientation:landscape){.rice-control-hint{right:12px;bottom:120px;max-width:280px}}

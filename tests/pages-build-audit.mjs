@@ -3,6 +3,8 @@ import {readFile, stat} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {MUSIC_TRACKS} from '../src/music.js';
+import {createHash} from 'node:crypto';
+import {HERO_MODEL_NAMES,heroModelPath} from '../src/hero-model-paths.js';
 
 const prefixes=[];
 for(const [directory,base] of [['dist','/'],['dist-pages','/lunaneco-adventure/']]){
@@ -33,7 +35,14 @@ for(const [directory,base] of [['dist','/'],['dist-pages','/lunaneco-adventure/'
   let pending;
   handlers.install({waitUntil:promise=>{pending=promise;}});await pending;
   assert.ok(installed.includes(base+'index.html'));
-  assert.ok(installed.includes(base+'assets/models/omsolo.glb'));
+  for(const name of HERO_MODEL_NAMES){
+    const bytes=await readFile(resolve('public',heroModelPath(name,{})));
+    const revision=createHash('sha256').update(bytes).digest('hex').slice(0,12);
+    const path=heroModelPath(name,{[name]:revision});
+    assert.ok(installed.includes(base+path),`Offline cache includes the current ${name} revision`);
+    assert.ok(!installed.includes(base+heroModelPath(name,{})),'Old canonical paths cannot shadow updated models');
+    assert.deepEqual(await readFile(resolve(directory,path)),bytes,'Published model matches the source asset');
+  }
   assert.ok(installed.includes(base+'assets/title/adventure-loop.mp4'));
   assert.ok(installed.includes(base+'assets/title/adventure-poster.jpg'));
   for(const track of Object.values(MUSIC_TRACKS))assert.ok(installed.includes(base+track.file));

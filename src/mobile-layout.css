@@ -1,0 +1,58 @@
+/* Keep the canvas and screen overlays on the same visible viewport height. */
+:root{
+  --app-height:100vh;
+  --viewport-safe-top:env(safe-area-inset-top,0px);
+  --viewport-safe-right:env(safe-area-inset-right,0px);
+  --viewport-safe-bottom:env(safe-area-inset-bottom,0px);
+  --viewport-safe-left:env(safe-area-inset-left,0px);
+  --hud-top:max(18px,calc(var(--viewport-safe-top) + 12px));
+}
+@supports(height:100dvh){:root{--app-height:100dvh}}
+/* iOS installed apps can exclude the status bar from dvh even while drawing under it. */
+.ios-standalone{--app-height:100vh}
+@media(orientation:portrait) and (max-width:760px){
+  .ios-standalone{
+    --viewport-safe-top:max(64px,env(safe-area-inset-top,0px));
+    --viewport-safe-bottom:max(34px,env(safe-area-inset-bottom,0px));
+  }
+}
+@media(orientation:landscape) and (max-height:500px){
+  .ios-standalone{
+    --viewport-safe-left:max(48px,env(safe-area-inset-left,0px));
+    --viewport-safe-right:max(48px,env(safe-area-inset-right,0px));
+    --viewport-safe-bottom:max(21px,env(safe-area-inset-bottom,0px));
+  }
+}
+#scene,#home,#hud,#chapter-menu,#loading{bottom:auto;height:100%;height:var(--app-height)}
+.ios-standalone #modal::backdrop{bottom:auto;height:var(--app-height)}
+.ios-standalone .home .title-footer{bottom:calc(var(--viewport-safe-bottom) + 12px)}
+.ios-standalone #modal:not(:has(.skill-options)){
+  inset:calc((var(--app-height) + var(--viewport-safe-top) - var(--viewport-safe-bottom))/2) auto auto calc((100vw + var(--viewport-safe-left) - var(--viewport-safe-right))/2);
+  margin:0;transform:translate(-50%,-50%);
+}
+
+@media(max-width:760px),(pointer:coarse),(display-mode:standalone){
+  /* Reserve safe areas outside the centered menu, including its bottom edge. */
+  #chapter-menu{
+    --menu-safe-top:var(--viewport-safe-top);
+    --menu-safe-right:var(--viewport-safe-right);
+    --menu-safe-bottom:var(--viewport-safe-bottom);
+    --menu-safe-left:var(--viewport-safe-left);
+    padding-block:var(--menu-safe-top) var(--menu-safe-bottom);
+  }
+  #chapter-menu .chapter-shell{
+    padding:32px calc(16px + var(--menu-safe-right)) 20px calc(16px + var(--menu-safe-left));
+  }
+  #chapter-menu .journey-tools .icon-button{width:48px;height:48px;flex:none}
+  #modal:not(:has(.skill-options)){
+    inset:var(--viewport-safe-top) var(--viewport-safe-right) var(--viewport-safe-bottom) var(--viewport-safe-left);
+    margin:auto;
+    max-width:calc(100vw - var(--viewport-safe-left) - var(--viewport-safe-right) - 24px);
+    max-height:calc(var(--app-height) - var(--viewport-safe-top) - var(--viewport-safe-bottom) - 24px);
+  }
+  #modal .brief-close{top:24px;width:48px;height:48px}
+  #hud .party-hud{top:var(--hud-top);left:calc(16px + var(--viewport-safe-left))}
+  #hud .top-actions{top:var(--hud-top);right:calc(15px + var(--viewport-safe-right))}
+  #hud .top-actions>.icon-button{width:44px;height:44px}
+  #hud .controls{right:calc(23px + var(--viewport-safe-right))}
+}

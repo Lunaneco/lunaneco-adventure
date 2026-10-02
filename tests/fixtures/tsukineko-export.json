@@ -1,126 +1,98 @@
 {
   "character": "tsukineko",
+  "status": "engine_candidate",
+  "asset_class": "poseable",
+  "rig_version": "renewal-20261001",
+  "source_sha256": "f88d733d9a1831dbd7ccec476bbffbf7408b187de989d669780ea0d8948bfdfb",
+  "export_sha256": "ac09aa2fdc26a6f52fc28be1f400ee831471eebadce3f1ba16bb9b8f8c59ae13",
+  "triangles": 136203,
+  "bytes": 11645184,
+  "bones": 43,
   "unweighted_vertices": 0,
   "meshes": [
     {
-      "source_mesh": "TSUKI_HEAD",
-      "evaluated_triangles": 112292,
-      "game_triangles": 42000
+      "source_mesh": "Eye_reference.L",
+      "game_triangles": 6816
     },
     {
-      "source_mesh": "TSUKI_EARS",
-      "evaluated_triangles": 9992,
-      "game_triangles": 2797
+      "source_mesh": "Eye_reference.R",
+      "game_triangles": 6816
     },
     {
-      "source_mesh": "TSUKI_HAIR",
-      "evaluated_triangles": 259840,
-      "game_triangles": 46000
+      "source_mesh": "tsukineko_ARM.L",
+      "game_triangles": 274
     },
     {
-      "source_mesh": "TSUKI_HOODIE",
-      "evaluated_triangles": 66873,
-      "game_triangles": 20061
+      "source_mesh": "tsukineko_ARM.R",
+      "game_triangles": 287
     },
     {
-      "source_mesh": "TSUKI_SKIRT",
-      "evaluated_triangles": 9493,
-      "game_triangles": 2847
+      "source_mesh": "tsukineko_EAR.L",
+      "game_triangles": 2400
     },
     {
-      "source_mesh": "TSUKI_SHOES",
-      "evaluated_triangles": 13049,
-      "game_triangles": 3653
+      "source_mesh": "tsukineko_EAR.R",
+      "game_triangles": 2400
     },
     {
-      "source_mesh": "TSUKI_FrontLock.L",
-      "evaluated_triangles": 2398,
-      "game_triangles": 671
+      "source_mesh": "tsukineko_HAIR.BACK",
+      "game_triangles": 15998
     },
     {
-      "source_mesh": "TSUKI_BODY",
-      "evaluated_triangles": 704,
-      "game_triangles": 195
+      "source_mesh": "tsukineko_HAIR.L",
+      "game_triangles": 15999
     },
     {
-      "source_mesh": "TSUKI_BODY_Leg.L",
-      "evaluated_triangles": 144,
-      "game_triangles": 144
+      "source_mesh": "tsukineko_HAIR.R",
+      "game_triangles": 15999
     },
     {
-      "source_mesh": "TSUKI_BODY_Palm.L",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_HAND.L",
+      "game_triangles": 948
     },
     {
-      "source_mesh": "TSUKI_BODY_Index.L",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_HAND.R",
+      "game_triangles": 984
     },
     {
-      "source_mesh": "TSUKI_BODY_Middle.L",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_HEAD",
+      "game_triangles": 31999
     },
     {
-      "source_mesh": "TSUKI_BODY_Ring.L",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_LEG.L",
+      "game_triangles": 2478
     },
     {
-      "source_mesh": "TSUKI_BODY_Little.L",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_LEG.R",
+      "game_triangles": 2397
     },
     {
-      "source_mesh": "TSUKI_BODY_Thumb.L",
-      "evaluated_triangles": 624,
-      "game_triangles": 174
+      "source_mesh": "tsukineko_SHOE.L",
+      "game_triangles": 4189
     },
     {
-      "source_mesh": "TSUKI_BODY_Leg.R",
-      "evaluated_triangles": 144,
-      "game_triangles": 144
+      "source_mesh": "tsukineko_SHOE.R",
+      "game_triangles": 4282
     },
     {
-      "source_mesh": "TSUKI_BODY_Palm.R",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_SKIRT",
+      "game_triangles": 12999
     },
     {
-      "source_mesh": "TSUKI_BODY_Index.R",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_TORSO",
+      "game_triangles": 8000
     },
     {
-      "source_mesh": "TSUKI_BODY_Middle.R",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_Hoodie_fitted_sides",
+      "game_triangles": 402
     },
     {
-      "source_mesh": "TSUKI_BODY_Ring.R",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
+      "source_mesh": "tsukineko_Sleeve_joint_loops.L",
+      "game_triangles": 268
     },
     {
-      "source_mesh": "TSUKI_BODY_Little.R",
-      "evaluated_triangles": 720,
-      "game_triangles": 200
-    },
-    {
-      "source_mesh": "TSUKI_BODY_Thumb.R",
-      "evaluated_triangles": 624,
-      "game_triangles": 174
-    },
-    {
-      "source_mesh": "TSUKI_Stocking.L",
-      "evaluated_triangles": 4992,
-      "game_triangles": 1396
-    },
-    {
-      "source_mesh": "TSUKI_Stocking.R",
-      "evaluated_triangles": 4992,
-      "game_triangles": 1396
+      "source_mesh": "tsukineko_Sleeve_joint_loops.R",
+      "game_triangles": 268
     }
   ]
 }

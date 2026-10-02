@@ -1,9 +1,10 @@
 import {defineConfig} from 'vite';
-import {readdir,readFile,writeFile} from 'node:fs/promises';
+import {readdir,readFile,writeFile,copyFile} from 'node:fs/promises';
 import {resolve,relative} from 'node:path';
 import {createHash} from 'node:crypto';
 import {cachedMediaResponse} from './src/offline-range.js';
 import {CONTENT_SECURITY_POLICY,SECURITY_HEADERS} from './security.config.js';
+import {HERO_MODEL_NAMES,heroModelPath} from './src/hero-model-paths.js';
 function browserSecurity(){return {
   name:'lunaria-browser-security',apply:'build',
   transformIndexHtml(){return [
@@ -11,9 +12,20 @@ function browserSecurity(){return {
     {tag:'meta',attrs:{name:'referrer',content:'no-referrer'},injectTo:'head-prepend'},
   ];},
 };}
-function offlineBundle(){let config;return {name:'lunaria-offline-bundle',apply:'build',configResolved(value){config=value;},async closeBundle(){
+function offlineBundle(){let config;const revisions={};return {name:'lunaria-offline-bundle',apply:'build',
+  async config(){
+    for(const name of HERO_MODEL_NAMES){
+      const bytes=await readFile(resolve('public',heroModelPath(name,{})));
+      revisions[name]=createHash('sha256').update(bytes).digest('hex').slice(0,12);
+    }
+    return {define:{__HERO_MODEL_REVISIONS__:JSON.stringify(revisions)}};
+  },configResolved(value){config=value;},async closeBundle(){
   const base=config.base,dir=resolve(config.root,config.build.outDir);const files=[];
-  async function visit(folder){for(const e of await readdir(folder,{withFileTypes:true})){const p=resolve(folder,e.name);if(e.isDirectory())await visit(p);else if(e.name!=='sw.js')files.push(p);}}
+  // Keep canonical URLs available to already-open older clients, but precache
+  // only the versioned copies so the offline download does not double in size.
+  const legacyModels=new Set(HERO_MODEL_NAMES.map(name=>resolve(dir,heroModelPath(name,{}))));
+  for(const name of HERO_MODEL_NAMES)await copyFile(resolve(dir,heroModelPath(name,{})),resolve(dir,heroModelPath(name,revisions)));
+  async function visit(folder){for(const e of await readdir(folder,{withFileTypes:true})){const p=resolve(folder,e.name);if(e.isDirectory())await visit(p);else if(e.name!=='sw.js'&&!legacyModels.has(p))files.push(p);}}
   await visit(dir);files.sort();const hash=createHash('sha256');hash.update('scoped-offline-v5-media-range'+base);for(const p of files){hash.update(relative(dir,p));hash.update(await readFile(p));}
   const prefix='lunaria-v1-'+createHash('sha256').update(base).digest('hex').slice(0,12)+'-';
   const cache=prefix+hash.digest('hex').slice(0,12);const urls=[base,...files.map(p=>base+relative(dir,p).replaceAll('\\','/'))];

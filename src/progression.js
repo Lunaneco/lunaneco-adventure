@@ -6,6 +6,7 @@ import {normalizeWeapons,weaponAttackBonus,weaponDefenseBonus} from './weapons.j
 import {normalizeMissions,STAGE_MISSIONS} from './missions.js';
 import {normalizeStory} from './acts.js';
 import {normalizeSkillLoadouts} from './blessings.js';
+import {normalizeAwakenings} from './rice-awakening.js';
 export {LEVEL_RULES} from './level-rules.js';
 export const PROGRESSION_KEY='lunaria-progression-v1';
 export const ENEMY_REWARDS=Object.freeze({...Object.fromEntries(Object.entries(ENEMY_TYPES).map(([id,s])=>[id,{xp:s.xp,crystals:s.crystals}])),boss:{xp:60,crystals:0}});
@@ -29,6 +30,7 @@ export function normalizeProgression(raw,roster=[],legacyRecord={}){
     applyBankedXp(character);character.tree=normalizeTalentTree(item?.tree,character.level);result.characters[id]=character;
   }
   result.blessingLoadouts=normalizeSkillLoadouts(raw?.blessingLoadouts,result);
+  result.awakenings=normalizeAwakenings(raw?.awakenings,result);
   return result;
 }
 export function characterProgress(profile,id){

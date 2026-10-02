@@ -1,4 +1,5 @@
 import {chapterRoom} from './chapter-terrain.js';
+import {RICE_QUEST_ID} from './rice-awakening.js';
 // The same outlines drive floor geometry, walking collision, navigation and spawn positions.
 const polygon=(id,name,points,style='stone',extra={})=>({id,name,points,style,entrance:{x:0,z:8},exit:{x:0,z:-16.6,radius:1.7},height:0,...extra});
 const oct=(x,z)=>[[-x*.55,-z],[x*.55,-z],[x,-z*.55],[x,z*.55],[x*.55,z],[-x*.55,z],[-x,z*.55],[-x,-z*.55]];
@@ -48,7 +49,9 @@ const BASE_EXTRA_FIELD_LAYOUTS=Object.freeze([
  [single(variant(garden,'extra-mochi-street','夢蝕のもち街道','clock',{mochi:'mochi-dreamtown',district:0}),'全EX最難関 · 七種の魔物の総攻撃'),floors(variant(courtyard,'extra-mochi-lower','黒糖の螺旋回廊・下層','sky',{mochi:'mochi-teagarden',district:1}),variant(roof,'extra-mochi-upper','黒糖の螺旋回廊・上層','sky',{mochi:'mochi-teagarden',district:1})),single(variant(eclipse,'extra-mochi-throne','夢蝕の王座','eclipse',{mochi:'mochi-palace',district:2}),'最終決戦 · HP半分で夢蝕覚醒')],
 ]);
 export const EXTRA_FIELD_LAYOUTS=Object.freeze(BASE_EXTRA_FIELD_LAYOUTS.map((fields,chapter)=>fields.map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom(room,chapter,3,area,field.kind,index))}))));
-export const fieldFor=(act,area)=>FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
+// The solo trial uses three separate, single-floor arenas. No story/EX room is changed.
+export const RICE_FIELD_LAYOUTS=Object.freeze([garden,hall,eclipse].map((room,area)=>single(chapterRoom(variant(room,`rice-awakening-${area}`,['ユーダの修行場','静かな用水の庭','誓いの穂守り壇'][area],'meadow',{country:['village','valley','fortress'][area],district:area,surface:'stone'}),1,0,area,'single',0),'オムソロ単独 · ライスの力の覚醒試練')));
+export const fieldFor=(act,area)=>act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
 export function layoutFor(act,area,wave,route='safe'){
  const f=fieldFor(act,area);return f.rooms[f.kind==='floors'?(wave%2===0?1:0):f.kind==='branch'&&wave%2===0?(route==='elite'?2:1):0];
 }

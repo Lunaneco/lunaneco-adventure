@@ -14,12 +14,14 @@ export const requiresSoloTsukineko=(profile,act)=>actFor(act)?.chapter===4&&!act
 
 export function requiredPartyMember(profile,act){
   const stage=actFor(act);
+  if(stage?.soloHero)return stage.soloHero;
   if(requiresSoloTsukineko(profile,act))return 'tsukineko';
   return stage?.chapter===3&&!stage.extra&&!isActCleared(profile,act)?'nyanluna':null;
 }
 
 // Preserve the selected lead when a first-clear story member needs the other slot.
 export function partyForAct(raw,roster,profile,act,lead){
+  if(actFor(act)?.soloHero&&roster.some(h=>h.id===actFor(act).soloHero))return [actFor(act).soloHero];
   if(requiresSoloTsukineko(profile,act)&&roster.some(h=>h.id==='tsukineko'))return ['tsukineko'];
   const party=normalizeParty(raw,roster),required=requiredPartyMember(profile,act);
   if(!required||party.includes(required)||!roster.some(hero=>hero.id===required))return party;

@@ -1,4 +1,5 @@
 import {FIELD_THEMES} from './field-themes.js';
+import {RICE_QUEST,riceQuestUnlocked,hasRicePower} from './rice-awakening.js';
 import {EXTRA_ACTS,EXTRA_FIRST_TICKETS,EXTRA_REPEAT_TICKETS} from './extra-stages.js';
 export {EXTRA_ACTS} from './extra-stages.js';
 const stage=(name,theme,note,index)=>({name,theme,image:FIELD_THEMES[theme].image,note,waves:`WAVE 0${index*2+1}–0${index*2+2}`});
@@ -32,11 +33,11 @@ export const CHAPTERS=Object.freeze([
  {id:4,title:'プリズムの国',summary:'青い結晶とオーロラの異世界。つきねことプリムだけの全4幕。適正Lv.60・第4章と同等の難易度。各幕の初回はつきねこ単独。',start:16,end:19},
 ]);
 export const ACTS=Object.freeze(acts.map(a=>Object.freeze({...a,recommendedLevel:a.id>=12?60:a.id>=8?40:a.id>=4?30:null,chapter:Math.floor(a.id/4),number:a.id%4+1,recruit:a.id===19?'prim':a.id===3?'tsukineko':a.id===7?'omsolo':a.id===11?'mochinyafe':a.id===15?'shizuku':null})));
-export const PLAYABLE_ACTS=Object.freeze([...ACTS,...EXTRA_ACTS]);
+export const PLAYABLE_ACTS=Object.freeze([...ACTS,...EXTRA_ACTS,RICE_QUEST]);
 export const actFor=act=>PLAYABLE_ACTS[act];
 export const chapterForAct=act=>CHAPTERS[actFor(act)?.chapter??0];
-export const actLabel=act=>`第${chapterForAct(act).id+1}章・${actFor(act)?.extra?'エクストラ':`第${actFor(act)?.number??1}幕`}`;
-export const isActCleared=(profile,act)=>actFor(act)?.extra?profile?.story?.extraClears?.[actFor(act).chapter]===true:profile?.story?.actClears?.[act]===true;
+export const actLabel=act=>actFor(act)?.awakening?'オムソロ・ソロ覚醒':`第${chapterForAct(act).id+1}章・${actFor(act)?.extra?'エクストラ':`第${actFor(act)?.number??1}幕`}`;
+export const isActCleared=(profile,act)=>actFor(act)?.awakening?hasRicePower(profile):actFor(act)?.extra?profile?.story?.extraClears?.[actFor(act).chapter]===true:profile?.story?.actClears?.[act]===true;
 export const clearTicketReward=(profile,act)=>actFor(act)?.extra?(isActCleared(profile,act)?EXTRA_REPEAT_TICKETS:EXTRA_FIRST_TICKETS):1;
 export function normalizeStory(raw,legacy={}){
  const oldClear=raw?.chapterOneCleared===true||legacy?.chapterOneCleared===true;
@@ -44,10 +45,11 @@ export function normalizeStory(raw,legacy={}){
  for(let i=1;i<actClears.length;i++)if(!actClears[i-1])actClears[i]=false;
  return {version:2,actClears,extraClears:EXTRA_ACTS.map(a=>actClears.slice(0,a.unlockAfterAct+1).every(Boolean)&&raw?.extraClears?.[a.chapter]===true),chapterOneCleared:actClears.slice(0,4).every(Boolean),chapterTwoCleared:actClears.slice(4,8).every(Boolean),tsukinekoUnlocked:raw?.version===2?raw.tsukinekoUnlocked===true||actClears[3]:oldClear,omsoloUnlocked:actClears[7],chapterThreeCleared:actClears.slice(8,12).every(Boolean),mochinyafeUnlocked:actClears[11],chapterFourCleared:actClears.slice(12,16).every(Boolean),shizukuUnlocked:actClears[15],chapterFiveCleared:actClears.slice(16,20).every(Boolean),primUnlocked:actClears[19],demonKingCalm:actClears[15]};
 }
-export const isActUnlocked=(profile,act)=>Number.isInteger(act)&&act>=0&&act<PLAYABLE_ACTS.length&&(actFor(act).extra?ACTS.slice(0,actFor(act).unlockAfterAct+1).every(a=>profile?.story?.actClears?.[a.id]===true):act===0||profile?.story?.actClears?.[act-1]===true);
+export const isActUnlocked=(profile,act)=>Number.isInteger(act)&&act>=0&&act<PLAYABLE_ACTS.length&&(actFor(act).awakening?riceQuestUnlocked(profile):actFor(act).extra?ACTS.slice(0,actFor(act).unlockAfterAct+1).every(a=>profile?.story?.actClears?.[a.id]===true):act===0||profile?.story?.actClears?.[act-1]===true);
 export const nextAct=profile=>{const next=ACTS.findIndex((_,i)=>!profile.story.actClears[i]);return next<0?ACTS.length-1:next;};
 export function completeAct(profile,act){
  if(!isActUnlocked(profile,act))return false;
+ if(actFor(act).awakening){profile.awakenings??={rice:false};profile.awakenings.rice=true;return false;}
  if(actFor(act).extra){profile.story.extraClears[actFor(act).chapter]=true;return false;}
  const hero=ACTS[act].recruit,recruited=hero&&!profile.story[`${hero}Unlocked`];
  profile.story.actClears[act]=true;profile.story.chapterOneCleared=profile.story.actClears.slice(0,4).every(Boolean);profile.story.chapterTwoCleared=profile.story.actClears.slice(4,8).every(Boolean);profile.story.chapterThreeCleared=profile.story.actClears.slice(8,12).every(Boolean);
