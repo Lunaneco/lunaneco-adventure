@@ -1,3 +1,4 @@
+import {ANTI_KEMO_ENEMIES,antiKemoEnemyAttack,antiKemoBossAttack} from './chapter-seven-enemies.js';
 import {GOLDEN_HEHE,HEHE_ENEMIES} from './chapter-six-enemies.js';
 import {heheEnemyAttack,heheBossAttack} from './chapter-six-combat.js';
 import {PRISM_ENEMIES} from './chapter-five-enemies.js';
@@ -77,7 +78,7 @@ function bossAttack(g,e){
  e.special=g.actConfig?.chapter>=3?(empowered?1.4:1.95):g.actConfig?.chapter===2?(empowered?1.65:2.35):g.actConfig?.chapter===1?(empowered?2.5:3.35):(empowered?3:4.1);
  g.emit('bossAttack',{kind:['rune','stars','charge'][action],label:g.actConfig?.apex?['夢蝕の包囲陣','三重王冠の星弾','王座砕きの交差突進'][action]:spec.attacks[g.actConfig?.chapter===4?(e.action-1)%2:action],bossId:e.bossId});
  const helpers={angle,action,color,empowered,line,circle,ring,charge,lockCast,volley};
- if(g.actConfig?.chapter===5)heheBossAttack(g,e,helpers);else if(g.actConfig?.chapter===4)prismBossAttack(g,e,helpers);else if(g.actConfig?.chapter>=3)demonBossAttack(g,e,helpers);
+ if(g.actConfig?.chapter===6)antiKemoBossAttack(g,e,helpers);else if(g.actConfig?.chapter===5)heheBossAttack(g,e,helpers);else if(g.actConfig?.chapter===4)prismBossAttack(g,e,helpers);else if(g.actConfig?.chapter>=3)demonBossAttack(g,e,helpers);
  else if(g.actConfig?.chapter===2)mochiBossAttack(g,e,helpers);
  else storyBossAttack(g,e,helpers);
 }
@@ -89,7 +90,7 @@ export function tickEnemyBehavior(g,e,dt,slow=1){
  if(e.prismFollowup)e.prismFollowup.due-=dt;
  if(e.type===GOLDEN_SLIME.type||e.type===GOLDEN_HEHE.type){fleeGoldenSlime(g,e,dt,slow);return;}
  const p=g.player,dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz)||.01,angle=Math.atan2(dx,dz),route=g.steerEnemy(e);
- if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;g.emit('bossPhase',{label:g.actConfig?.chapter===5?'へへへの猛攻 — 扇矢と連撃が増加':g.actConfig?.chapter===4?'虹光の暴走 — 五方向弾・三連撃、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
+ if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;g.emit('bossPhase',{label:g.actConfig?.chapter===6?'集団の猛攻 — 連射と突撃に注意':g.actConfig?.chapter===5?'へへへの猛攻 — 扇矢と連撃が増加':g.actConfig?.chapter===4?'虹光の暴走 — 五方向弾・三連撃、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
  if(e.type==='boss'&&g.actConfig?.apex&&!e.apexAwakened&&e.hp<=e.maxHp*.5){e.apexAwakened=true;g.emit('bossPhase',{label:'夢蝕覚醒 — 包囲魔法と星弾が増加'});}
  if(e.rush){const rush=e.rush;e.face=rush.angle;move(e,Math.sin(rush.angle),Math.cos(rush.angle),rush.speed*slow,Math.min(dt,rush.remaining));rush.remaining-=dt;if(rush.remaining<=0){e.rush=null;e.recovery=.8;}return;}
  if(e.cast){e.cast.remaining-=dt;if(e.cast.remaining<=0){const cast=e.cast;e.cast=null;finishCast(g,e,cast);}return;}
@@ -115,6 +116,7 @@ export function tickEnemyBehavior(g,e,dt,slow=1){
   e.special-=dt*cadence(g);if(e.special<=0){bossAttack(g,e);return;}
   const preferred=g.actConfig?.chapter===4?9:e.bossId==='chronarch'?7:0;if(d>Math.max(preferred,e.radius+.6))move(e,route.x,route.z,e.speed*slow,dt);return;
  }
+ if(ANTI_KEMO_ENEMIES[e.type]){antiKemoEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}
  if(HEHE_ENEMIES[e.type]){heheEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}
  if(PRISM_ENEMIES[e.type]){prismEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}
  if(e.type.startsWith('demon')){demonEnemyAttack(g,e,{angle,d,route,dt,slow,move,line,circle,ring,charge,lockCast,volley,cooldownRate:cadence(g)});return;}

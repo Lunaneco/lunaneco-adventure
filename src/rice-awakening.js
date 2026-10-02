@@ -1,3 +1,4 @@
+import {nyanQuestUnlocked} from './nyanluna-awakening.js';
 import {FIELD_THEMES} from './field-themes.js';
 
 export const RICE_UNLOCK_LEVEL=50;
@@ -12,7 +13,7 @@ export const RICE_QUEST=Object.freeze({
 
 export const riceQuestUnlocked=profile=>profile?.story?.omsoloUnlocked===true&&Number.isFinite(profile?.characters?.omsolo?.level)&&profile.characters.omsolo.level>=RICE_UNLOCK_LEVEL;
 export const hasRicePower=profile=>profile?.awakenings?.rice===true&&riceQuestUnlocked(profile);
-export const normalizeAwakenings=(raw,profile)=>({rice:raw?.rice===true&&riceQuestUnlocked(profile)});
+export const normalizeAwakenings=(raw,profile)=>({rice:raw?.rice===true&&riceQuestUnlocked(profile),nyanluna:raw?.nyanluna===true&&nyanQuestUnlocked(profile)});
 export const RICE_HELP='オムソロ操作中、通常の敵・敵弾・ダメージのある攻撃予告をドラッグして掴み、別の敵へぶつけよう。ボス本体は掴めないが、ボスの遠距離攻撃は掴めます。何もない地面はドラッグで移動。';
 
 const scene=(area,title,next,lines)=>Object.freeze({act:RICE_QUEST_ID,area,kicker:'OMSOLO · SOLO AWAKENING',title,next,lines:lines.map(([who,text])=>({who,text,voiced:false}))});

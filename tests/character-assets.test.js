@@ -24,8 +24,44 @@ function glb(name) {
   return { doc, read, bytes: file.length };
 }
 
-for(const name of ['nyanluna','tsukineko','mochinyafe','hehereal'])test(`${name}: published metadata contains no private workstation paths`,()=>{
+for(const name of ['nyanluna','tsukineko','mochinyafe','hehereal','lumi','nyanluna-awakening','nyanluna-awakening-staff'])test(`${name}: published metadata contains no private workstation paths`,()=>{
   assert.doesNotMatch(JSON.stringify(glb(name).doc),/\/Users\/|\/private\//);
+});
+
+test('awakened Nyanluna: portable 39-bone maid preserves eyes, opaque hair and normalized mobile weights',()=>{
+ const {doc,read,bytes}=glb('nyanluna-awakening');assert.equal(doc.skins.length,1);assert.equal(doc.skins[0].joints.length,39);assert.ok(doc.meshes.length<=20);assert.ok(doc.materials.length<=4);assert.ok(bytes<17*1048576);assert.equal(doc.images.length,2);assert.ok(doc.images.every(i=>i.bufferView!==undefined&&!i.uri));
+ let triangles=0;
+ for(const p of doc.meshes.flatMap(m=>m.primitives)){
+  const positions=read(p.attributes.POSITION),normals=read(p.attributes.NORMAL),weights=read(p.attributes.WEIGHTS_0),joints=read(p.attributes.JOINTS_0),indices=read(p.indices);triangles+=indices.length/3;
+  for(const [index] of indices)assert.ok(index>=0&&index<positions.length);
+  for(let i=0;i<positions.length;i++){assert.ok(positions[i].every(Number.isFinite));assert.ok(normals[i].every(Number.isFinite));assert.ok(weights[i].every(w=>Number.isFinite(w)&&w>=0&&w<=1));assert.ok(Math.abs(weights[i].reduce((a,b)=>a+b,0)-1)<.0001);assert.ok(joints[i].every(j=>j>=0&&j<39));}
+ }
+ assert.equal(triangles,223983);assert.ok(triangles<230000);assert.ok(doc.nodes.some(n=>n.extras?.game_rig_version==='nyanluna-awakening-20261003'));
+ for(const name of ['head','upper_arm.L','upper_arm.R','hand.R','thigh.L','thigh.R'])assert.ok(doc.nodes.some(n=>n.name===name));
+ for(const side of ['L','R'])assert.ok(doc.nodes.some(n=>n.name===`Nyanluna_Reference_Iris_${side}`));
+ for(const material of doc.materials){assert.ok(!material.alphaMode||material.alphaMode==='OPAQUE');assert.equal(material.pbrMetallicRoughness.baseColorFactor?.[3]??1,1);}
+ for(const matrix of read(doc.skins[0].inverseBindMatrices))assert.ok(matrix.every(Number.isFinite));assert.ok(!doc.nodes.some(n=>n.name==='Nyanluna_Moon_Staff'));
+});
+test('awakened moon staff is a portable 12k static hand prop, not a detached skinned armature',()=>{
+ const {doc,read,bytes}=glb('nyanluna-awakening-staff');assert.equal(doc.meshes.length,1);assert.equal(doc.skins,undefined);assert.ok(bytes<3*1048576);const p=doc.meshes[0].primitives[0],positions=read(p.attributes.POSITION);assert.equal(read(p.indices).length/3,12000);assert.ok(positions.every(v=>v.every(Number.isFinite)));assert.ok(!p.attributes.JOINTS_0);assert.ok(doc.images.every(i=>i.bufferView!==undefined&&!i.uri));assert.ok(Math.max(...positions.map(p=>p[1]))>.8);assert.ok(Math.min(...positions.map(p=>p[1]))>-.5);
+});
+
+test('lumi: portable 32-bone heroine preserves opaque hair and normalized mobile skin weights',()=>{
+ const {doc,read,bytes}=glb('lumi');assert.equal(doc.skins.length,1);assert.equal(doc.skins[0].joints.length,32);assert.equal(doc.meshes.length,15);assert.ok(doc.materials.length<=4);assert.ok(bytes<12*1048576);
+ assert.equal(doc.images.length,2);assert.ok(doc.images.every(i=>i.bufferView!==undefined&&!i.uri));
+ let triangles=0;
+ for(const p of doc.meshes.flatMap(m=>m.primitives)){
+  const positions=read(p.attributes.POSITION),normals=read(p.attributes.NORMAL),weights=read(p.attributes.WEIGHTS_0),joints=read(p.attributes.JOINTS_0),indices=read(p.indices);triangles+=indices.length/3;
+  for(const [index] of indices)assert.ok(index>=0&&index<positions.length);
+  for(let i=0;i<positions.length;i++){
+   assert.ok(positions[i].every(Number.isFinite));assert.ok(normals[i].every(Number.isFinite));
+   assert.ok(weights[i].every(w=>Number.isFinite(w)&&w>=0&&w<=1));assert.ok(Math.abs(weights[i].reduce((a,b)=>a+b,0)-1)<.0001);assert.ok(joints[i].every(j=>j>=0&&j<32));
+  }
+ }
+ assert.equal(triangles,154161);assert.ok(triangles<180000);
+ for(const name of ['head','upper_arm.L','upper_arm.R','forearm.R','hand.R','thigh.L','thigh.R'])assert.ok(doc.nodes.some(n=>n.name===name));
+ for(const n of doc.nodes.filter(n=>n.mesh!==undefined&&/hair/i.test(n.name)))for(const p of doc.meshes[n.mesh].primitives){const m=doc.materials[p.material];assert.ok(!m.alphaMode||m.alphaMode==='OPAQUE');assert.equal(m.pbrMetallicRoughness.baseColorFactor?.[3]??1,1);}
+ for(const matrix of read(doc.skins[0].inverseBindMatrices))assert.ok(matrix.every(Number.isFinite));
 });
 
 test('hehereal: portable 64-bone bow heroine preserves reference eyes, opaque hair and valid mobile skin weights',()=>{

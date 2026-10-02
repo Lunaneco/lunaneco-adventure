@@ -6,15 +6,18 @@ import {shizukuScytheName} from './shizuku-weapons.js';
 
 export const WEAPON_TICKET_DROP_RATE=.05;
 export const WEAPON_MULTI_DRAW_COUNT=10;
-export const WEAPON_HERO_IDS=Object.freeze(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal']);
+export const WEAPON_HERO_IDS=Object.freeze(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal','lumi']);
 export const WEAPON_RARITIES=Object.freeze([
   Object.freeze({rank:1,name:'通常',color:'#b7cbc7',attack:0,chance:0,duplicateBuds:0}),
   Object.freeze({rank:2,name:'希少',color:'#86d5ff',attack:.10,chance:.75,duplicateBuds:5}),
   Object.freeze({rank:3,name:'特級',color:'#d0a9ff',attack:.22,chance:.20,duplicateBuds:15}),
   Object.freeze({rank:4,name:'伝説',color:'#ffd580',attack:.40,chance:.05,duplicateBuds:50}),
 ]);
-const base=(heroId)=>({...WEAPONS[heroId],heroId,style:'均衡型',attackOffset:0,interval:1,range:1,pierce:heroId==='tsukineko'?2:0});
+const base=(heroId)=>({...WEAPONS[heroId],heroId,style:'均衡型',attackOffset:0,interval:1,range:1,pierce:heroId==='lumi'?3:heroId==='tsukineko'?2:0});
 export const WEAPON_FAMILIES=Object.freeze([
+  base('lumi'),
+  {id:'lumi-rail-violet',heroId:'lumi',name:'指先のレールガン・紫光',kind:'railgun',style:'速射型',attackOffset:-.08,interval:.78,range:.9,pierce:3,effectColor:0xba9fff,note:'紫の光で識別する速射型。攻撃間隔22%短縮・射程10%短縮。ねこるみでは射程無限。'},
+  {id:'lumi-rail-rose',heroId:'lumi',name:'指先のレールガン・桃光',kind:'railgun',style:'遠射型',attackOffset:.16,interval:1.2,range:1.25,pierce:3,effectColor:0xff9ecb,note:'桃色の光で識別する遠射型。威力16%増・射程25%増。ねこるみでは射程無限。'},
   base('hehereal'),
   {id:'sakura-swift-bow',heroId:'hehereal',name:'桜風の弓・そよぎ',kind:'bow',style:'速射型',attackOffset:-.08,interval:.78,range:.9,effectColor:0xff8fc7,note:'追尾矢を素早く放つ。間隔22%短縮・射程10%短縮。'},
   {id:'sakura-far-bow',heroId:'hehereal',name:'桜星の弓・とどけ',kind:'bow',style:'遠射型',attackOffset:.16,interval:1.2,range:1.25,effectColor:0xffd7ec,note:'遠い敵にも追尾矢を届ける。威力16%増・射程25%増。'},
@@ -46,7 +49,7 @@ const MAX_COUNT=99999999;
 const count=value=>Number.isFinite(value)&&value>=0?Math.min(MAX_COUNT,Math.floor(value)):0;
 export const weaponVariant=id=>WEAPON_CATALOG.find(item=>item.id===id);
 export const rarityLabel=rarity=>`★${rarity.rank} ${rarity.name}`;
-export const weaponImage=item=>item.heroId==='hehereal'?equipmentImage('hehereal-bow'):item.heroId==='prim'?publicUrl(`assets/equipment/weapons/${item.id}-v1.webp`):item.heroId==='shizuku'?publicUrl(`assets/equipment/weapons/${item.id}-v3.webp`):item.heroId==='mochinyafe'?publicUrl(`assets/equipment/weapons/${item.weapon.id}-v1.png`):item.weapon.style==='均衡型'?equipmentImage(item.weapon.id):publicUrl(`assets/equipment/weapons/${item.weapon.id}-v1.png`);
+export const weaponImage=item=>item.heroId==='lumi'?equipmentImage(item.weapon.id):item.heroId==='hehereal'?equipmentImage('hehereal-bow'):item.heroId==='prim'?publicUrl(`assets/equipment/weapons/${item.id}-v1.webp`):item.heroId==='shizuku'?publicUrl(`assets/equipment/weapons/${item.id}-v3.webp`):item.heroId==='mochinyafe'?publicUrl(`assets/equipment/weapons/${item.weapon.id}-v1.png`):item.weapon.style==='均衡型'?equipmentImage(item.weapon.id):publicUrl(`assets/equipment/weapons/${item.weapon.id}-v1.png`);
 export function normalizeWeapons(raw){
   const owned=WEAPON_CATALOG.filter(item=>item.rarity.rank===1||Array.isArray(raw?.owned)&&raw.owned.includes(item.id)).map(item=>item.id);
   const loadout={};

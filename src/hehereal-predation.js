@@ -5,7 +5,7 @@ export const PREDATION_KILL_ATTACK_RATE=.1;
 export function predationUltimate(character){
  const bonus=ultimateBonuses(character,'hehereal');
  const pulses=8+bonus.ultimatePulses+bonus.ultimateShots,interval=.35;
- return {id:'hehe-predation-dance',name:'捕食の舞',icon:'link',color:0xffb77c,kind:'predationDance',radius:6.5+bonus.ultimateRadius+bonus.ultimateRange*.25,pulses,interval,duration:pulses*interval,baseDamage:38*(1+bonus.ultimateDamage),immunity:pulses*interval+bonus.ultimateImmunity,note:'魔法の弓を持って周囲を舞う。必殺技中の敵撃破1体ごとに変身時攻撃力の10%を加算。上昇は幕終了まで維持。'};
+ return {id:'hehe-predation-dance',name:'捕食の舞',icon:'link',color:0xffb77c,kind:'predationDance',radius:6.5+bonus.ultimateRadius+bonus.ultimateRange*.25,pulses,interval,duration:pulses*interval,baseDamage:38*(1+bonus.ultimateDamage),immunity:pulses*interval+bonus.ultimateImmunity,note:'魔法の弓を持って周囲を舞う。必殺技中の敵撃破1体ごとに変身時のへへりある自身の攻撃力の10%を加算。上昇は幕終了まで維持。'};
 }
 export function predationKill(game,heroId){
  const state=game.predation;
@@ -20,8 +20,8 @@ export function canPredate(game){
 }
 export function startPredation(game){
  if(!canPredate(game))return false;
- const absorbedAttack=game.statsFor(2).attack,baseAttack=game.statsFor(6).attack+absorbedAttack;
- game.predation={active:true,used:true,absorbedAttack,baseAttack,attackBonus:0,danceKills:0,party:[...game.party],lead:game.player.hero};
+ const baseAttack=game.statsFor(6).attack;
+ game.predation={active:true,used:true,baseAttack,attackBonus:0,danceKills:0,party:[...game.party],lead:game.player.hero};
  game.cancelRice();
  // Absorbed Omsolo cannot keep attacking through lingering shots or support.
  game.projectiles=game.projectiles.filter(p=>p.heroId!=='omsolo');
@@ -29,7 +29,7 @@ export function startPredation(game){
  game.skillPool=Object.freeze(skillsForParty(game.party,game.progression));
  game.player.hero=6;game.player.attack=.05;game.player.dash=0;game.player.moving=false;
  game.partner.moving=false;game.refreshStats();
- game.emit('predationStart',{hero:6,heroId:'hehereal',absorbedAttack});
+ game.emit('predationStart',{hero:6,heroId:'hehereal'});
  return true;
 }
 // There is intentionally no manual release or timer. A whole act is one battle.

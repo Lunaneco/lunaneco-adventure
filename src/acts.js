@@ -1,5 +1,7 @@
 import {FIELD_THEMES} from './field-themes.js';
+import {SEVENTH_CHAPTER_ACTS} from './chapter-seven.js';
 import {SIXTH_CHAPTER_ACTS} from './chapter-six.js';
+import {NYAN_QUEST,nyanQuestUnlocked,hasNyanAwakening} from './nyanluna-awakening.js';
 import {RICE_QUEST,riceQuestUnlocked,hasRicePower} from './rice-awakening.js';
 import {EXTRA_ACTS,EXTRA_FIRST_TICKETS,EXTRA_REPEAT_TICKETS} from './extra-stages.js';
 export {EXTRA_ACTS} from './extra-stages.js';
@@ -32,35 +34,38 @@ export const CHAPTERS=Object.freeze([
  {id:2,title:'もちにゃふぇの国と、最後のふぇ〜',summary:'謎の敵に襲われ、もちにゃふぇは最後の一匹になってしまった。言葉は「ふぇ〜」だけ。それでも届いた助けを求める声を、今度は仲間たちが守り抜く。',start:8,end:11},
  {id:3,title:'悪魔の国',summary:'優しい悪魔たちが突然暴走した国。必死に街を守る雫と再会し、悪魔大王を正気に戻す、全4幕の物語。適正Lv.60。★3素材とLv.80への育成が開く。',start:12,end:15},
  {id:4,title:'プリズムの国',summary:'青い結晶とオーロラの異世界。つきねことプリムだけの全4幕。適正Lv.60・第4章と同等の難易度。各幕の初回はつきねこ単独。',start:16,end:19},
- {id:5,title:'へへへランド',summary:'オムソロのソロクエスト・全4幕。空腹のへへりあるに自分の顔のおむすびを分け、魔法の弓と共闘。推奨Lv.60。各幕20%で黄金のへへへが出現。',start:24,end:27},
+ {id:5,title:'へへへランド',summary:'全4幕・各幕の初回はオムソロのソロクエスト、クリア後は自由編成。空腹のへへりあるに顔のおむすびを分け、魔法の弓と共闘。推奨Lv.60。各幕20%で黄金のへへへが出現。',start:24,end:27},
+ {id:6,title:'ねこみみの村と、指先の光',summary:'ケモみみを毛嫌うアンチケモみみ集団に荒らされた村。各幕の初回はもちにゃふぇ単独、るみとの共闘で村を守る。推奨Lv.60。第4幕クリアでるみ加入。クリア後は自由編成。',start:28,end:31},
 ]);
-export const ACTS=Object.freeze([...acts.map(a=>Object.freeze({...a,recommendedLevel:a.id>=12?60:a.id>=8?40:a.id>=4?30:null,chapter:Math.floor(a.id/4),number:a.id%4+1,recruit:a.id===19?'prim':a.id===3?'tsukineko':a.id===7?'omsolo':a.id===11?'mochinyafe':a.id===15?'shizuku':null})),...SIXTH_CHAPTER_ACTS]);
-export const PLAYABLE_ACTS=Object.freeze([...ACTS.slice(0,20),...EXTRA_ACTS,RICE_QUEST,...ACTS.slice(20)]);
+export const ACTS=Object.freeze([...acts.map(a=>Object.freeze({...a,recommendedLevel:a.id>=12?60:a.id>=8?40:a.id>=4?30:null,chapter:Math.floor(a.id/4),number:a.id%4+1,recruit:a.id===19?'prim':a.id===3?'tsukineko':a.id===7?'omsolo':a.id===11?'mochinyafe':a.id===15?'shizuku':null})),...SIXTH_CHAPTER_ACTS,...SEVENTH_CHAPTER_ACTS]);
+export const PLAYABLE_ACTS=Object.freeze([...ACTS.slice(0,20),...EXTRA_ACTS,RICE_QUEST,...ACTS.slice(20),NYAN_QUEST]);
 const ACT_BY_ID=new Map(PLAYABLE_ACTS.map(act=>[act.id,act]));
 export const actFor=act=>ACT_BY_ID.get(act);
 export const chapterForAct=act=>CHAPTERS[actFor(act)?.chapter??0];
-export const actLabel=act=>actFor(act)?.awakening?'オムソロ・ソロ覚醒':`第${chapterForAct(act).id+1}章・${actFor(act)?.extra?'エクストラ':`第${actFor(act)?.number??1}幕`}`;
-export const isActCleared=(profile,act)=>actFor(act)?.awakening?hasRicePower(profile):actFor(act)?.extra?profile?.story?.extraClears?.[actFor(act).chapter]===true:profile?.story?.actClears?.[act]===true;
+export const actLabel=act=>actFor(act)?.awakening?(actFor(act).awakening==='nyanluna'?'にゃんるな・ソロ覚醒':'オムソロ・ソロ覚醒'):`第${chapterForAct(act).id+1}章・${actFor(act)?.extra?'エクストラ':`第${actFor(act)?.number??1}幕`}`;
+export const isActCleared=(profile,act)=>actFor(act)?.awakening?(actFor(act).awakening==='nyanluna'?hasNyanAwakening(profile):hasRicePower(profile)):actFor(act)?.extra?profile?.story?.extraClears?.[actFor(act).chapter]===true:profile?.story?.actClears?.[act]===true;
 export const clearTicketReward=(profile,act)=>actFor(act)?.extra?(isActCleared(profile,act)?EXTRA_REPEAT_TICKETS:EXTRA_FIRST_TICKETS):1;
 export function normalizeStory(raw,legacy={}){
  const oldClear=raw?.chapterOneCleared===true||legacy?.chapterOneCleared===true;
- const actClears=Array(28).fill(false);let previous=true;
+ const actClears=Array(32).fill(false);let previous=true;
  for(const act of ACTS){actClears[act.id]=previous&&(raw?.version===2?raw?.actClears?.[act.id]===true:act.id===0&&oldClear);previous=actClears[act.id];}
- return {version:2,actClears,extraClears:EXTRA_ACTS.map(a=>actClears.slice(0,a.unlockAfterAct+1).every(Boolean)&&raw?.extraClears?.[a.chapter]===true),chapterOneCleared:actClears.slice(0,4).every(Boolean),chapterTwoCleared:actClears.slice(4,8).every(Boolean),tsukinekoUnlocked:raw?.version===2?raw.tsukinekoUnlocked===true||actClears[3]:oldClear,omsoloUnlocked:actClears[7],chapterThreeCleared:actClears.slice(8,12).every(Boolean),mochinyafeUnlocked:actClears[11],chapterFourCleared:actClears.slice(12,16).every(Boolean),shizukuUnlocked:actClears[15],chapterFiveCleared:actClears.slice(16,20).every(Boolean),primUnlocked:actClears[19],chapterSixCleared:actClears.slice(24,28).every(Boolean),heherealUnlocked:actClears[27],demonKingCalm:actClears[15]};
+ return {version:2,actClears,extraClears:EXTRA_ACTS.map(a=>actClears.slice(0,a.unlockAfterAct+1).every(Boolean)&&raw?.extraClears?.[a.chapter]===true),chapterOneCleared:actClears.slice(0,4).every(Boolean),chapterTwoCleared:actClears.slice(4,8).every(Boolean),tsukinekoUnlocked:raw?.version===2?raw.tsukinekoUnlocked===true||actClears[3]:oldClear,omsoloUnlocked:actClears[7],chapterThreeCleared:actClears.slice(8,12).every(Boolean),mochinyafeUnlocked:actClears[11],chapterFourCleared:actClears.slice(12,16).every(Boolean),shizukuUnlocked:actClears[15],chapterFiveCleared:actClears.slice(16,20).every(Boolean),primUnlocked:actClears[19],chapterSixCleared:actClears.slice(24,28).every(Boolean),heherealUnlocked:actClears[27],chapterSevenCleared:actClears.slice(28,32).every(Boolean),lumiUnlocked:actClears[31],demonKingCalm:actClears[15]};
 }
-export const isActUnlocked=(profile,act)=>Number.isInteger(act)&&ACT_BY_ID.has(act)&&(actFor(act).awakening?riceQuestUnlocked(profile):actFor(act).extra?ACTS.filter(a=>a.id<=actFor(act).unlockAfterAct).every(a=>profile?.story?.actClears?.[a.id]===true):act===0||profile?.story?.actClears?.[ACTS[ACTS.findIndex(a=>a.id===act)-1]?.id]===true);
+export const isActUnlocked=(profile,act)=>Number.isInteger(act)&&ACT_BY_ID.has(act)&&(actFor(act).awakening?(actFor(act).awakening==='nyanluna'?nyanQuestUnlocked(profile):riceQuestUnlocked(profile)):actFor(act).extra?ACTS.filter(a=>a.id<=actFor(act).unlockAfterAct).every(a=>profile?.story?.actClears?.[a.id]===true):act===0||profile?.story?.actClears?.[ACTS[ACTS.findIndex(a=>a.id===act)-1]?.id]===true);
 export const nextAct=profile=>ACTS.find(a=>!profile.story.actClears[a.id])?.id??ACTS.at(-1).id;
 export const nextStoryAct=id=>ACTS[ACTS.findIndex(a=>a.id===id)+1]?.id??id;
 export function completeAct(profile,act){
  if(!isActUnlocked(profile,act))return false;
- if(actFor(act).awakening){profile.awakenings??={rice:false};profile.awakenings.rice=true;return false;}
+ if(actFor(act).awakening){profile.awakenings??={rice:false,nyanluna:false};profile.awakenings[actFor(act).awakening==='nyanluna'?'nyanluna':'rice']=true;return false;}
  if(actFor(act).extra){profile.story.extraClears[actFor(act).chapter]=true;return false;}
  const hero=actFor(act).recruit,recruited=hero&&!profile.story[`${hero}Unlocked`];
  profile.story.actClears[act]=true;profile.story.chapterOneCleared=profile.story.actClears.slice(0,4).every(Boolean);profile.story.chapterTwoCleared=profile.story.actClears.slice(4,8).every(Boolean);profile.story.chapterThreeCleared=profile.story.actClears.slice(8,12).every(Boolean);
  profile.story.chapterFourCleared=profile.story.actClears.slice(12,16).length===4&&profile.story.actClears.slice(12,16).every(Boolean);profile.story.demonKingCalm=profile.story.chapterFourCleared;
  profile.story.chapterFiveCleared=profile.story.actClears.slice(16,20).length===4&&profile.story.actClears.slice(16,20).every(Boolean);
  profile.story.chapterSixCleared=profile.story.actClears.slice(24,28).length===4&&profile.story.actClears.slice(24,28).every(Boolean);
- if(hero==='hehereal')profile.story.heherealUnlocked=profile.story.chapterSixCleared;
+ profile.story.chapterSevenCleared=profile.story.actClears.slice(28,32).length===4&&profile.story.actClears.slice(28,32).every(Boolean);
+ if(hero==='lumi')profile.story.lumiUnlocked=profile.story.chapterSevenCleared;
+ else if(hero==='hehereal')profile.story.heherealUnlocked=profile.story.chapterSixCleared;
  else if(hero)profile.story[`${hero}Unlocked`]=true;
  return !!recruited;
 }

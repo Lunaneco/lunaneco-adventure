@@ -1,3 +1,4 @@
+import {fireLumiRail} from './lumi-combat.js';
 import {canPrimDuet,beamContains} from './prim-combat.js';
 import {canShizukuDuet,SHIZUKU_DUET,healHero,drainShizuku} from './shizuku-combat.js';
 import {mochiCryHit} from './mochi-combat.js';
@@ -27,6 +28,7 @@ function pulse(game,effect){
 }
 function shoot(game,effect){
   const spec=effect.spec,source=game.sourceFor(effect.heroId),target=game.nearest(source.x,source.z,spec.range);
+  if(spec.kind==='railgunBarrage'){fireLumiRail(game,source,{range:spec.range,damage:effect.damage,color:spec.color,crit:true,ultimate:true,pierce:Infinity,width:spec.width});game.emit('ultimateShot',{x:source.x,z:source.z,angle:source.face,heroId:effect.heroId});effect.shotsLeft--;return;}
   const angle=target?Math.atan2(target.x-source.x,target.z-source.z):source.face;source.face=angle;
   game.projectiles.push({id:game.ids++,owner:'player',kind:spec.kind==='homingBarrage'?'magicArrow':'gun',target:target?.id,color:spec.color,ultimate:true,heroId:effect.heroId,x:source.x,z:source.z,vx:Math.sin(angle)*spec.speed,vz:Math.cos(angle)*spec.speed,speed:spec.speed,life:(spec.range+2)/spec.speed,damage:effect.damage,crit:true,radius:.32,pierce:spec.pierce,hitIds:[]});
   game.emit('ultimateShot',{x:source.x,z:source.z,angle,heroId:effect.heroId});effect.shotsLeft--;

@@ -1,3 +1,4 @@
+import {createLumiFingerLight,createLumiEars,updateLumiEars} from './lumi-visuals.js';
 import {createHeherealBow} from './hehereal-visuals.js';
 import {createPrimClaw} from './prim-visuals.js';
 import {PRIM_MOUNT} from './prim-combat.js';
@@ -28,6 +29,13 @@ export async function loadHeroes() {
   return assets.map((asset, hero) => createHero(asset, hero));
 }
 
+export async function loadNyanlunaAwakeningHero(){
+  const loader=new GLTFLoader(),[body,staff]=await Promise.all(['nyanluna-awakening','nyanluna-awakening-staff'].map(name=>loader.loadAsync(publicUrl(heroModelPath(name)))));
+  const prop=staff.scene.getObjectByName('Nyanluna_Moon_Staff');if(!prop)throw new Error('Awakening staff mesh missing');prop.position.y-=.25;
+  staff.scene.name='Awakened moon staff · supplied';staff.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=false;o.material.roughness=.83;o.material.metalness=0;}});
+  return createHero(body,0,{awakened:true,weapon:staff.scene});
+}
+
 function starGeometry(radius) {
   const shape = new THREE.Shape();
   for (let i = 0; i < 10; i++) {
@@ -42,6 +50,7 @@ function starGeometry(radius) {
 }
 
 function createWeapon(hero) {
+  if(hero===7)return createLumiFingerLight();
   if(hero===6)return createHeherealBow();
   if(hero===5)return createPrimClaw();
   if(hero===4)return createShizukuScythe();
@@ -83,21 +92,21 @@ function createWeapon(hero) {
 }
 
 export function setHeroWeapon(root,item){
-  const d=root.userData;if(!item)return;const key=[4,5,6].includes(d.hero)?item.id:item.weapon.id,current=[4,5,6].includes(d.hero)?d.weapon.userData.variantId:d.weapon.userData.family;if(current===key)return;
+  const d=root.userData;if(!item||d.awakened)return;const key=[4,5,6,7].includes(d.hero)?item.id:item.weapon.id,current=[4,5,6,7].includes(d.hero)?d.weapon.userData.variantId:d.weapon.userData.family;if(current===key)return;
   d.weaponCache??=new Map([[current,d.weapon]]);
   let next=d.weaponCache.get(key);
-  if(!next){next=![3,4,5,6].includes(d.hero)&&item.weapon.style==='均衡型'?createWeapon(d.hero):createWeaponVariant(item);d.weaponCache.set(key,next);}
+  if(!next){next=![3,4,5,6,7].includes(d.hero)&&item.weapon.style==='均衡型'?createWeapon(d.hero):createWeaponVariant(item);d.weaponCache.set(key,next);}
   if(d.hero===3){next.position.set(d.renewal?.65:.75,.95,d.renewal?.9:.2);next.scale.setScalar(.75);}
   d.rig.remove(d.weapon);d.rig.add(next);d.weapon=next;
 }
 
-function createHero(asset, hero) {
+function createHero(asset, hero, options={}) {
   const root = new THREE.Group();
-  root.name = files[hero];
+  root.name = options.awakened?'nyanluna-awakening':files[hero];
   const rig = new THREE.Group();
   root.add(rig);
   const model = asset.scene;
-  model.name = `${files[hero]}_supplied_model`;
+  model.name = `${root.name}_supplied_model`;
   model.updateMatrixWorld(true);
   const bounds = new THREE.Box3().setFromObject(model, true);
   const height = bounds.max.y - bounds.min.y;
@@ -144,15 +153,16 @@ function createHero(asset, hero) {
   for (const required of (hero===3?[]:['head', 'upper_arm.L', 'upper_arm.R', 'thigh.L', 'thigh.R', 'hand.R'])) {
     if (!bones.has(required)) throw new Error(`Character bone missing: ${files[hero]} / ${required}`);
   }
-  const weapon = hero===3?new THREE.Group():createWeapon(hero);
+  const weapon = options.weapon??(hero===3?new THREE.Group():createWeapon(hero));if(options.weapon)weapon.scale.setScalar(scale);
   rig.add(weapon);
   const ring = new THREE.Mesh(new THREE.RingGeometry(.6, .66, 48),
-    new THREE.MeshBasicMaterial({ color: hero===6?0xff9dc9:hero===4?0xe5a0ba:hero===3?0xffb8d4:hero === 0 ? 0xd5adff : hero===1?0x8ce9ff:0x8affaf,
+    new THREE.MeshBasicMaterial({ color: hero===7?0xb8c9ff:hero===6?0xff9dc9:hero===4?0xe5a0ba:hero===3?0xffb8d4:hero === 0 ? 0xd5adff : hero===1?0x8ce9ff:0x8affaf,
       transparent: true, opacity: .65, side: THREE.DoubleSide, depthWrite: false }));
   ring.rotation.x = -Math.PI / 2;
   root.add(ring);
   root.userData = { rig, model, slimeBody, bones, weapon, ring, hero, renewal, attackTime: 0,
-    metrics, source: publicUrl(heroModelPath(files[hero])), movement: 0 };
+    metrics, awakened:!!options.awakened, normalizationScale:scale, source: publicUrl(heroModelPath(root.name)), movement: 0 };
+  if(hero===7){root.userData.ears=createLumiEars();rig.add(root.userData.ears);}
   animateHero(root, { x: 0, z: 0, face: 0, moving: false, invincible: 0 }, 0, 0, hero === 0);
   return root;
 }
@@ -225,11 +235,13 @@ export function animateHero(root, state, time, dt, active) {
   pose(d, 'chest', Math.sin(time * 2.2) * .013, attack * -.06, stride * .014);
   pose(d, 'head', 0, Math.sin(time * 1.8) * .025, Math.sin(time * 2) * .015);
   // Renewal humans are both authored in A pose; older Tsukineko is T pose.
-  const lowerArm = d.renewal ? .06 : d.hero > 0 ? 1.02 : .06;
+  const lowerArm = d.awakened ? 1.02 : d.renewal ? .06 : d.hero > 0 ? 1.02 : .06;
   pose(d, 'upper_arm.L', -stride * .18, 0, -lowerArm);
   pose(d, 'upper_arm.R', d.hero===1?-.95+attack*.14:stride*.14-attack*.70, d.hero===1?-.12:attack*-.22, d.hero===1?(d.renewal?-.18:.78):lowerArm-attack*.13);
   pose(d, 'forearm.L', -.12);
   pose(d, 'forearm.R', d.hero===1?-.48-attack*.09:-.20-attack*.20);
+  if(d.awakened){pose(d,'upper_arm.R',-.12-attack*.22,attack*.18,1.03-attack*.04);pose(d,'forearm.R',-.30-attack*.12);pose(d,'upper_arm.L',-.12-attack*.28,-attack*.15,-1.02+attack*.12);}
+  if(d.hero===7){pose(d,'upper_arm.R',-.05,1.55,.08);pose(d,'forearm.R',.02,.10+attack*.03,0);}
   if(d.hero===6){
     // Both arms start along character X. Turn them forward about Y, keeping
     // the bow ahead of the chest and the drawing hand behind its string.
@@ -269,7 +281,16 @@ export function animateHero(root, state, time, dt, active) {
     gripOffset.set(0,.07,0).applyQuaternion(handRotation);
     d.weapon.position.copy(handPosition).add(gripOffset);
   }
-  if(d.hero===1){d.weapon.rotation.set(-attack*.075,0,0);d.weapon.position.z-=attack*.10;d.weapon.userData.muzzle.visible=d.attackTime>ATTACK_DURATION-.09;}
+  if(d.hero===7){
+    d.bones.get('hand.R').bone.getWorldQuaternion(handRotation);d.rig.getWorldQuaternion(rigRotation).invert();handRotation.premultiply(rigRotation);
+    d.weapon.position.copy(handPosition).add(new THREE.Vector3(0,.16,0).applyQuaternion(handRotation));d.weapon.rotation.set(0,0,0);d.weapon.userData.light.material.opacity=.4+attack*.6;updateLumiEars(root,!!state.neko);
+  }
+  else if(d.awakened){
+    d.bones.get('hand.R').bone.getWorldQuaternion(handRotation);d.rig.getWorldQuaternion(rigRotation).invert();handRotation.premultiply(rigRotation);
+    if(!d.awakenedGrip){const inverse=handRotation.clone().invert();d.awakenedGrip={rotation:inverse.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(.08,0,.13))),offset:new THREE.Vector3(0,-.03,.075).applyQuaternion(inverse)};}
+    d.weapon.position.copy(handPosition).add(d.awakenedGrip.offset.clone().applyQuaternion(handRotation));d.weapon.quaternion.copy(handRotation).multiply(d.awakenedGrip.rotation);
+  }
+  else if(d.hero===1){d.weapon.rotation.set(-attack*.075,0,0);d.weapon.position.z-=attack*.10;d.weapon.userData.muzzle.visible=d.attackTime>ATTACK_DURATION-.09;}
   else if(d.hero===2){
     // Calibrate once in the idle grip, then keep the hilt rigidly attached to
     // the hand. Its blade points forward and away from the face, not backwards.

@@ -1,4 +1,5 @@
 import {chapterRoom} from './chapter-terrain.js';
+import {NYAN_QUEST_ID} from './nyanluna-awakening.js';
 import {RICE_QUEST_ID} from './rice-awakening.js';
 // The same outlines drive floor geometry, walking collision, navigation and spawn positions.
 const polygon=(id,name,points,style='stone',extra={})=>({id,name,points,style,entrance:{x:0,z:8},exit:{x:0,z:-16.6,radius:1.7},height:0,...extra});
@@ -51,8 +52,10 @@ const BASE_EXTRA_FIELD_LAYOUTS=Object.freeze([
 export const EXTRA_FIELD_LAYOUTS=Object.freeze(BASE_EXTRA_FIELD_LAYOUTS.map((fields,chapter)=>fields.map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom(room,chapter,3,area,field.kind,index))}))));
 // The solo trial uses three separate, single-floor arenas. No story/EX room is changed.
 export const RICE_FIELD_LAYOUTS=Object.freeze([garden,hall,eclipse].map((room,area)=>single(chapterRoom(variant(room,`rice-awakening-${area}`,['ユーダの修行場','静かな用水の庭','誓いの穂守り壇'][area],'meadow',{country:['village','valley','fortress'][area],district:area,surface:'stone'}),1,0,area,'single',0),'オムソロ単独 · ライスの力の覚醒試練')));
+export const NYAN_FIELD_LAYOUTS=Object.freeze([garden,hall,eclipse].map((room,area)=>single(chapterRoom(variant(room,`nyanluna-awakening-${area}`,['月映しの修行庭','双星の月光回廊','覚醒の月華壇'][area],['meadow','stone','sanctuary'][area]),0,0,area,'single',0),'にゃんるな単独 · 月光を結ぶ覚醒修行')));
 export const HEHE_FIELD_LAYOUTS=Object.freeze(Array.from({length:4},(_,act)=>[single(variant([garden,cross,hall,petal][act],`hehe-${act}-entry`,['へへへランドの門前','花弓の商店街','分けあう食堂街','いただきますの街路'][act]),'オムソロ単独操作 · 推奨Lv.60'),floors(variant(courtyard,`hehe-${act}-lower`,'花弓の階段・下層'),variant(roof,`hehe-${act}-upper`,'花弓の階段・上層')),single(variant(eclipse,`hehe-${act}-arena`,['門番の広場','射撃隊の見張り台','鉄腕の街角','へへへランドの王宮前'][act]),'へへりあると共闘 · 黄金のへへへは各幕20%')].map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom({...room,hehe:true,country:'town',district:area,surface:'stone'},5,act,area,field.kind,index))}))));
-export const fieldFor=(act,area)=>act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
+export const LUMI_FIELD_LAYOUTS=Object.freeze(Array.from({length:4},(_,act)=>[single(variant([garden,cross,hall,petal][act],`lumi-${act}-entry`,['壊れた村の門','封鎖された市場','包囲された住居跡','帰り道の参道'][act]),'初回はもちにゃふぇ操作 · 推奨Lv.60'),floors(variant(courtyard,`lumi-${act}-lower`,'村の階段・下層'),variant(roof,`lumi-${act}-upper`,'村の階段・上層')),single(variant(eclipse,`lumi-${act}-arena`,['門封じの広場','封鎖射撃の見張り台','避難所の中庭','みんなの村の広場'][act]),'アンチケモみみ集団を退ける')].map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom({...room,kemoVillage:true,country:'village',district:area,surface:'stone'},6,act,area,field.kind,index))}))));
+export const fieldFor=(act,area)=>act===NYAN_QUEST_ID?(NYAN_FIELD_LAYOUTS[area]??NYAN_FIELD_LAYOUTS[0]):act>=28&&act<=31?(LUMI_FIELD_LAYOUTS[act-28][area]??LUMI_FIELD_LAYOUTS[act-28][0]):act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
 export function layoutFor(act,area,wave,route='safe'){
  const f=fieldFor(act,area);return f.rooms[f.kind==='floors'?(wave%2===0?1:0):f.kind==='branch'&&wave%2===0?(route==='elite'?2:1):0];
 }

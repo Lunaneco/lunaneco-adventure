@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {MUSIC_TRACKS} from '../src/music.js';
 import {createHash} from 'node:crypto';
-import {HERO_MODEL_NAMES,heroModelPath} from '../src/hero-model-paths.js';
+import {CACHE_MODEL_NAMES as HERO_MODEL_NAMES,heroModelPath} from '../src/hero-model-paths.js';
 
 const prefixes=[];
 for(const [directory,base] of [['dist','/'],['dist-pages','/lunaneco-adventure/']]){

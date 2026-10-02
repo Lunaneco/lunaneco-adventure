@@ -1,6 +1,8 @@
 import {publicUrl} from './public-url.js';
 // The narrator is represented by the lost moonlight already present in the story.
 export const STORY_CAST=Object.freeze({
+  lumi:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-story-v1.png'),alt:'銀色のボブと紫の瞳、薄紫の制服のるみ',color:'#b8c9ff'}),
+  nekolumi:Object.freeze({name:'ねこるみ',role:'もちにゃふぇと一緒なら、どこまでも',image:publicUrl('assets/story/nekolumi-story-v1.png'),alt:'ねこみみが生えたるみ',color:'#d0baff'}),
   hehereal:Object.freeze({name:'へへりある',role:'おなかいっぱいで、街を守る花弓使い',image:publicUrl('assets/story/hehereal-story-v1.png'),alt:'ピンクのツインテールとメガネ、2743の飾り、桜の魔法弓を持つへへりある',color:'#ff9dc9'}),
   primRaging:Object.freeze({name:'プリズムドラゴン',role:'あふれる光に苦しむ、結晶の竜',image:publicUrl('assets/story/prim-raging-v1.webp'),alt:'暴走する青い結晶の鱗と虹の翼を持つプリズムドラゴン',color:'#97dfff'}),
   prim:Object.freeze({name:'プリム',role:'キュ〜で心を伝える、七彩の小竜',image:publicUrl('assets/story/prim-story-v1.webp'),alt:'真珠色の鱗と虹の翼、青い瞳の小さな竜プリム',color:'#bceaff'}),
@@ -13,6 +15,7 @@ export const STORY_CAST=Object.freeze({
   komusubi:Object.freeze({name:'こむすび',role:'お父さんを探す小さな子',image:publicUrl('assets/story/komusubi.png'),alt:'こむすび — 黒い帽子と青いリュックの小さな猫。涙を流して助けを求めている',color:'#ffe3a5'}),
   omsolo:Object.freeze({name:'オムソロ',role:'翠光の剣士',image:publicUrl('assets/story/omsolo.png'),alt:'オムソロ — 黒い帽子とサングラス、砂色のローブを着て緑のライトセーバーを持つ猫の剣士',color:'#adffc6'}),
   omsolo_hurt:Object.freeze({name:'オムソロ',role:'消えかけた命の灯り',image:publicUrl('assets/story/omsolo-hurt.png'),alt:'傷ついたオムソロ — 汚れたローブで膝をつき、消えた光剣の柄を握っている',color:'#bfe3cf'}),
+  nyanlunaAwakened:Object.freeze({name:'にゃんるな・覚醒',role:'月光を結ぶ、双星の魔法使い',image:publicUrl('assets/story/nyanluna-awakening-story-v1.png'),alt:'薄紫の長い髪と猫耳、白黒のメイド服と月の杖の覚醒にゃんるな',color:'#e7c9ff'}),
   nyanluna:Object.freeze({name:'にゃんるな',role:'月光の魔法使い',image:publicUrl('assets/story/nyanluna.webp'),alt:'にゃんるな — 月の杖を持つ、薄紫の髪の猫耳の魔法使い',color:'#dac5ff'}),
   tsukineko:Object.freeze({name:'つきねこ',role:'星影の銃使い',image:publicUrl('assets/story/tsukineko.webp'),alt:'つきねこ — 星穿銃を持つ、白と紺の髪の猫耳の銃使い',color:'#a2eaff'}),
   guardian:Object.freeze({name:'月の守護者',role:'古い約束の声',image:publicUrl('assets/story/guardian.webp'),alt:'月の守護者 — 金色の角と青い月の結晶を持つ石の守り手',color:'#f1d8a2'}),

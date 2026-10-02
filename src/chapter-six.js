@@ -9,7 +9,7 @@ export const SIXTH_CHAPTER_ACTS=Object.freeze([
  {id:25,title:'追いかける桜の矢',summary:'食べ物を奪うへへへたちを追い、へへりあるの追尾する魔法の矢とともに街の市場へ。',boss:'へへへ・射撃隊長',bossId:'heheArcher',bossHp:12500,counts:[30,32,34,36,38,1],stages:[stage('空っぽのパン屋通り',20,'追尾弾をかわしながら市場へ',0),stage('桜弓の上層路',20,'遠い敵はへへりあるに任せる',1),stage('食料倉庫の屋上',20,'取り戻した食べ物を街へ',2)]},
  {id:26,title:'半分でも、守れる',summary:'顔を分けたオムソロを、へへりあるが今度は弓で支える。街を囲む重装兵の包囲を二人で破ろう。',boss:'へへへ・鉄腕将軍',bossId:'heheGuard',bossHp:14000,counts:[32,34,36,38,40,1],stages:[stage('へへへ工房街',21,'重装兵の隙へ光剣を届ける',0),stage('花灯りの架け橋',21,'一人で抱えず、背中を預ける',1),stage('眼鏡塔の中庭',21,'鉄腕の包囲を破る',2)]},
  {id:27,title:'いっしょに、いただきます',summary:'へへへランドを占拠した大王を退け、街に食卓を取り戻す。へへりあるは守り手として、そして新しい仲間として歩き出す。',boss:'へへへ大王',bossId:'heheKing',bossHp:17000,counts:[34,36,38,40,42,1],recruit:'hehereal',stages:[stage('へへへ城の参道',22,'街の食卓を取り戻す最後の道',0),stage('満腹の鐘の階段',22,'二人の合図で包囲を抜ける',1),stage('いただきますの大広場',22,'へへへ大王を退け、仲間を迎える',2)]},
-].map((act,i)=>Object.freeze({...act,chapter:5,number:i+1,recommendedLevel:60,soloHero:'omsolo',storyAlly:'hehereal'})));
+].map((act,i)=>Object.freeze({...act,chapter:5,number:i+1,recommendedLevel:60,soloHero:'omsolo',soloFirstClear:true,storyAlly:'hehereal'})));
 
 const scene=(act,area,title,lines)=>({act,area,kicker:`第6章 · 第${act-23}幕`,title,next:area===2?'先へ進む':'街を守りに行く',lines:lines.map(([who,text])=>({who,text,voiced:who==='hehereal'}))});
 export const SIXTH_CHAPTER_SCENES=Object.freeze([

@@ -26,7 +26,7 @@ test('rice trial unlocks at level 50, not at 49 or for an unrecruited/invalid ch
   awardCharacterXp(p,'omsolo',xpRequired(49));assert.equal(p.characters.omsolo.level,50);assert.equal(isActUnlocked(p,23),true);
   for(const level of [50,60,80])assert.equal(isActUnlocked(profile(level),23),true);
   assert.equal(isActUnlocked(profile(50,false,7),23),false);
-  assert.equal(PLAYABLE_ACTS[23],RICE_QUEST);assert.equal(ACTS.length,24);
+  assert.equal(PLAYABLE_ACTS[23],RICE_QUEST);assert.equal(ACTS.length,28);
   assert.equal(hasRicePower(normalizeProgression({awakenings:{rice:true}},HEROES)),false);
   for(const rice of ['true',1,{},null])assert.equal(hasRicePower(normalizeProgression({...profile(),awakenings:{rice}},HEROES)),false);
 });
@@ -43,7 +43,7 @@ test('only crossing the final gate learns rice; boss kill, intermediate gates, d
   assert.equal(g.riceAvailable,false);gate(g,0);assert.equal(hasRicePower(g.progression),false);g.advanceStage();gate(g,1);assert.equal(hasRicePower(g.progression),false);g.advanceStage();
   g.wave=6;g.area=2;g.hit(g.spawnEnemy('boss',0,-8),1e9,0,0);assert.equal(hasRicePower(g.progression),false);
   assert.equal(gate(g,2),true);assert.equal(g.phase,'victory');assert.equal(hasRicePower(g.progression),true);assert.equal(isActCleared(g.progression,23),true);assert.equal(g.clearRewardTickets,1);
-  assert.deepEqual(g.progression.story,story);assert.deepEqual(g.progression.missions,missions);assert.equal(g.progression.story.actClears.length,28);assert.equal(g.progression.story.extraClears.length,3);
+  assert.deepEqual(g.progression.story,story);assert.deepEqual(g.progression.missions,missions);assert.equal(g.progression.story.actClears.length,32);assert.equal(g.progression.story.extraClears.length,3);
   assert.equal(g.drainEvents().filter(e=>e.type==='riceAwakened').length,1);assert.equal(g.crossExit(),false);
   const restored=normalizeProgression(JSON.parse(JSON.stringify(g.progression)),HEROES);assert.equal(hasRicePower(restored),true);assert.equal(clearTicketReward(restored,23),1);
   const replay=quiet({act:23,progression:restored});gate(replay,2);assert.equal(replay.drainEvents().some(e=>e.type==='riceAwakened'),false);

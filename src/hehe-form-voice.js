@@ -1,4 +1,5 @@
-import {BATTLE_VOICES} from './voice-catalog.js';
+import {BATTLE_VOICES,LUMI_NEKO_ULTIMATE_LINE} from './voice-catalog.js';
+import {hasNekoLumi} from './lumi-combat.js';
 
 // The supplied clips are reused verbatim, not synthesized as a new voice.
 export const HEHE_FORM_LINES=Object.freeze({
@@ -7,6 +8,7 @@ export const HEHE_FORM_LINES=Object.freeze({
  power:Object.freeze({id:'hehereal-hehe-power',who:'hehereal',text:'（雄叫び）'}),
 });
 export function battleVoiceLines(who,event,game){
+ if(who==='lumi'&&event==='ultimate'&&hasNekoLumi(game?.party))return [LUMI_NEKO_ULTIMATE_LINE];
  if(who==='hehereal'&&game?.predation?.active){
   return [HEHE_FORM_LINES[['attack','support'].includes(event)?'attack':['ultimate','hurt','down','dash','lowhp'].includes(event)?'power':'laugh']];
  }

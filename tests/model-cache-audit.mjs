@@ -6,7 +6,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {resolve, extname} from 'node:path';
 import {chromium} from '@playwright/test';
-import {HERO_MODEL_NAMES,heroModelPath} from '../src/hero-model-paths.js';
+import {CACHE_MODEL_NAMES as HERO_MODEL_NAMES,heroModelPath} from '../src/hero-model-paths.js';
 
 const base='/lunaneco-adventure/', directory=resolve('dist-pages'), served=new Map();
 const {version}=JSON.parse(await readFile(resolve('package.json'),'utf8'));

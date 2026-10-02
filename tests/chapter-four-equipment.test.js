@@ -9,7 +9,7 @@ const relics=UNIQUE_EQUIPMENT.filter(e=>e.act>=12&&e.act<16);
 const profile=()=>normalizeProgression({story:{version:2,actClears:Array(20).fill(true)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:60,breaks:4}])),tutorial:{firstBattleCompleted:true}},HEROES);
 function gate(g){g.area=2;g.wave=6;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.ok(g.crossExit());}
 test('chapter-four challenge gates grant four distinct relics once and retain the original rarity-three materials',()=>{
- assert.equal(relics.length,4);assert.equal(UNIQUE_EQUIPMENT.length,22);
+ assert.equal(relics.length,4);assert.equal(UNIQUE_EQUIPMENT.length,30);
  for(const relic of relics){
   const mission=STAGE_MISSIONS.find(m=>m.equipment===relic.id);assert.equal(mission.id,`act${relic.act+1}-relic`);assert.deepEqual(mission.rewards,{bloodCrystal:6,demonHeart:2});
   for(const [difficulty,extraTime,hits,success] of [['hard',0,1,true],['hard',.001,1,false],['hard',0,2,false],['normal',0,0,false]]){

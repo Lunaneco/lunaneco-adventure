@@ -1,0 +1,4 @@
+.portrait.lumi{background-image:url('/assets/portraits/lumi-face-v1.png');background-size:cover;background-position:center;}
+.portrait.lumi.nekolumi,.portrait.nekolumi{background-image:url('/assets/portraits/nekolumi-face-v1.png');background-size:cover;background-position:center;}
+.chapter-seven-brief{padding:14px 18px;border:1px solid #b8c9ff66;border-radius:14px;color:#dedbf0;background:#292b4566;font-size:13px;line-height:1.8;}
+.story-cast.lumi img{object-fit:contain;}

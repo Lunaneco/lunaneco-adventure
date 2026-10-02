@@ -1,5 +1,7 @@
 import {publicUrl} from './public-url.js';
+import {CHAPTER_UNIQUE_EQUIPMENT} from './chapter-unique-equipment.js';
 export const WEAPONS=Object.freeze({
+  lumi:{id:'lumi-rail-cyan',name:'指先のレールガン・青光',kind:'railgun',icon:'spark',effectColor:0x8feaff,note:'るみ専用。銃を持たず指先から青い光を放つ。通常は射程14、もちにゃふぇと組むとねこるみになり射程無限。'},
   hehereal:{id:'hehereal-bow',name:'桜心の魔法弓・2743',kind:'bow',icon:'spark',effectColor:0xff8fc7,note:'へへりある専用。桜色の魔法矢が遠くの敵を追尾する。'},
   prim:{id:'prism-claw',name:'虹晶の爪・はじまり',kind:'claw',icon:'sword',effectColor:0xaeefff,note:'プリム専用。三本の虹晶の爪で近くの敵を扇状にひっかく。'},
   shizuku:{id:'crimson-scythe',name:'紅月の鎌・しずく',kind:'scythe',icon:'sword',effectColor:0xf2a6c7,note:'雫専用。黒銀の大鎌で近くの敵を扇状に斬り、与えた実ダメージの10%を自分のHPへ吸収する。'},
@@ -31,8 +33,13 @@ export const UNIQUE_EQUIPMENT=Object.freeze([
   {id:'demon-lullaby-charm',name:'安らぎの夜鈴',act:13,area:2,icon:'shield',color:'#bba5ef',bonus:{hp:100,defense:24},note:'暴走した子守歌に、穏やかな眠りを取り戻す銀の鈴。最大HP +100／防御力 +24。'},
   {id:'demon-moon-drop-knot',name:'月雫の親友結び',act:14,area:2,icon:'link',color:'#d5b5ef',bonus:{hp:85,attack:.22,defense:18},note:'月と紅い雫を結んだ、背中を預け合う大の仲良しの証。最大HP +85／攻撃力 +22%／防御力 +18。'},
   {id:'demon-kind-king-crown',name:'優しき魔王の冠',act:15,area:2,icon:'star',color:'#e3be8b',bonus:{hp:110,attack:.26,defense:26},note:'正気を取り戻した悪魔大王から贈られた、みんなを守る冠。最大HP +110／攻撃力 +26%／防御力 +26。'},
+  ...CHAPTER_UNIQUE_EQUIPMENT,
 ]);
-export const equipmentImage=id=>id==='hehereal-bow'?publicUrl('assets/equipment/hehereal-bow-v1.png'):publicUrl(`assets/equipment/${['prism-first-light','aurora-wing-charm','prism-heart-knot','prism-home-crown'].includes(id)?id+'-v1':id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
+export const equipmentImage=id=>{
+  const image=UNIQUE_EQUIPMENT.find(item=>item.id===id)?.image;
+  if(image)return publicUrl(image);
+  return id.startsWith('lumi-rail-')?publicUrl(`assets/equipment/${id}-v1.png`):id==='hehereal-bow'?publicUrl('assets/equipment/hehereal-bow-v1.png'):publicUrl(`assets/equipment/${['prism-first-light','aurora-wing-charm','prism-heart-knot','prism-home-crown'].includes(id)?id+'-v1':id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
+};
 export const uniqueEquipment=id=>UNIQUE_EQUIPMENT.find(item=>item.id===id);
 const safeId=id=>typeof id==='string'&&/^[a-z0-9_-]{1,64}$/i.test(id)&&!['__proto__','constructor','prototype'].includes(id);
 export function normalizeEquipment(raw){

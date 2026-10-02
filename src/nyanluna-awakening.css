@@ -1,0 +1,5 @@
+.portrait.nyanluna.nyanluna-awakened{background-image:url('/assets/portraits/nyanluna-awakening-face-v1.png');background-size:cover;background-position:center;}
+.nyan-awakening-button{position:absolute;bottom:calc(100% + 100px);right:0;min-width:120px;min-height:50px;border-radius:16px;border:1px solid #e7c9ff;background:linear-gradient(120deg,#403d64,#665581);color:#fff;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;touch-action:manipulation;box-shadow:0 3px 18px #101c3944;}
+.nyan-awakening-button span{font-size:14px;font-weight:750;}.nyan-awakening-button small{font-size:11px;}.nyan-awakening-button:disabled{opacity:.65;}.nyan-awakening-button.awakened{border-color:#fff0ff;background:linear-gradient(120deg,#625378,#957ca8);opacity:1;}
+@media(max-width:480px){.nyan-awakening-button{bottom:calc(100% + 105px);min-height:45px;min-width:112px;}.nyan-awakening-button kbd{display:none;}}
+@media(max-height:500px) and (orientation:landscape){.nyan-awakening-button{right:calc(100% + 8px);bottom:0;min-width:90px;max-width:120px;min-height:50px;gap:3px;flex-wrap:wrap;}.nyan-awakening-button kbd{display:none;}}

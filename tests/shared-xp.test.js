@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {Adventure,HEROES} from '../src/model.js';
 import {normalizeProgression,awardCharacterXp,breakthrough,xpRequired,ENEMY_REWARDS} from '../src/progression.js';
 import {LEVEL_AWAKENING_COSTS} from '../src/level-rules.js';
-const story={version:2,actClears:Array(28).fill(true)};
+const story={version:2,actClears:Array(32).fill(true)};
 function game(party=['nyanluna','mochinyafe'],progression={story}){const g=new Adventure({party,progression,act:8,seed:42});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.player.attack=g.partner.attack=999;return g;}
 function kill(g,id,type='moss'){const e=type==='goldenSlime'?g.spawnGoldenSlime():g.spawnEnemy(type,0,5);g.hit(e,1e9,0,0,false,false,id);return e;}
 test('every enemy, including bosses and gold slime, credits killer 100% and partner 50% for every hero',()=>{
@@ -25,7 +25,7 @@ test('fallen deployed partner receives 50% and can level up without reviving; ma
  const g=game();g.healthFor(3).hp=0;g.progressFor(3).xp=xpRequired(1)-1;Object.assign(g.progressFor(0),{level:80,breaks:6});kill(g,'nyanluna');assert.equal(g.earnedXp.nyanluna,0);assert.equal(g.earnedXp.mochinyafe,1.5);assert.equal(g.progressFor(3).level,2);assert.equal(g.progressFor(3).xp,.5);assert.equal(g.healthFor(3).hp,0);
 });
 test('solo kills award 100% only; an undeployed damage owner cannot create XP for anyone',()=>{
- const g=game(['mochinyafe']);kill(g,'mochinyafe');assert.deepEqual(g.earnedXp,{nyanluna:0,tsukineko:0,omsolo:0,mochinyafe:3,shizuku:0,prim:0,hehereal:0});const before=structuredClone(g.earnedXp);kill(g,'nyanluna');assert.deepEqual(g.earnedXp,before);
+ const g=game(['mochinyafe']);kill(g,'mochinyafe');assert.deepEqual(g.earnedXp,{nyanluna:0,tsukineko:0,omsolo:0,mochinyafe:3,shizuku:0,prim:0,hehereal:0,lumi:0});const before=structuredClone(g.earnedXp);kill(g,'nyanluna');assert.deepEqual(g.earnedXp,before);
 });
 test('in-flight support attack keeps its killer when the owner falls and control changes',()=>{
  const g=game(['nyanluna','tsukineko']);const e=g.spawnEnemy('moss',g.partner.x,g.partner.z+2);e.hp=1;e.speed=0;g.attackFrom(g.partner,1,true);g.healthFor(1).hp=0;

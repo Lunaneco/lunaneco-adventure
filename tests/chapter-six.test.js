@@ -15,7 +15,7 @@ import {fieldFor,contains} from '../src/terrain.js';
 import {WEAPON_CATALOG,equipWeapon,weaponImage} from '../src/weapons.js';
 import {VOICE_MANIFEST} from '../src/voice-manifest.js';
 import {dialogueVoiceId} from '../src/voice-catalog.js';
-const profile=(cleared=24)=>normalizeProgression({story:{version:2,actClears:Array.from({length:28},(_,i)=>(i<20||i>=24)&&i<cleared)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:60,breaks:4}])),awakenings:{rice:true},tutorial:{firstBattleCompleted:true}},HEROES);
+const profile=(cleared=24)=>normalizeProgression({story:{version:2,actClears:Array.from({length:32},(_,i)=>(i<20||i>=24)&&i<cleared)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:60,breaks:4}])),awakenings:{rice:true},tutorial:{firstBattleCompleted:true}},HEROES);
 const quiet=(options={})=>{const g=new Adventure({act:24,hero:0,party:['nyanluna','prim'],seed:1,progression:profile(),...options});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.player.attack=g.partner.attack=999;g.player.invincible=0;g.player.x=g.player.z=0;g.drainEvents();return g;};
 const step=(g,t)=>{for(let i=0;i<Math.ceil(t*60);i++)g.tick(1/60);};
 function finalGate(g){g.area=2;g.wave=6;g.pendingBlessings=0;g.exitOpen=true;g.exitDelay=0;Object.assign(g.player,g.exitPoint);return g.crossExit();}
@@ -23,17 +23,17 @@ function finalGate(g){g.area=2;g.wave=6;g.pendingBlessings=0;g.exitOpen=true;g.e
 test('chapter six preserves old quest IDs and saves; four acts recommend level 60, not a level gate',()=>{
  const old=profile();assert.equal(CHAPTERS[5].title,'へへへランド');assert.equal(nextAct(old),24);assert.equal(nextStoryAct(19),24);
  for(const id of HEHE_ACT_IDS){const a=actFor(id);assert.equal(a.chapter,5);assert.equal(a.recommendedLevel,60);assert.equal(a.soloHero,'omsolo');assert.ok(HEHE_BOSSES[a.bossId]);assert.equal(storyScenesFor(id),SIXTH_CHAPTER_SCENES[id-24]);}
- assert.deepEqual([20,21,22,23].map(id=>actFor(id).id),[20,21,22,23]);assert.equal(old.story.actClears.length,28);assert.deepEqual(old.story.actClears.slice(24),[false,false,false,false]);
+ assert.deepEqual([20,21,22,23].map(id=>actFor(id).id),[20,21,22,23]);assert.equal(old.story.actClears.length,32);assert.deepEqual(old.story.actClears.slice(24,28),[false,false,false,false]);
  assert.equal(isActUnlocked(profile(19),24),false);old.characters.omsolo.level=20;assert.equal(isActUnlocked(old,24),true);assert.equal(isActUnlocked(old,25),false);assert.equal(isHeroUnlocked(old,'hehereal'),false);
  old.characters.omsolo.level=60;assert.deepEqual(normalizeProgression(old,HEROES),old);assert.equal(completeAct(old,27),false);assert.equal(old.story.chapterSixCleared,false);
 });
-test('food scene precedes ally combat; solo control is fixed on first clear and replay without mutating selection',()=>{
+test('food scene precedes ally combat; solo control is fixed only until the first clear without mutating selection',()=>{
  const p=profile(),before=structuredClone(p),party=['nyanluna','prim'],g=quiet({progression:p,party});assert.equal(g.player.hero,2);assert.deepEqual(g.party,['omsolo']);assert.equal(g.guestHeroId,null);
  assert.deepEqual(p,before);assert.deepEqual(party,['nyanluna','prim']);g.wave=2;g.phase='transition';g.advanceStage();assert.equal(g.wave,3);assert.equal(g.guestHeroId,'hehereal');assert.deepEqual(g.party,['omsolo','hehereal']);assert.equal(g.switchHero(),false);
  assert.equal(isHeroUnlocked(g.progression,'hehereal'),false);assert.ok(g.statsFor(6).attack>100);const beforeLevel=g.progression.characters.hehereal.level;g.statsFor(6);assert.equal(g.progression.characters.hehereal.level,beforeLevel);
  g.player.invincible=0;g.hurt(1e9,0,0);assert.equal(g.phase,'defeat');assert.equal(g.player.hero,2);assert.ok(g.healthFor(6).hp>0);assert.equal(isHeroUnlocked(g.progression,'hehereal'),false);
  for(const id of [25,26,27])assert.deepEqual(quiet({act:id,progression:profile(id)}).party,['omsolo','hehereal']);
- assert.equal(quiet({act:24,progression:profile(28)}).hasPartner,false);
+ const replayPair=quiet({act:24,progression:profile(28)});assert.deepEqual(replayPair.party,['nyanluna','prim']);assert.equal(replayPair.guestHeroId,null);assert.equal(replayPair.switchHero(),true);
  const high=profile(28);high.characters.hehereal.level=70;high.characters.hehereal.breaks=5;const replay=quiet({act:25,progression:high});assert.equal(replay.statsFor(6).attack,combatStats(replay.progression,HEROES[6]).attack);
 });
 test('only the last chapter-six gate recruits; kills, earlier clears and forged flags never do',()=>{

@@ -1,5 +1,5 @@
 import {BATTLE_VOICES} from './voice-catalog.js';
-const HERO_IDS=['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal'];
+const HERO_IDS=['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal','lumi'];
 export const BATTLE_VOICE_TARGET_LUFS=-18.5;
 export const BATTLE_VOICE_VOLUME=.5;
 // Calibrated per-clip gain aligns loudness before the 50% reduction. Dialogue keeps its own volume.

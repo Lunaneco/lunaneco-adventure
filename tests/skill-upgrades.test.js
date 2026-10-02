@@ -16,7 +16,7 @@ function target(g,x=0,z=2,type='moss'){
 }
 const upgrades=SKILLS.filter(s=>s.upgrades);
 test('every tree blessing upgrades exactly one original of the same hero and retains at least its maximum rank',()=>{
- assert.equal(upgrades.length,21);assert.equal(new Set(upgrades.map(s=>s.upgrades)).size,21);
+ assert.equal(upgrades.length,24);assert.equal(new Set(upgrades.map(s=>s.upgrades)).size,24);
  for(const s of upgrades){const base=SKILLS.find(b=>b.id===s.upgrades);assert.ok(base&&!base.unlockNode);assert.deepEqual(base.requires,s.requires);assert.ok(s.max>=base.max);assert.ok(skillUpgradeLabel(s).includes(base.name));}
 });
 test('base and upgraded effects use the higher acquired rank without changing raw levels, in either acquisition order',()=>{

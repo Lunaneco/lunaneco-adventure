@@ -4,7 +4,7 @@ import {resolve,relative} from 'node:path';
 import {createHash} from 'node:crypto';
 import {cachedMediaResponse} from './src/offline-range.js';
 import {CONTENT_SECURITY_POLICY,SECURITY_HEADERS} from './security.config.js';
-import {HERO_MODEL_NAMES,heroModelPath} from './src/hero-model-paths.js';
+import {CACHE_MODEL_NAMES as HERO_MODEL_NAMES,heroModelPath} from './src/hero-model-paths.js';
 function browserSecurity(){return {
   name:'lunaria-browser-security',apply:'build',
   transformIndexHtml(){return [

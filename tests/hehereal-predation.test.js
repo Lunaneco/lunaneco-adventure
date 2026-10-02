@@ -10,7 +10,7 @@ import {createHeheForm,updateHeheForm} from '../src/hehe-form-visuals.js';
 import {WEAPON_CATALOG,equippedWeapon,equipWeapon} from '../src/weapons.js';
 
 function battle(hero=6,act=0){
- const g=new Adventure({seed:31,hero,act,party:['omsolo','hehereal'],progression:{story:{version:2,actClears:Array(28).fill(true)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:60,breaks:4}]))}});
+ const g=new Adventure({seed:31,hero,act,party:['omsolo','hehereal'],progression:{story:{version:2,actClears:Array(32).fill(true)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:60,breaks:4}]))}});
  g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-1000;g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;
 }
 test('predation requires exactly the two living partners, works with either lead, and leaves saved selection untouched',()=>{
@@ -24,11 +24,17 @@ test('capturing is never damage: no HP loss, hurt/down, hit counters, combo rese
  assert.equal(g.predate(),true);assert.deepEqual(g.heroHealth,health);assert.deepEqual(g.progression.missions,missions);assert.equal(g.runHits,4);assert.equal(g.stageTrial.hits,2);assert.equal(g.combo,12);assert.equal(g.comboTimer,3);assert.equal(g.player.invincible,invincible);
  assert.deepEqual(g.drainEvents().map(e=>e.type),['predationStart']);
 });
-test('attack adds Omsolo exactly once, including equipped weapons; HP, defense, bow and charge remain Hehereal’s',()=>{
+test('capture preserves Hehereal attack, HP, defense, bow and charge, without adding Omsolo attack',()=>{
  const g=battle();for(const id of ['omsolo','hehereal']){const weapon=WEAPON_CATALOG.find(w=>w.heroId===id&&w.rarity.rank===4);g.progression.weapons.owned.push(weapon.id);equipWeapon(g.progression,id,weapon.id);}
- const base=g.statsFor(6),om=g.statsFor(2).attack,weapon=equippedWeapon(g.progression,'hehereal'),profile=g.attackProfile(6);g.ultimateCharges.hehereal=73;g.ultimateCharges.omsolo=92;
- g.predate();const after=g.statsFor(6);assert.equal(after.attack,base.attack+om);assert.equal(after.maxHp,base.maxHp);assert.equal(after.defense,base.defense);assert.deepEqual(g.attackProfile(6),profile);assert.deepEqual(equippedWeapon(g.progression,'hehereal'),weapon);assert.equal(g.player.charge,73);assert.equal(g.chargeFor(2),92);
- for(let i=0;i<5;i++){assert.equal(g.predate(),false);assert.equal(finishPredation(g),false);assert.equal(g.statsFor(6).attack,base.attack+om);}assert.equal(g.switchHero(),false);
+ const base=g.statsFor(6),weapon=equippedWeapon(g.progression,'hehereal'),profile=g.attackProfile(6);g.ultimateCharges.hehereal=73;g.ultimateCharges.omsolo=92;
+ g.predate();const after=g.statsFor(6);assert.deepEqual(after,base);assert.equal(g.predation.baseAttack,base.attack);assert.equal(g.predation.attackBonus,0);assert.deepEqual(g.attackProfile(6),profile);assert.deepEqual(equippedWeapon(g.progression,'hehereal'),weapon);assert.equal(g.player.charge,73);assert.equal(g.chargeFor(2),92);
+ for(let i=0;i<5;i++){assert.equal(g.predate(),false);assert.equal(finishPredation(g),false);assert.equal(g.statsFor(6).attack,base.attack);}assert.equal(g.switchHero(),false);
+});
+test('all Omsolo weapon variants and levels leave transformed attack unchanged with either lead',()=>{
+ for(const lead of [2,6])for(const level of [1,40,80])for(const weapon of WEAPON_CATALOG.filter(w=>w.heroId==='omsolo')){
+  const g=battle(lead);g.progression.characters.omsolo.level=level;g.progression.characters.omsolo.breaks=6;g.progression.weapons.owned.push(weapon.id);assert.equal(equipWeapon(g.progression,'omsolo',weapon.id),true);
+  const own=g.statsFor(6),other=g.statsFor(2).attack,health=structuredClone(g.heroHealth);assert.ok(other>0);assert.equal(g.predate(),true);assert.deepEqual(g.statsFor(6),own);assert.equal(g.predation.baseAttack,own.attack);assert.deepEqual(g.heroHealth,health);
+ }
 });
 test('absorbed Omsolo cannot support, shoot, earn run XP, charge, or leave lingering attacks',()=>{
  const g=battle();g.projectiles=[{id:1,heroId:'omsolo',life:2},{id:2,heroId:'hehereal',life:2}];g.predate();assert.deepEqual(g.projectiles.map(p=>p.heroId),['hehereal']);
@@ -52,7 +58,7 @@ for(const condition of ['pause','upgrade','ultimateIntro','transition','exit','t
  const g=battle();if(['pause','upgrade','ultimateIntro','transition'].includes(condition))g.phase=condition;else if(condition==='exit')g.exitOpen=true;else if(condition==='travel')g.travelOpen='stairs';else if(condition==='ultimate')g.ultimateEffects=[{heroId:'omsolo'}];else g.tutorial={active:true};assert.equal(g.predate(),false);assert.equal(g.predation.active,false);
 });
 test('chapter six unlocks capture only after feeding, and the transformed exception allows Hehereal alone',()=>{
- const g=battle(2,24);assert.deepEqual(g.party,['omsolo']);assert.equal(g.predate(),false);g.wave=3;g.meetHehereal();assert.equal(g.predate(),true);assert.equal(g.player.hero,6);assert.equal(g.switchHero(),false);g.startWave();assert.deepEqual(g.party,['hehereal']);
+ const g=new Adventure({act:24,hero:2,party:['omsolo','nyanluna'],progression:{story:{version:2,actClears:Array(20).fill(true)},characters:{omsolo:{level:60,breaks:4}}}});assert.deepEqual(g.party,['omsolo']);assert.equal(g.predate(),false);g.wave=3;g.meetHehereal();assert.equal(g.predate(),true);assert.equal(g.player.hero,6);assert.equal(g.switchHero(),false);g.startWave();assert.deepEqual(g.party,['hehereal']);
 });
 test('supplied voice clips replace every transformed action, including ultimate cut-in; normal voice restores',()=>{
  const g=battle();assert.match(battleVoiceLines('hehereal','attack',g)[0].id,/^hehereal-attack/);g.predate();

@@ -7,7 +7,7 @@ import {ULTIMATE_ART} from '../src/ultimate-art.js';
 import {statSync} from 'node:fs';
 import {TALENT_NODES} from '../src/talents.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} !== ${b}`);
-function game(){const g=new Adventure({seed:3,hero:6,party:['hehereal','omsolo'],progression:{story:{version:2,actClears:Array(28).fill(true)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:80,breaks:5}]))}});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.player.attack=g.partner.attack=999;g.player.x=g.player.z=0;g.player.invincible=0;g.drainEvents();return g;}
+function game(){const g=new Adventure({seed:3,hero:6,party:['hehereal','omsolo'],progression:{story:{version:2,actClears:Array(32).fill(true)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:80,breaks:5}]))}});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.player.attack=g.partner.attack=999;g.player.x=g.player.z=0;g.player.invincible=0;g.drainEvents();return g;}
 function enemy(g,x=0,z=3,hp=1e9){const e=g.spawnEnemy('moss',x,z);e.hp=e.maxHp=hp;e.speed=0;e.special=e.attack=999;return e;}
 function cast(g){g.predate();g.player.charge=100;assert.equal(g.ultimate(),true);g.player.attack=999;return g.ultimateEffects[0];}
 test('normal Hehereal keeps her homing ultimate; only transformed Hehehe gets Predation Dance',()=>{const g=game();assert.equal(g.ultimateSpec().kind,'homingBarrage');assert.equal(g.ultimateSpec().shots,9);cast(g);assert.equal(g.ultimateSpec().name,'捕食の舞');assert.equal(g.ultimateEffects[0].kind,'predationDance');assert.equal(g.projectiles.length,0);assert.equal(g.player.charge,0);assert.ok(g.player.invincible>=2.8);});
@@ -15,8 +15,13 @@ test('eight mobile-following dance pulses hit nearby enemies and not distant one
  const g=game(),inside=enemy(g),outside=enemy(g,17,0);g.healthFor(6).hp=131;cast(g);const after=inside.hp;assert.ok(after<1e9);assert.equal(outside.hp,1e9);assert.equal(g.player.hp,131);
  for(let i=0;i<180;i++){inside.x=0;inside.z=3;inside.knockX=inside.knockZ=0;g.tick(1/60);}assert.equal(g.drainEvents().filter(e=>e.type==='predationPulse').length,8);assert.equal(g.ultimateEffects.length,0);assert.equal(g.player.charge,0);assert.equal(g.player.hp,131);
 });
-test('each kill during the dance adds a fixed 10% of the combined transformation attack, not compounding',()=>{
- const g=game();enemy(g,0,2,1);enemy(g,1,2,1);cast(g);const base=g.predation.baseAttack;assert.equal(g.predation.danceKills,2);near(g.predation.attackBonus,base*PREDATION_KILL_ATTACK_RATE*2);near(g.statsFor(6).attack,base+base*.2);const third=enemy(g,10,0,1);g.hit(third,999,0,0,false,false,'hehereal');assert.equal(g.predation.danceKills,3);near(g.statsFor(6).attack,base+base*.3);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);
+test('each kill during the dance adds a fixed 10% of Hehereal own transformation attack, not compounding',()=>{
+ const g=game(),own=g.statsFor(6).attack;enemy(g,0,2,1);enemy(g,1,2,1);cast(g);const base=g.predation.baseAttack;near(base,own);assert.equal(g.predation.danceKills,2);near(g.predation.attackBonus,own*PREDATION_KILL_ATTACK_RATE*2);near(g.statsFor(6).attack,own+own*.2);const third=enemy(g,10,0,1);g.hit(third,999,0,0,false,false,'hehereal');assert.equal(g.predation.danceKills,3);near(g.statsFor(6).attack,own+own*.3);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);
+});
+test('Omsolo upgrades cannot affect either transformation base attack or the kill bonus',()=>{
+ const results=[];
+ for(const level of [1,40,80]){const g=game();g.progression.characters.omsolo.level=level;const own=g.statsFor(6).attack;enemy(g,0,2,1);cast(g);assert.equal(g.predation.baseAttack,own);near(g.predation.attackBonus,own*.1);results.push(g.statsFor(6).attack);}
+ assert.ok(results.every(attack=>attack===results[0]));
 });
 test('normal attacks and chained nova kills during the ultimate also qualify; non-ultimate kills never do',()=>{
  const g=game();g.predate();const before=enemy(g,0,2,1);g.hit(before,999,0,0);assert.equal(g.predation.danceKills,0);g.skills.nova=1;enemy(g,0,2,1);enemy(g,.5,2,1);g.player.charge=100;g.ultimate();assert.equal(g.predation.danceKills,2);const count=g.predation.danceKills;tickUltimates(g,10);assert.equal(g.ultimateEffects.length,0);const after=enemy(g,10,0,1);g.hit(after,999,0,0);assert.equal(g.predation.danceKills,count);

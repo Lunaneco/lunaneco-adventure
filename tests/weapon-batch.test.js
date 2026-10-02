@@ -23,7 +23,7 @@ test('invalid rolls and RNG failures after earlier valid draws do not partially 
  const p=profile(),before=structuredClone(p);let n=0;assert.throws(()=>drawWeapons(p,10,()=>{if(++n===29)throw Error('random unavailable');return 0;}));assert.deepEqual(p,before);
 });
 test('duplicates within the batch convert once per repeated item and preserve actual capped grants',()=>{
- const p=profile();const results=drawWeapons(p,10,()=>0);assert.equal(results[0].duplicate,false);assert.ok(results.slice(1).every(r=>r.duplicate&&r.duplicateBuds===5));assert.equal(p.inventory.starBud,45);assert.equal(p.weapons.owned.length,8);
+ const p=profile();const results=drawWeapons(p,10,()=>0);assert.equal(results[0].duplicate,false);assert.ok(results.slice(1).every(r=>r.duplicate&&r.duplicateBuds===5));assert.equal(p.inventory.starBud,45);assert.equal(p.weapons.owned.length,9);
  const capped=profile();capped.inventory.starBud=99999997;const r=drawWeapons(capped,10,()=>0);assert.equal(r[1].duplicateBuds,2);assert.ok(r.slice(2).every(r=>r.duplicateBuds===0));assert.equal(capped.inventory.starBud,99999999);
  assert.deepEqual(normalizeWeapons(capped.weapons).lastBatch,capped.weapons.lastBatch);
 });

@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import {ULTIMATES} from './abilities.js';
 const glow=(color,opacity)=>new THREE.MeshBasicMaterial({color,transparent:true,opacity,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
 export function createSanctuary(effect){
-  const group=new THREE.Group();group.name='月華の聖域';group.userData.disposable=true;
-  const add=(geometry,opacity,y)=>{const mesh=new THREE.Mesh(geometry,glow(0xdfbaff,opacity));mesh.rotation.x=-Math.PI/2;mesh.position.y=y;group.add(mesh);return mesh;};
+  const group=new THREE.Group();group.name=effect.spec?.awakened?'月華覚醒・双星の聖域':'月華の聖域';group.userData.disposable=true;
+  const add=(geometry,opacity,y)=>{const mesh=new THREE.Mesh(geometry,glow(effect.spec?.awakened?0xf1d9ff:0xdfbaff,opacity));mesh.rotation.x=-Math.PI/2;mesh.position.y=y;group.add(mesh);return mesh;};
   add(new THREE.CircleGeometry(effect.radius,72),.055,.105);
   add(new THREE.RingGeometry(effect.radius-.11,effect.radius,96),.8,.155);
   add(new THREE.RingGeometry(effect.radius*.83-.035,effect.radius*.83,80),.5,.16);

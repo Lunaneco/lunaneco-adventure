@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Adventure} from '../src/model.js';
 import {ACTS} from '../src/acts.js';
-import {FIELD_LAYOUTS,HEHE_FIELD_LAYOUTS} from '../src/terrain.js';
+import {FIELD_LAYOUTS,HEHE_FIELD_LAYOUTS,LUMI_FIELD_LAYOUTS} from '../src/terrain.js';
 import {tickEnemyBehavior} from '../src/enemy-combat.js';
 import {levelThirtyProfile,playRun} from './chapter-two-fixtures.js';
 const near=(a,b)=>assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
 function quiet(act=0,difficulty='normal'){
- const g=new Adventure({act,difficulty,seed:2,progression:levelThirtyProfile({tree:true,cleared:28})});
+ const g=new Adventure({act,difficulty,seed:2,progression:levelThirtyProfile({tree:true,cleared:32})});
  g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.enemies=[];g.projectiles=[];g.hazards=[];g.player.attack=g.partner.attack=999;g.player.invincible=0;g.drainEvents();return g;
 }
 function cast(act,difficulty,elite,action,low=false){
@@ -47,7 +47,7 @@ test('actual HP loss after defense doubles for body contact, charge, projectile,
 });
 test('each fork spawns a doubled boss only on the strong route, without changing ordinary enemies',()=>{
  for(const act of ACTS)for(const route of ['safe','elite']){
-  const area=(act.chapter===5?HEHE_FIELD_LAYOUTS[act.id-24]:FIELD_LAYOUTS[act.id]).findIndex(f=>f.kind==='branch');if(area<0)continue;const g=quiet(act.id);g.area=area;g.wave=area*2+1;g.route=route;g.startWave();
+  const area=(act.chapter===6?LUMI_FIELD_LAYOUTS[act.id-28]:act.chapter===5?HEHE_FIELD_LAYOUTS[act.id-24]:FIELD_LAYOUTS[act.id]).findIndex(f=>f.kind==='branch');if(area<0)continue;const g=quiet(act.id);g.area=area;g.wave=area*2+1;g.route=route;g.startWave();
   if(g.wave!==6){g.waveSpawned=0;g.spawn();const ordinary=g.enemies.at(-1),base=quiet(act.id);base.wave=g.wave;const reference=base.spawnEnemy(ordinary.type,0,-5);near(ordinary.maxHp,reference.maxHp);near(ordinary.damage,reference.damage);assert.equal(ordinary.elite,false);}
   g.enemies=[];g.waveSpawned=g.waveGoal-1;g.spawn();const last=g.enemies.at(-1);
   assert.equal(last.elite,route==='elite');if(route==='elite'){assert.equal(last.type,'boss');near(last.maxHp,act.bossHp*2);near(last.damage,(act.id>=12?92:act.id>=8?62:act.id>=4?45:22)*2);}

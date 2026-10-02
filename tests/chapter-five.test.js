@@ -38,9 +38,9 @@ test('chapter five uses two story voices and the reference dragon purification, 
 });
 test('ten generated claws and four distinct trial relics remain obtainable and persist',()=>{
  const claws=WEAPON_CATALOG.filter(w=>w.heroId==='prim');assert.equal(claws.length,10);assert.deepEqual([1,2,3,4].map(r=>claws.filter(w=>w.rarity.rank===r).length),[1,3,3,3]);assert.equal(new Set(claws.map(weaponImage)).size,10);
- const p=profile();p.inventory.weaponTicket=9;for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[5.5/7,rarity,family],r=drawWeapon(p,()=>rolls.shift());assert.equal(r.item.heroId,'prim');assert.equal(r.duplicate,false);assert.ok(equipWeapon(p,'prim',r.item.id));}
+ const p=profile();p.inventory.weaponTicket=9;for(const rarity of [.1,.8,.99])for(const family of [.1,.5,.9]){const rolls=[5.5/8,rarity,family],r=drawWeapon(p,()=>rolls.shift());assert.equal(r.item.heroId,'prim');assert.equal(r.duplicate,false);assert.ok(equipWeapon(p,'prim',r.item.id));}
  for(const item of claws){const bytes=readFileSync('public'+weaponImage(item));assert.equal(bytes.toString('ascii',8,12),'WEBP');}
- const relics=UNIQUE_EQUIPMENT.filter(r=>r.act>=16);assert.equal(relics.length,4);for(const r of relics){assert.ok(existsSync('public'+equipmentImage(r.id)));assert.ok(STAGE_MISSIONS.some(m=>m.act===r.act&&m.equipment===r.id&&m.trial));}
+ const relics=UNIQUE_EQUIPMENT.filter(r=>r.act>=16&&r.act<20);assert.equal(relics.length,4);for(const r of relics){assert.ok(existsSync('public'+equipmentImage(r.id)));assert.ok(STAGE_MISSIONS.some(m=>m.act===r.act&&m.equipment===r.id&&m.trial));}
  assert.equal(normalizeProgression(p,HEROES).weapons.owned.filter(id=>id.includes('claw')).length,10);
 });
 test('the pair bonus is confined to the deployed pair; mount uses Omsolo speed and both independent main attacks',()=>{

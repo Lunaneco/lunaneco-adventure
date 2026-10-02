@@ -1,4 +1,5 @@
 // Combat data is shared by the simulation, readable HUD hints and the renderer.
+import {ANTI_KEMO_ENEMIES,ANTI_KEMO_BOSSES} from './chapter-seven-enemies.js';
 import {HEHE_ENEMIES,HEHE_BOSSES,GOLDEN_HEHE} from './chapter-six-enemies.js';
 import {PRISM_ENEMIES,PRISM_BOSSES} from './chapter-five-enemies.js';
 import {DEMON_ENEMIES,DEMON_BOSSES} from './chapter-four-enemies.js';
@@ -7,7 +8,7 @@ import {actFor} from './acts.js';
 import {GOLDEN_SLIME} from './golden-slime.js';
 export const ELITE_BOSS_MULTIPLIER=2;
 export const ELITE_BOSS_LABEL=`HP×${ELITE_BOSS_MULTIPLIER}・攻撃威力×${ELITE_BOSS_MULTIPLIER}`;
-export const ENEMY_TYPES=Object.freeze({...HEHE_ENEMIES,goldenHehe:GOLDEN_HEHE,...PRISM_ENEMIES,...DEMON_ENEMIES,...MOCHI_ENEMIES,goldenSlime:GOLDEN_SLIME,
+export const ENEMY_TYPES=Object.freeze({...ANTI_KEMO_ENEMIES,...HEHE_ENEMIES,goldenHehe:GOLDEN_HEHE,...PRISM_ENEMIES,...DEMON_ENEMIES,...MOCHI_ENEMIES,goldenSlime:GOLDEN_SLIME,
   moss:{name:'草の魔物',hp:29,speed:1.4,damage:9,radius:.64,role:'近接',hint:'近づいて体当たりする。距離を取ろう。',xp:3,crystals:1,buds:1},
   bat:{name:'月影コウモリ',hp:23,speed:2.35,damage:7,radius:.52,role:'飛行',hint:'素早く接近する。囲まれる前に倒そう。',xp:4,crystals:1,buds:1},
   golem:{name:'遺跡ゴーレム',hp:85,speed:.88,damage:17,radius:.95,role:'重装',hint:'頑丈だが足が遅い。周り込みながら攻撃しよう。',xp:9,crystals:3,buds:2},
@@ -26,10 +27,11 @@ export const CHAPTER_TWO_ENEMIES=Object.freeze(['reaper','matchlock','stormlante
 export const CHAPTER_THREE_ENEMIES=Object.freeze(Object.keys(MOCHI_ENEMIES));
 export const CHAPTER_FOUR_ENEMIES=Object.freeze(Object.keys(DEMON_ENEMIES));
 export const CHAPTER_FIVE_ENEMIES=Object.freeze(Object.keys(PRISM_ENEMIES));
+export const CHAPTER_SEVEN_ENEMIES=Object.freeze(Object.keys(ANTI_KEMO_ENEMIES));
 export const CHAPTER_SIX_ENEMIES=Object.freeze(Object.keys(HEHE_ENEMIES));
-export const enemyRosterForAct=act=>actFor(act)?.chapter===5?CHAPTER_SIX_ENEMIES:actFor(act)?.chapter===4?CHAPTER_FIVE_ENEMIES:actFor(act)?.chapter===3?CHAPTER_FOUR_ENEMIES:actFor(act)?.chapter===2?CHAPTER_THREE_ENEMIES:actFor(act)?.chapter===1?CHAPTER_TWO_ENEMIES:CHAPTER_ONE_ENEMIES;
+export const enemyRosterForAct=act=>actFor(act)?.chapter===6?CHAPTER_SEVEN_ENEMIES:actFor(act)?.chapter===5?CHAPTER_SIX_ENEMIES:actFor(act)?.chapter===4?CHAPTER_FIVE_ENEMIES:actFor(act)?.chapter===3?CHAPTER_FOUR_ENEMIES:actFor(act)?.chapter===2?CHAPTER_THREE_ENEMIES:actFor(act)?.chapter===1?CHAPTER_TWO_ENEMIES:CHAPTER_ONE_ENEMIES;
 export const isRangedEnemy=type=>ENEMY_TYPES[type]?.ranged===true||['archer','mage'].includes(type);
-export const BOSSES=Object.freeze({...HEHE_BOSSES,...PRISM_BOSSES,...DEMON_BOSSES,...MOCHI_BOSSES,
+export const BOSSES=Object.freeze({...ANTI_KEMO_BOSSES,...HEHE_BOSSES,...PRISM_BOSSES,...DEMON_BOSSES,...MOCHI_BOSSES,
   thornmaw:{name:'茨牙の獣王',subtitle:'THE THORNMAW KING',role:'茨をまとう巨獣',color:0xffac69,speed:1.35,radius:2.1,attacks:["追い込む茨爪","三段の獣吼","獣王の跳撃"],hint:'左右の茨爪が中央へ迫り、最後に噛み砕く。咆哮は内から外へ三段階。突進先の爆発と、その外側の衝撃までかわして反撃。'},
   basalt:{name:'岩鎧の大蛇',subtitle:'THE JADE COIL',role:'翡翠の岩蛇',color:0x9ff4b6,speed:1.1,radius:2.1,attacks:["蛇行する地割れ","脱皮の岩礫","蛇尾の連続薙ぎ"],hint:'蛇のように曲がる地割れを横へ抜けよう。岩礫は角度を変えて連射。尾は扇状に順番になぎ払うので、消えた帯へ切り返そう。'},
   ironbell:{name:'鉄鐘の門衛',subtitle:'THE IRON BELL KEEPER',role:'鐘楼の鉄騎士',color:0xd7acff,speed:.8,radius:2,attacks:["開門の交差鐘","波紋の三重奏","落鐘の断罪"],hint:'十字と斜めの鐘撃を交互に回避。輪の波紋には安全な中央がある。足元への落鐘の後、十字の亀裂が走るので斜めへ逃げよう。'},
@@ -39,9 +41,10 @@ export const BOSSES=Object.freeze({...HEHE_BOSSES,...PRISM_BOSSES,...DEMON_BOSSE
   tempest:{name:'雲海の番人',subtitle:'THE CLOUDSEA WYVERN',role:'雲海の翼竜',color:0xff9c7e,speed:1.3,radius:1.85,attacks:["薙ぎ渡る風壁","旋回する星羽","急降下の風圧"],hint:'風の帯が横から順に通過。消えた帯へ切り返そう。星羽は切れ目が動く連続弾幕。急降下の後は着地点を囲む風圧に注意。'},
   eclipse:{name:'月蝕の守護者',subtitle:'THE ECLIPSE WARDEN',role:'月を抱く石の守り手',color:0xff749d,speed:1.1,radius:1.9,attacks:["満ち欠けの月蝕","螺旋の欠け月","月影の残響"],hint:'輪の中央へ入り、続く中央爆発では外へ。星弾は切れ目が動く連射。突進した跡にも月影が連鎖する。HP半分で三連撃へ。'},
 });
-export const BOSS_IDS=Object.freeze(['treant','chronarch','tempest','eclipse','thornmaw','basalt','ironbell','colossus',...Object.keys(MOCHI_BOSSES),...Object.keys(DEMON_BOSSES),...Object.keys(PRISM_BOSSES),...Object.keys(HEHE_BOSSES)]);
+export const BOSS_IDS=Object.freeze(['treant','chronarch','tempest','eclipse','thornmaw','basalt','ironbell','colossus',...Object.keys(MOCHI_BOSSES),...Object.keys(DEMON_BOSSES),...Object.keys(PRISM_BOSSES),...Object.keys(HEHE_BOSSES),...Object.keys(ANTI_KEMO_BOSSES)]);
 export function enemyForSpawn(act,wave,index,roll){
   if(wave===6)return 'boss';
+  if(actFor(act)?.awakening==='nyanluna')return CHAPTER_ONE_ENEMIES[index<CHAPTER_ONE_ENEMIES.length?index:Math.min(CHAPTER_ONE_ENEMIES.length-1,Math.floor(roll*CHAPTER_ONE_ENEMIES.length))];
   if(actFor(act)?.extra){const roster=enemyRosterForAct(act);return roster[index<roster.length?index:Math.min(roster.length-1,Math.floor(roll*roster.length))];}
   if(actFor(act)?.chapter>=3){const roster=enemyRosterForAct(act);return roster[index<roster.length?index:Math.min(roster.length-1,Math.floor(roll*roster.length))];}
   if(actFor(act)?.chapter===2){const available=CHAPTER_THREE_ENEMIES.slice(0,Math.min(7,3+wave));return available[index<available.length?index:Math.min(available.length-1,Math.floor(roll*available.length))];}

@@ -27,7 +27,7 @@ test('chapter one saves keep every value and unlock only the second chapter, nev
  const corrupt=normalizeProgression({story:{...story(3),actClears:[true,true,true,false,true,true,true,true],omsoloUnlocked:true}},HEROES);assert.equal(isHeroUnlocked(corrupt,'omsolo'),false);assert.equal(corrupt.story.chapterTwoCleared,false);
 });
 test('twenty sequential acts have matching story, terrains, distinct bosses and illustrated equipment',()=>{
- assert.equal(CHAPTERS.length,6);assert.equal(ACTS.length,24);assert.equal(ACT_SCENES.length,20);assert.deepEqual(ACTS.map(a=>a.bossId),BOSS_IDS);assert.equal(new Set(FIELD_LAYOUTS.flat().flatMap(f=>f.rooms).map(r=>r.id)).size,100);
+ assert.equal(CHAPTERS.length,7);assert.equal(ACTS.length,28);assert.equal(ACT_SCENES.length,20);assert.deepEqual(ACTS.map(a=>a.bossId),BOSS_IDS);assert.equal(new Set(FIELD_LAYOUTS.flat().flatMap(f=>f.rooms).map(r=>r.id)).size,100);
  for(const act of ACTS){assert.equal(actLabel(act.id),`第${act.chapter+1}章・第${act.number}幕`);assert.ok(BOSSES[act.bossId]);for(const scene of Object.values(storyScenesFor(act.id)))for(const line of scene.lines)assert.ok(STORY_CAST[line.who],line.who);}
  for(const id of ['komusubi','omsolo','omsolo_hurt'])assert.ok(existsSync('public'+STORY_CAST[id].image));
  for(const item of UNIQUE_EQUIPMENT.filter(e=>e.act>=4)){assert.ok(existsSync('public'+equipmentImage(item.id)));const m=STAGE_MISSIONS.find(m=>m.equipment===item.id);assert.equal(m.act,item.act);assert.ok(m.trial);}

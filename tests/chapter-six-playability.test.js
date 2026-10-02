@@ -9,7 +9,7 @@ import {trialInput} from './country-bot.js';
 import {chooseOffer} from './bot.js';
 
 function profile(act){
- const p=normalizeProgression({story:{version:2,actClears:Array.from({length:28},(_,i)=>(i<20||i>=24)&&i<act)},characters:{omsolo:{level:60,breaks:4,tree:[...FIRST_TIER_NODES,...SECOND_TIER_NODES].map(n=>n.id)}},tutorial:{firstBattleCompleted:true}},HEROES);
+ const p=normalizeProgression({story:{version:2,actClears:Array.from({length:32},(_,i)=>(i<20||i>=24)&&i<act)},characters:{omsolo:{level:60,breaks:4,tree:[...FIRST_TIER_NODES,...SECOND_TIER_NODES].map(n=>n.id)}},tutorial:{firstBattleCompleted:true}},HEROES);
  p.weapons.owned.push('light-saber-r3');assert.ok(equipWeapon(p,'omsolo','light-saber-r3'));return p;
 }
 for(const act of HEHE_ACT_IDS)for(const difficulty of ['normal','hard'])test(`Lv.60 Omsolo and story ally complete chapter-six act ${act}, ${difficulty}, three seeds`,()=>{

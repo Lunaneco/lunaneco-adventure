@@ -1,3 +1,4 @@
+import {buildKemoVillage} from './lumi-visuals.js';
 import {buildHeheLandmarks} from './hehereal-visuals.js';
 import {buildPrismLandmarks} from './prim-visuals.js';
 import {buildMochiLandmarks} from './mochi-country.js';
@@ -59,6 +60,7 @@ export class FieldEnvironment {
   createLandmarks(){
     return FIELD_THEMES.map((theme,index)=>{
       const group=new THREE.Group();group.name=`Field ${index+1} landmarks`;this.world.scene.add(group);
+      if(theme.kemoVillage){buildKemoVillage(group,index-23,{part});bakeGroup(group);return group;}
       if(theme.hehe){buildHeheLandmarks(group,index-19);return group;}
       if(theme.prism){buildPrismLandmarks(group);bakeGroup(group);return group;}
       if(theme.demon){buildDemonLandmarks(group,theme.demon);bakeGroup(group);return group;}

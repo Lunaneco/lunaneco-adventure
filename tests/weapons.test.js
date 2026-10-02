@@ -15,30 +15,30 @@ test('mochinyafe keeps the Lv.50 attack interval floor through the new Lv.80 cap
  for(const level of [60,70,80]){p.characters.mochinyafe.level=level;assert.equal(weaponAttackProfile(p,hero).interval,floor);}
 });
 
-test('legacy saves retain all progress, relics and base stats with seven starter weapons and zero tickets',()=>{
+test('legacy saves retain all progress, relics and base stats with eight starter weapons and zero tickets',()=>{
  const old={story:{version:2,actClears:[true,true]},characters:{nyanluna:{level:9,xp:17,tree:['origin']},future:{level:2}},inventory:{starBud:71,moonDew:5,limitStone:2},equipment:{owned:['meadow-charm'],loadout:{nyanluna:'meadow-charm'}}};
- const p=normalizeProgression(old,HEROES);assert.equal(p.inventory.weaponTicket,0);assert.equal(p.inventory.starBud,71);assert.deepEqual(p.equipment,old.equipment);assert.equal(p.characters.nyanluna.level,9);assert.equal(p.characters.nyanluna.xp,17);assert.equal(p.characters.future.level,2);assert.equal(p.weapons.owned.length,7);
+ const p=normalizeProgression(old,HEROES);assert.equal(p.inventory.weaponTicket,0);assert.equal(p.inventory.starBud,71);assert.deepEqual(p.equipment,old.equipment);assert.equal(p.characters.nyanluna.level,9);assert.equal(p.characters.nyanluna.xp,17);assert.equal(p.characters.future.level,2);assert.equal(p.weapons.owned.length,8);
  for(const hero of HEROES)assert.equal(equippedWeapon(p,hero.id).rarity.rank,1);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
 });
 test('weapon IDs, tickets and saved draw results are normalized without accepting invented rewards',()=>{
  for(const bad of [-2,NaN,Infinity,'4',null])assert.equal(normalizeProgression({inventory:{weaponTicket:bad}},HEROES).inventory.weaponTicket,0);
  const p=normalizeProgression({inventory:{weaponTicket:4.9},weapons:{owned:['nox-rifle-r4','nox-rifle-r4','luna-staff-r99','__proto__'],draws:-2,lastDraw:{weaponId:'<script>',duplicate:true}}},HEROES);
- assert.equal(p.inventory.weaponTicket,4);assert.equal(p.weapons.owned.length,8);assert.equal(p.weapons.draws,0);assert.equal(p.weapons.lastDraw,null);assert.deepEqual(normalizeWeapons(null),normalizeWeapons({}));
+ assert.equal(p.inventory.weaponTicket,4);assert.equal(p.weapons.owned.length,9);assert.equal(p.weapons.draws,0);assert.equal(p.weapons.lastDraw,null);assert.deepEqual(normalizeWeapons(null),normalizeWeapons({}));
 });
 for(const [heroIndex,heroRoll] of WEAPON_HERO_IDS.map((_,i)=>[i,i/WEAPON_HERO_IDS.length]))for(const [rank,rarityRoll] of [[2,0],[3,.75],[4,.95]])test(`gacha boundary selects hero ${heroIndex}, rarity ${rank}, independently of recruitment`,()=>{
  const p=fresh();p.inventory.weaponTicket=1;const before=structuredClone(p),r=roll(p,heroRoll,rarityRoll);assert.equal(r.item.heroId,WEAPON_HERO_IDS[heroIndex]);assert.equal(r.item.rarity.rank,rank);assert.equal(r.duplicate,false);assert.equal(p.inventory.weaponTicket,0);assert.equal(p.weapons.draws,1);assert.equal(equippedWeapon(p,r.item.heroId).rarity.rank,1);assert.deepEqual(p.characters,before.characters);assert.deepEqual(p.story,before.story);assert.deepEqual(p.equipment,before.equipment);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
 });
 test('the published 75/20/5 rates and equal character odds cover a uniform grid exactly',()=>{
- const p=fresh();p.inventory.weaponTicket=2100;const totals={};
+ const p=fresh();p.inventory.weaponTicket=WEAPON_HERO_IDS.length*300;const totals={};
  for(let hero=0;hero<WEAPON_HERO_IDS.length;hero++)for(let rarity=0;rarity<100;rarity++)for(let type=0;type<3;type++){const result=roll(p,(hero+.5)/WEAPON_HERO_IDS.length,(rarity+.5)/100,(type+.5)/3),id=`${result.item.heroId}-${result.item.rarity.rank}`;totals[id]=(totals[id]??0)+1;}
- for(const id of WEAPON_HERO_IDS){assert.equal(totals[`${id}-2`],225);assert.equal(totals[`${id}-3`],60);assert.equal(totals[`${id}-4`],15);}assert.equal(p.weapons.owned.length,70);assert.equal(p.inventory.weaponTicket,0);
+ for(const id of WEAPON_HERO_IDS){assert.equal(totals[`${id}-2`],225);assert.equal(totals[`${id}-3`],60);assert.equal(totals[`${id}-4`],15);}assert.equal(p.weapons.owned.length,80);assert.equal(p.inventory.weaponTicket,0);
 });
 test('a draw with no ticket, or an invalid RNG, changes nothing',()=>{
  const p=fresh(),before=structuredClone(p);assert.equal(drawWeapon(p,()=>{throw Error('must not roll');}),null);assert.deepEqual(p,before);
  p.inventory.weaponTicket=2;for(const value of [NaN,-.1,1,Infinity]){const snapshot=structuredClone(p);assert.equal(drawWeapon(p,()=>value),null);assert.deepEqual(p,snapshot);}
 });
 for(const [rarity,seed] of [[2,.1],[3,.8],[4,.99]])test(`rarity ${rarity} duplicate converts into the advertised buds and still consumes exactly one ticket`,()=>{
- const p=fresh();p.inventory.weaponTicket=3;roll(p,0,seed);const r=roll(p,0,seed);assert.equal(r.duplicate,true);assert.equal(r.duplicateBuds,WEAPON_RARITIES[rarity-1].duplicateBuds);assert.equal(p.inventory.starBud,r.duplicateBuds);assert.equal(p.inventory.weaponTicket,1);assert.equal(p.weapons.owned.length,8);assert.equal(p.weapons.draws,2);assert.deepEqual(p.weapons.lastDraw,{weaponId:r.item.id,duplicate:true,duplicateBuds:r.duplicateBuds});
+ const p=fresh();p.inventory.weaponTicket=3;roll(p,0,seed);const r=roll(p,0,seed);assert.equal(r.duplicate,true);assert.equal(r.duplicateBuds,WEAPON_RARITIES[rarity-1].duplicateBuds);assert.equal(p.inventory.starBud,r.duplicateBuds);assert.equal(p.inventory.weaponTicket,1);assert.equal(p.weapons.owned.length,9);assert.equal(p.weapons.draws,2);assert.deepEqual(p.weapons.lastDraw,{weaponId:r.item.id,duplicate:true,duplicateBuds:r.duplicateBuds});
  const restored=normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES);assert.deepEqual(restored,p);assert.equal(restored.inventory.starBud,r.duplicateBuds);
 });
 test('only the equipped owner receives the bonus; draws preserve the selection and relics stay separate',()=>{
@@ -63,16 +63,16 @@ test('actual boss kills award once, attribute to the run, persist through defeat
  g.player.invincible=0;g.hurt(99999,0,0);assert.equal(g.phase,'defeat');const saved=normalizeProgression(JSON.parse(JSON.stringify(g.progression)),HEROES);assert.equal(saved.inventory.weaponTicket,1);const late=g.spawnEnemy('boss',8,8);g.hit(late,99999,0,0);assert.equal(g.progression.inventory.weaponTicket,1);
 });
 test('every chapter boss and strong-route boss can grant a ticket without needing the final gate',()=>{
- for(let act=0;act<8;act++)for(const elite of [false,true]){const g=quiet({act,progression:{story:{version:2,actClears:Array(28).fill(true)}}});g.lootRng=()=>0;const e=g.spawnEnemy('boss',10,10,{elite});g.hit(e,99999,0,0);assert.equal(g.progression.inventory.weaponTicket,1);assert.notEqual(g.phase,'victory');assert.equal(new Adventure({progression:g.progression}).progression.inventory.weaponTicket,1);}
+ for(let act=0;act<8;act++)for(const elite of [false,true]){const g=quiet({act,progression:{story:{version:2,actClears:Array(32).fill(true)}}});g.lootRng=()=>0;const e=g.spawnEnemy('boss',10,10,{elite});g.hit(e,99999,0,0);assert.equal(g.progression.inventory.weaponTicket,1);assert.notEqual(g.phase,'victory');assert.equal(new Adventure({progression:g.progression}).progression.inventory.weaponTicket,1);}
 });
 test('gacha descriptions expose exact odds, locked-character storage and duplicate values and exact-name duplicate rules',()=>{
- const p=fresh(),html=weaponGachaView(p);assert.match(html,/5%で1枚/);assert.match(html,/75%/);assert.match(html,/20%/);assert.match(html,/約0.2381%/);assert.match(html,/同じ武器・同じレア度/);assert.match(html,/data-draw-weapon disabled/);for(const id of WEAPON_HERO_IDS)assert.ok(html.includes(`data-weapon-hero="${id}"`));
- p.inventory.weaponTicket=1;const r=roll(p,.8,.99),result=weaponDrawResult(r,p,true);assert.match(result,/加入後に使えるよう保管/);assert.match(result,/★4/);assert.match(result,/結果を保存/);assert.equal(WEAPON_CATALOG.length,70);
+ const p=fresh(),html=weaponGachaView(p);assert.match(html,/5%で1枚/);assert.match(html,/75%/);assert.match(html,/20%/);assert.match(html,/約0.2083%/);assert.match(html,/同じ武器・同じレア度/);assert.match(html,/data-draw-weapon disabled/);for(const id of WEAPON_HERO_IDS)assert.ok(html.includes(`data-weapon-hero="${id}"`));
+ p.inventory.weaponTicket=1;const r=roll(p,.8,.99),result=weaponDrawResult(r,p,true);assert.match(result,/加入後に使えるよう保管/);assert.match(result,/★4/);assert.match(result,/結果を保存/);assert.equal(WEAPON_CATALOG.length,80);
 });
 
-const allWeapons=()=>normalizeProgression({story:{version:2,actClears:Array(28).fill(true)},weapons:{version:2,owned:WEAPON_CATALOG.map(w=>w.id)},tutorial:{firstBattleCompleted:true}},HEROES);
+const allWeapons=()=>normalizeProgression({story:{version:2,actClears:Array(32).fill(true)},weapons:{version:2,owned:WEAPON_CATALOG.map(w=>w.id)},tutorial:{firstBattleCompleted:true}},HEROES);
 test('each gacha hero has three distinct combat profiles at every gacha rarity and one starter',()=>{
- assert.equal(new Set(WEAPON_CATALOG.map(w=>w.id)).size,70);
+ assert.equal(new Set(WEAPON_CATALOG.map(w=>w.id)).size,80);
  for(const hero of HEROES.filter(h=>WEAPON_HERO_IDS.includes(h.id)))for(const rank of [1,2,3,4]){
   const items=WEAPON_CATALOG.filter(w=>w.heroId===hero.id&&w.rarity.rank===rank);assert.equal(items.length,rank===1?1:3);
   const stats=new Set();for(const item of items){const p=allWeapons();assert.ok(equipWeapon(p,hero.id,item.id));stats.add(JSON.stringify({...combatStats(p,hero),...weaponAttackProfile(p,hero)}));assert.ok(weaponImage(item).startsWith('/assets/equipment/'));}assert.equal(stats.size,items.length);
@@ -91,7 +91,7 @@ test('only owned, character-specific weapons on recruited heroes can be equipped
 });
 test('different weapon families at the same rarity are new acquisitions, only exact duplicates convert',()=>{
  const p=fresh();p.inventory.weaponTicket=4;for(const type of [0,.34,.67])assert.equal(roll(p,0,.1,type).duplicate,false);
- assert.equal(p.weapons.owned.length,10);assert.equal(p.inventory.starBud,0);assert.equal(roll(p,0,.1,.34).duplicate,true);assert.equal(p.inventory.starBud,5);assert.equal(p.weapons.loadout.nyanluna,'luna-staff-r1');
+ assert.equal(p.weapons.owned.length,11);assert.equal(p.inventory.starBud,0);assert.equal(roll(p,0,.1,.34).duplicate,true);assert.equal(p.inventory.starBud,5);assert.equal(p.weapons.loadout.nyanluna,'luna-staff-r1');
 });
 test('speed and reach change actual attacks, stack with blessings, and retain support scaling',()=>{
  for(const [id,hero] of [['lilica-staff-r2',0],['artemis-rifle-r3',1],['hayate-saber-r4',2]]){
