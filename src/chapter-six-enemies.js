@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {GOLDEN_SLIME} from './golden-slime.js';
 
 export const GOLDEN_HEHE=Object.freeze({type:'goldenHehe',name:'黄金のへへへ',chance:.2,lifetime:20,hp:2200,speed:4.6,damage:0,radius:.8,role:'黄金のレア敵',chapter:5,rare:true,barHeight:3.3,xp:3000,crystals:0,buds:200,tickets:10,stones:1,hint:'各幕で一度だけ20%抽選。20秒で逃走。素材はレアスライムの2倍＋★3の紅月の結晶40個・魔心の宝珠20個！',materials:Object.freeze({...Object.fromEntries(Object.entries(GOLDEN_SLIME.materials).map(([id,n])=>[id,n*2])),bloodCrystal:40,demonHeart:20})});
-export function goldenHeheWave(act,rng){if(act?.chapter!==5)return null;const roll=rng();return Number.isFinite(roll)&&roll>=0&&roll<GOLDEN_HEHE.chance?1+Math.min(4,Math.floor(rng()*5)):null;}
+export function goldenHeheWave(act,rng){if(act?.chapter!==5)return null;if(act.extra&&act.goldenHeheWave===3)return 3;const roll=rng();return Number.isFinite(roll)&&roll>=0&&roll<GOLDEN_HEHE.chance?1+Math.min(4,Math.floor(rng()*5)):null;}
 const enemy=(name,hp,speed,damage,role,hint,extra={})=>Object.freeze({name,hp,speed,damage,radius:.78,role,hint,chapter:5,barHeight:3.2,xp:38,crystals:3,buds:4,...extra});
 export const HEHE_ENEMIES=Object.freeze({
  heheBrawler:enemy('へへへ・拳闘士',290,2.5,42,'拳の近接','短い橙の帯の後に拳を振るう。背後へ回り込もう。'),

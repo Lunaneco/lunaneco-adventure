@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Adventure,HEROES} from '../src/model.js';
 import {normalizeProgression} from '../src/progression.js';
-import {ACTS,EXTRA_ACTS,actLabel,isActUnlocked,isActCleared,clearTicketReward} from '../src/acts.js';
+import {ACTS,EXTRA_ACTS as ALL_EXTRA_ACTS,actLabel,isActUnlocked,isActCleared,clearTicketReward} from '../src/acts.js';
 import {enemyRosterForAct,enemyForSpawn} from '../src/enemies.js';
 import {tickEnemyBehavior} from '../src/enemy-combat.js';
 import {missionsForAct} from '../src/missions.js';
@@ -12,6 +12,7 @@ import {WEAPONS} from '../src/equipment.js';
 import {trialInput} from './country-bot.js';
 import {chooseOffer} from './bot.js';
 
+const EXTRA_ACTS=ALL_EXTRA_ACTS.filter(a=>!a.endgame);
 const profile=(cleared=12)=>normalizeProgression({story:{version:2,actClears:ACTS.map(a=>a.id<cleared)},characters:Object.fromEntries(HEROES.map(h=>[h.id,{level:50,breaks:3,tree:TALENT_NODES.map(n=>n.id)}])),weapons:{version:2,owned:HEROES.map(h=>`${WEAPONS[h.id].id}-r4`),loadout:Object.fromEntries(HEROES.map(h=>[h.id,`${WEAPONS[h.id].id}-r4`]))}},HEROES);
 function gate(g,area){g.phase='playing';g.area=area;g.wave=area*2+2;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.equal(g.crossExit(),true);}
 function attack(act,type='boss',action=0){
@@ -25,9 +26,9 @@ test('chapter one and two extras unlock after chapter two; the new extra require
   const g=new Adventure({act:finalAct,progression:profile(finalAct)});g.wave=5;g.startWave();g.lootRng=()=>1;g.hit(g.enemies.find(e=>e.type==='boss'),1e6,0,0);
   assert.equal(isActUnlocked(g.progression,finalAct===7?20:22),false);gate(g,2);for(const act of extras)assert.equal(isActUnlocked(g.progression,act),true);
  }
- const existing=profile(8);assert.deepEqual(existing.story.extraClears,[false,false,false]);assert.equal(existing.inventory.weaponTicket,0);
- for(const cleared of [7,8,11,12]){const corrupt=profile(cleared);corrupt.story.extraClears=[true,true,true];assert.deepEqual(normalizeProgression(corrupt,HEROES).story.extraClears,[cleared>=8,cleared>=8,cleared>=12]);}
- const old=profile(12);old.story.extraClears=[true,false];assert.deepEqual(normalizeProgression(old,HEROES).story.extraClears,[true,false,false]);
+ const existing=profile(8);assert.deepEqual(existing.story.extraClears,[false,false,false,false,false,false]);assert.equal(existing.inventory.weaponTicket,0);
+ for(const cleared of [7,8,11,12]){const corrupt=profile(cleared);corrupt.story.extraClears=[true,true,true];assert.deepEqual(normalizeProgression(corrupt,HEROES).story.extraClears,[cleared>=8,cleared>=8,cleared>=12,false,false,false]);}
+ const old=profile(12);old.story.extraClears=[true,false];assert.deepEqual(normalizeProgression(old,HEROES).story.extraClears,[true,false,false,false,false,false]);
  for(const act of [-1,15,10,8.5,NaN,'8'])assert.equal(isActUnlocked(existing,act),false);
 });
 test('each extra awards ten tickets first, two on repeats, once at the final gate and across reloads',()=>{
@@ -40,7 +41,7 @@ test('each extra awards ten tickets first, two on repeats, once at the final gat
   const saved=structuredClone(g.progression);assert.equal(g.crossExit(),false);assert.deepEqual(g.progression,saved);
   p=normalizeProgression(JSON.parse(JSON.stringify(saved)),HEROES);assert.equal(clearTicketReward(p,act),2);
  }
- assert.deepEqual(p.story.extraClears,[true,true,true]);
+ assert.deepEqual(p.story.extraClears,[true,true,true,false,false,false]);
 });
 test('retreat and defeat do not consume first clear; boss ticket drops remain separate',()=>{
  for(const act of EXTRA_ACTS){

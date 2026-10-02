@@ -1,4 +1,4 @@
-import {createNyanAwakening,canAwakenNyan,startNyanAwakening,finishNyanAwakening,tickNyanAwakening,awakenedNyanUltimate,fireAwakenedNyan,hasNyanAwakening} from './nyanluna-awakening.js';
+import {NYAN_AWAKENING_RULES,createNyanAwakening,canAwakenNyan,startNyanAwakening,finishNyanAwakening,tickNyanAwakening,awakenedNyanUltimate,fireAwakenedNyan,hasNyanAwakening} from './nyanluna-awakening.js';
 import {hasNekoLumi,lumiUltimate,fireLumiRail} from './lumi-combat.js';
 import {canPredate,startPredation,finishPredation,predationUltimate,predationKill} from './hehereal-predation.js';
 import {advanceFloors,tickFloors,floorMovementScale} from './special-floors.js';
@@ -36,7 +36,7 @@ export const HEROES = [
   {id:'mochinyafe',name:'もちにゃふぇ',title:'最後のもちもち守り手',color:'#ffb8d4',moveSpeed:4.2,dashSpeed:20,range:6,damage:5,baseHp:75,baseDefense:1,interval:1.4,skillPower:1,chargeRate:1.3,role:'援護特化・大器晩成',trait:'小さな声の大きな奇跡',traitText:'操作中は弱い追尾音弾で攻撃。援護のふぇ〜で雑魚を1.8秒停止／ボスの攻撃・防御を5秒間30%低下。初期能力は最弱、Lv.50では全員を超える基礎能力。ツリーのHP・防御成長3倍、攻撃成長2.5倍'},
   {id:'shizuku',name:'雫',title:'紅月の鎌使い',color:'#e5a0ba',moveSpeed:7,dashSpeed:30,range:3.9,damage:39,baseHp:230,baseDefense:16,interval:.64,skillPower:1.15,chargeRate:1.15,role:'近接・HP吸収',trait:'不器用な守り手',traitText:'鎌で与えた実ダメージの10%を自分のHPへ吸収。にゃんるなと編成すると二人のHP・攻撃+12%、必殺ゲージ獲得+20%。二人のゲージ100で特殊連携技。'},
   {id:'prim',name:'プリム',title:'七彩の小竜',color:'#bceaff',moveSpeed:6.2,dashSpeed:26,range:3.5,damage:41,baseHp:265,baseDefense:20,interval:.62,skillPower:1.15,chargeRate:1.15,role:'爪・直線ブレス・搭乗',trait:'キュ〜の約束',traitText:'爪で近接攻撃。必殺技は一直線のプリズムブレス。つきねこと組むとHP・攻撃+12%、ゲージ+20%。搭乗中12秒は二人がメインで攻撃・個別に被弾し、オムソロと同じ速さで移動。終了後20秒待機。'},
-  {id:'hehereal',name:'へへりある',title:'桜心の花弓使い',color:'#ff9dc9',moveSpeed:5.6,dashSpeed:24,range:15,damage:28,baseHp:190,baseDefense:10,interval:.65,skillPower:1.1,chargeRate:1.2,role:'遠距離・追尾弓',trait:'おむすびの約束',traitText:'桜の魔法矢で遠くの敵を追尾。必殺技は追尾矢9連射。第6章ではオムソロの援護として共闘。二人編成時は捕食でオムソロを取り込み、へへへに変身。攻撃力・弓・HP・防御は自分のものを維持。必殺技は捕食の舞に変わり、発動中の撃破で攻撃力が上がる。戦闘終了まで解除不可。'},
+  {id:'hehereal',name:'へへりある',title:'桜心の花弓使い',color:'#ff9dc9',moveSpeed:5.6,dashSpeed:24,range:15,damage:28,baseHp:190,baseDefense:10,interval:.65,skillPower:1.1,chargeRate:1.2,role:'遠距離・追尾弓',trait:'おむすびの約束',traitText:'桜の魔法矢で遠くの敵を追尾。必殺技は追尾矢9連射。第6章ではオムソロの援護として共闘。二人編成時は捕食でオムソロを取り込み、へへへに変身。攻撃力・弓・HP・防御は自分のものを維持。必殺技は捕食の舞に変わり、発動中の撃破1体ごとに攻撃力が＋1。戦闘終了まで解除不可。'},
   {id:'lumi',name:'るみ',title:'指先の光をつなぐ少女',color:'#b8c9ff',moveSpeed:5.6,dashSpeed:24,range:14,damage:30,baseHp:185,baseDefense:9,interval:.72,skillPower:1.1,chargeRate:1.15,role:'直線貫通・レールガン',trait:'ねこみみに、ときめいて',traitText:'指先から色の違う光を放つ。通常は武器ごとの有限射程。もちにゃふぇと編成するとねこみみが生えてねこるみに変わり、通常攻撃・援護・必殺技の射程が無限になる。第7章クリア後に仲間になる。'},
 ];
 export {SKILLS} from './blessings.js';
@@ -137,7 +137,7 @@ export class Adventure {
   isHeroAlive(hero){return this.partyHeroes.includes(hero)&&this.healthFor(hero).hp>0;}
   get hasLivingPartner(){return this.hasPartner&&this.isHeroAlive(this.partnerHero);}
   progressFor(hero){return characterProgress(this.progression,HEROES[hero].id);}
-  statsFor(hero){const profile=[5,6].includes(this.actConfig?.chapter)&&['hehereal','lumi'].includes(this.guestHeroId)&&HEROES[hero].id===this.guestHeroId?{...this.progression,characters:{...this.progression.characters,[this.guestHeroId]:{...this.progression.characters[this.guestHeroId],level:Math.max(60,this.progression.characters[this.guestHeroId].level),breaks:Math.max(4,this.progression.characters[this.guestHeroId].breaks)}}}:this.progression;const stats=combatStats(profile,HEROES[hero]);if(hasShizukuBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*SHIZUKU_BOND.hp);stats.attack*=SHIZUKU_BOND.attack;}if(hasPrimBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*PRIM_BOND.hp);stats.attack*=PRIM_BOND.attack;}if(hero===6&&this.predation?.active)stats.attack+=this.predation.attackBonus;return stats;}
+  statsFor(hero){const profile=[5,6].includes(this.actConfig?.chapter)&&['hehereal','lumi'].includes(this.guestHeroId)&&HEROES[hero].id===this.guestHeroId?{...this.progression,characters:{...this.progression.characters,[this.guestHeroId]:{...this.progression.characters[this.guestHeroId],level:Math.max(60,this.progression.characters[this.guestHeroId].level),breaks:Math.max(4,this.progression.characters[this.guestHeroId].breaks)}}}:this.progression;const stats=combatStats(profile,HEROES[hero]);if(hasShizukuBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*SHIZUKU_BOND.hp);stats.attack*=SHIZUKU_BOND.attack;}if(hasPrimBond(this.party)&&this.partyHeroes.includes(hero)){stats.maxHp=Math.round(stats.maxHp*PRIM_BOND.hp);stats.attack*=PRIM_BOND.attack;}if(hero===0&&this.nyanAwakening?.active)stats.attack*=NYAN_AWAKENING_RULES.attackPower;if(hero===6&&this.predation?.active)stats.attack+=this.predation.attackBonus;return stats;}
   attackProfile(hero){const profile=weaponAttackProfile(this.progression,HEROES[hero]);return {...profile,range:hero===7&&hasNekoLumi(this.party)?Infinity:profile.range,pierce:profile.pierce+(hero===1?this.rank('penetration'):0),interval:profile.interval*(hero===7?Math.pow(.92,this.effectRank('lumiTempo')):hero===6?Math.pow(.92,this.effectRank('sakuraTempo')):hero===5?Math.pow(.92,this.effectRank('primTempo')):hero===4?Math.pow(.92,this.effectRank('shizukuTempo')):hero===2?Math.pow(.9,this.rank('bladeTempo')):1)};}
   healthFor(hero){return this.heroHealth[this.heroId(hero)];}
   refreshStats(){
@@ -169,7 +169,7 @@ export class Adventure {
     this.emit('guestJoin',{heroId:'tsukineko'});return true;
   }
   meetHehereal(){
-    if(this.actConfig.chapter!==5||this.guestHeroId==='hehereal'||this.predation.used||this.party.length!==1||this.party.includes('hehereal')||this.act===24&&this.wave<3)return false;
+    if(this.actConfig.chapter!==5||this.actConfig.extra||this.guestHeroId==='hehereal'||this.predation.used||this.party.length!==1||this.party.includes('hehereal')||this.act===24&&this.wave<3)return false;
     this.guestHeroId='hehereal';this.party=Object.freeze([...this.party,'hehereal']);this.partyHeroes=this.party.map(id=>HEROES.findIndex(h=>h.id===id));this.skillPool=Object.freeze(skillsForParty(this.party,this.progression));this.refreshStats();
     Object.assign(this.partner,{x:this.player.x-1.7,z:this.player.z+1.5,attack:0,face:Math.PI});this.emit('guestJoin',{heroId:'hehereal'});return true;
   }
@@ -224,7 +224,7 @@ export class Adventure {
   spawnEnemy(type,x,z,{elite=false}={}){
     const boss=type==='boss',rare=type===GOLDEN_SLIME.type||type===GOLDEN_HEHE.type,rng=type===GOLDEN_HEHE.type?this.heheRng:rare?this.rareRng:this.rng;const hard=this.difficulty==='hard'?1.3:1,power=boss&&elite?ELITE_BOSS_MULTIPLIER:1;
     const spec=boss?BOSSES[this.actConfig.bossId]:ENEMY_TYPES[type];if(!spec)throw new Error(`Unknown enemy: ${type}`);
-    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra||this.actConfig.awakening?this.actConfig.hpScale:1+(this.actConfig.chapter>=3?this.actConfig.number-1:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
+    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra||this.actConfig.awakening?rare&&this.actConfig.endgame?1:this.actConfig.hpScale:1+(this.actConfig.chapter>=3?this.actConfig.number-1:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
     const e={id:this.ids++,type,bossId:boss?this.actConfig.bossId:null,name:(boss?this.actConfig.boss:spec.name)+(elite?'・深淵':''),elite,x,z,hp,maxHp:hp,speed:spec.speed*(extra?extraCombatFor(this.actConfig).moveScale:1),damage:(boss?(this.actConfig.chapter>=3?92:this.actConfig.chapter===2?62:this.actConfig.chapter===1?45:22):spec.damage)*hard*power*(extra?this.actConfig.damageScale:1),radius:spec.radius*(elite?1.12:1),hit:0,attack:1+rng(),age:0,knockX:0,knockZ:0,face:0,action:0,special:this.actConfig.chapter>=2?(boss?2.4:1.1+rng()*.7):boss?3:1.4+rng(),cast:null,rush:null,recovery:0,enraged:!!extra&&boss,navTimer:0};
     if(rare){e.rare=true;e.expiresAt=this.time+spec.lifetime;}
     if(this.actConfig.awakening)e.damage*=this.actConfig.damageScale;
@@ -305,7 +305,7 @@ export class Adventure {
   hit(e,damage,x,z,crit=false,chain=false,heroId=HEROES[this.player.hero].id,canCharge=true){
     if(e.hp<=0||this.phase==='defeat'||this.phase==='victory'||this.expireGoldenSlime(e))return 0;damage*=mochiDefenseMultiplier(this,e);const dealt=Math.min(e.hp,Math.max(0,damage));e.hp-=damage;e.hit=.15;if(!e.training)this.damageDealt+=Math.min(damage,e.hp+damage);
     const dx=e.x-x,dz=e.z-z,d=Math.hypot(dx,dz)||1;const knock=e.type==='boss'?.5:3.5;e.knockX=dx/d*knock;e.knockZ=dz/d*knock;
-    this.emit('hit',{id:e.id,x:e.x,z:e.z,damage:Math.round(damage),crit});
+    this.emit('hit',{id:e.id,x:e.x,z:e.z,damage:Math.round(damage),crit,heroId});
     if(e.training){if(e.hp<=0){this.emit('death',{id:e.id,x:e.x,z:e.z,enemyType:e.type,training:true});this.observeTutorial('defeat');}return;}
     if(canCharge)this.gainUltimateCharge(heroId,.65);
     if(e.hp<=0){

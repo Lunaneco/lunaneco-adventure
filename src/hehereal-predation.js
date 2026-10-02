@@ -1,16 +1,16 @@
 import {skillsForParty} from './blessings.js';
 import {ultimateBonuses} from './talents.js';
 
-export const PREDATION_KILL_ATTACK_RATE=.1;
+export const PREDATION_KILL_ATTACK_BONUS=1;
 export function predationUltimate(character){
  const bonus=ultimateBonuses(character,'hehereal');
  const pulses=8+bonus.ultimatePulses+bonus.ultimateShots,interval=.35;
- return {id:'hehe-predation-dance',name:'捕食の舞',icon:'link',color:0xffb77c,kind:'predationDance',radius:6.5+bonus.ultimateRadius+bonus.ultimateRange*.25,pulses,interval,duration:pulses*interval,baseDamage:38*(1+bonus.ultimateDamage),immunity:pulses*interval+bonus.ultimateImmunity,note:'魔法の弓を持って周囲を舞う。必殺技中の敵撃破1体ごとに変身時のへへりある自身の攻撃力の10%を加算。上昇は幕終了まで維持。'};
+ return {id:'hehe-predation-dance',name:'捕食の舞',icon:'link',color:0xffb77c,kind:'predationDance',radius:6.5+bonus.ultimateRadius+bonus.ultimateRange*.25,pulses,interval,duration:pulses*interval,baseDamage:38*(1+bonus.ultimateDamage),immunity:pulses*interval+bonus.ultimateImmunity,note:'魔法の弓を持って周囲を舞う。必殺技中の敵撃破1体ごとに攻撃力を＋1。上昇は幕終了まで維持。'};
 }
 export function predationKill(game,heroId){
  const state=game.predation;
  if(game.phase!=='playing'||!state?.active||heroId!=='hehereal'||!game.ultimateEffects.some(e=>e.kind==='predationDance'&&e.heroId==='hehereal'&&e.remaining>0))return false;
- state.danceKills++;state.attackBonus=state.baseAttack*PREDATION_KILL_ATTACK_RATE*state.danceKills;
+ state.danceKills++;state.attackBonus=PREDATION_KILL_ATTACK_BONUS*state.danceKills;
  game.emit('predationPower',{hero:6,heroId:'hehereal',kills:state.danceKills,attackBonus:state.attackBonus});return true;
 }
 

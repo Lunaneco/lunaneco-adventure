@@ -40,7 +40,7 @@ function gate(g){g.phase='playing';g.area=2;g.wave=6;g.exitOpen=true;g.exitDelay
 
 test('fourth chapter follows the old save, is playable at 50, and recruits Shizuku only on the final gate',()=>{
  const old=profile(12,50);assert.equal(old.story.chapterFourCleared,false);assert.equal(isHeroUnlocked(old,'shizuku'),false);assert.ok(isActUnlocked(old,12));assert.equal(isActUnlocked(old,13),false);
- assert.deepEqual(old.story.extraClears,[false,false,false]);assert.deepEqual(EXTRA_ACTS.map(a=>a.id),[20,21,22]);
+ assert.deepEqual(old.story.extraClears,[false,false,false,false,false,false]);assert.deepEqual(EXTRA_ACTS.map(a=>a.id),[20,21,22,33]);
  for(let act=12;act<16;act++){
   const g=quiet({act,progression:old,party:['nyanluna'],hero:0});assert.equal(g.act,act);assert.equal(g.player.hero,0);assert.equal(ACTS[act].recommendedLevel,60);
   const boss=g.spawnEnemy('boss',0,-5);g.hit(boss,1e9,0,0);assert.equal(isHeroUnlocked(g.progression,'shizuku'),false);gate(g);

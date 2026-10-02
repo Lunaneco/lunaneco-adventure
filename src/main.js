@@ -430,7 +430,7 @@ function handleEvents(events){
     if(e.type==='guestJoin'){lastHero=-1;if(e.heroId==='lumi'){toast('るみと共闘！ 指先の光で村を守ろう');announce('るみがNPC援護に参加。もちにゃふぇとの共闘でねこるみに変わり、射程無限になります。正式加入は第7章クリア後です。');}else if(e.heroId==='hehereal'){toast('へへりあると共闘！ 魔法の弓で援護してくれる');announce('おむすびを食べたへへりあるが援護に参加。NPCとして援護のみを行います。正式加入は第6章クリア後です。');}else{toast('つきねこと共闘！ 交代と連携の祝福が解放');announce('つきねこがボス戦に助っ人参戦。操作を交代できます。正式加入は第1章クリア後です。');}}
     if(e.type==='recruited'){growthChanged=true;selectedParty=normalizeParty([...selectedParty,e.heroId],unlockedRoster());persistParty();}
     if(e.type==='nyanAwakeningLearned'){growthChanged=true;toast('にゃんるなの覚醒を習得！ 覚醒ボタンで月光の力を解放');announce(NYAN_AWAKENING_HELP);}
-    if(e.type==='nyanAwakeningStarted'){audio.play('upgrade');toast(`覚醒！ ${NYAN_AWAKENING_RULES.duration}秒間、貫通弾＋追尾弾×2・必殺技の威力2倍`);announce('にゃんるな覚醒。');}
+    if(e.type==='nyanAwakeningStarted'){audio.play('upgrade');toast(`覚醒！ ${NYAN_AWAKENING_RULES.duration}秒間、基本攻撃力${NYAN_AWAKENING_RULES.attackPower}倍・貫通弾＋追尾弾×2`);announce(`にゃんるな覚醒。基本攻撃力が${NYAN_AWAKENING_RULES.attackPower}倍になりました。`);}
     if(e.type==='nyanAwakeningEnded'&&game.phase==='playing'){toast(`覚醒終了 · 再使用まで${NYAN_AWAKENING_RULES.cooldown}秒`);announce('覚醒が終了し、元の姿に戻りました。');}
     if(e.type==='riceAwakened'){growthChanged=true;toast('ライスの力を習得！ 敵や敵の攻撃をドラッグして掴めます');announce(RICE_HELP);}
     if(e.type==='predationPower'){announce(`捕食の舞で敵撃破。攻撃力上昇${e.kills}回、追加攻撃力${Math.round(e.attackBonus)}。幕終了まで維持。`);}
@@ -443,11 +443,11 @@ function handleEvents(events){
     if(e.type==='characterXp'){growthChanged=true;if(e.level>e.before){const name=HEROES.find(h=>h.id===e.heroId)?.name??'仲間';toast(`${name} Lv.${e.level} · 基礎能力アップ`);announce(`${name}がレベル${e.level}になりました。`);}}
     if(e.type==='characterXp'&&e.heroId==='omsolo'&&e.before<RICE_UNLOCK_LEVEL&&e.level>=RICE_UNLOCK_LEVEL&&!hasRicePower(progression)){toast('オムソロの覚醒イベント発生！ 第2章「ライスの力 — 覚醒」へ');announce('レベル50に到達。オムソロのソロ覚醒クエストが解放されました。');}
     if(e.type==='characterXp'&&e.heroId==='nyanluna'&&e.before<NYAN_UNLOCK_LEVEL&&e.level>=NYAN_UNLOCK_LEVEL&&!hasNyanAwakening(progression)){toast('にゃんるな覚醒修行が解放！ 第1章のソロ覚醒イベントへ');announce('レベル50に到達。にゃんるなのソロ覚醒修行が解放されました。');}
-    if(e.type==='attack'&&!e.support)audio.play(e.hero===1?'shot':'attack');
+    if(e.type==='attack'&&!e.support)audio.play(e.hero===1?'shot':'attack',e);
     if(e.type==='heroDown')toast(`${HEROES[e.hero].name}が戦闘不能`);
     if(e.type==='switch'){if(e.automatic)toast(`${HEROES[game.partnerHero].name}が戦闘不能 · ${HEROES[e.hero].name}へ自動交代`);announce(`${HEROES[e.hero].name}を操作中。${game.hasLivingPartner?HEROES[game.partnerHero].name+'が無敵で援護します。':'相方は戦闘不能です。'}`);}
     if(['collect','dash','switch','hurt','upgrade','victory','defeat'].includes(e.type))audio.play(e.type,e);
-    if(e.type==='hit'&&renderFrames%3===0)audio.play('hit');
+    if(e.type==='hit'&&renderFrames%3===0)audio.play('hit',e);
     if(e.type==='upgrade')upgrade();
     if(e.type==='stageClear'){
       clearTimeout(toastTimer);$('#toast').classList.remove('visible');
@@ -458,7 +458,7 @@ function handleEvents(events){
     if(e.type==='routeReward')toast('強ボス撃破！ ★2 深星の宝珠 +1・追加素材を獲得');
     if(e.type==='exitOpen'){clearTimeout(bannerTimer);clearTimeout(ultimateBannerTimer);clearTimeout(toastTimer);$('#wave-banner').classList.remove('visible');$('#ultimate-banner').classList.remove('visible');$('#toast').classList.remove('visible');audio.play('upgrade');announce(e.final?'最後の光を、月の門へ届けよう。':'月の門が開きました。光る輪へ進もう。');}
     if(e.type==='wave'){
-      const area=game.actConfig.stages[e.area];$('#area-name').textContent=game.layout.name;$('#area-sub').textContent=`CHAPTER 0${game.actConfig.chapter+1} · ${game.actConfig.awakening?'SOLO AWAKENING · Lv.50':game.actConfig.extra?'EXTRA · Lv.50':`ACT 0${game.actConfig.number}`}`;$('#boss-hud span').textContent=game.actConfig.boss;$('#boss-hud small').textContent=BOSSES[game.actConfig.bossId].subtitle;
+      const area=game.actConfig.stages[e.area];$('#area-name').textContent=game.layout.name;$('#area-sub').textContent=`CHAPTER 0${game.actConfig.chapter+1} · ${game.actConfig.awakening?'SOLO AWAKENING · Lv.50':game.actConfig.extra?`EXTRA · Lv.${game.actConfig.recommendedLevel}`:`ACT 0${game.actConfig.number}`}`;$('#boss-hud span').textContent=game.actConfig.boss;$('#boss-hud small').textContent=BOSSES[game.actConfig.bossId].subtitle;
       clearTimeout(ultimateBannerTimer);$('#ultimate-banner').classList.remove('visible');$('#wave-banner span').textContent=e.boss?'FINAL ENCOUNTER':`WAVE ${String(e.wave).padStart(2,'0')}`;$('#wave-banner strong').textContent=e.boss?(game.actConfig.apex?'夢蝕王の最終試練':game.actConfig.boss):game.layout.name;$('#wave-banner small').textContent=e.boss?(game.actConfig.apex?'HP半分で夢蝕覚醒。包囲陣と星弾の切れ目へ回避しよう。':game.actConfig.extra?extraCombatHint(game.actConfig):BOSSES[game.actConfig.bossId].hint):fieldSummary(game.act,game.area);$('#wave-banner').classList.add('visible');clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>$('#wave-banner').classList.remove('visible'),2800);audio.play('wave');announce(e.boss?`最終戦、${game.actConfig.boss}が現れました。`:`ウェーブ${e.wave}、${area.name}`);if(e.boss&&storyEnabled&&storyScenesFor(game.act)?.guardian)pendingStory='guardian';
     }
     if(e.type==='rescueSaved'){toast('救出成功！ 月の門へ進んで手当てをしよう');announce('オムソロを救出。最後の月の門を通ると仲間になります。');}
@@ -469,7 +469,7 @@ function handleEvents(events){
     if(e.type==='victory'||e.type==='defeat')showResult(e.type==='victory');
     if(e.type==='bossAttack'&&!game.exitOpen&&game.phase==='playing')toast(`${e.label} — 光る範囲を避けよう`);
     if(e.type==='bossPhase'){toast(e.label);announce(e.label);}
-    if(e.type==='rareSpawn'){audio.play('upgrade');toast(e.rareType===GOLDEN_HEHE.type?'黄金のへへへ出現！ 素材2倍＋★3素材を大量獲得':'金色のスライム出現！ 20秒以内に倒すとガチャ券10枚＋大量の素材・EXP');announce(e.rareType===GOLDEN_HEHE.type?GOLDEN_HEHE.hint:GOLDEN_SLIME.hint);}
+    if(e.type==='rareSpawn'){audio.play('upgrade');toast(e.rareType===GOLDEN_HEHE.type?'黄金のへへへ出現！ 素材2倍＋★3素材を大量獲得':'金色のスライム出現！ 20秒以内に倒すとガチャ券10枚＋大量の素材・EXP');announce(e.rareType===GOLDEN_HEHE.type?(game.actConfig.endgame?extraCombatHint(game.actConfig):GOLDEN_HEHE.hint):GOLDEN_SLIME.hint);}
     if(e.type==='rareEscape'){const name=e.rareType===GOLDEN_HEHE.type?'黄金のへへへ':'金色のスライム';toast(`${name}は逃げていった…`);announce(`${name}が逃走しました。`);}
     if(e.type==='rareDefeated'){growthChanged=true;audio.play('upgrade');toast(`レア討伐！ ガチャ券 +${e.tickets}枚・覚醒の輝石 +1個・大量の素材・仲間EXPを獲得`);announce(`${e.rareType===GOLDEN_HEHE.type?'黄金のへへへ':'金色のスライム'}討伐。武器ガチャ券${e.tickets}枚、覚醒の輝石1個と大量の素材、仲間の経験値を獲得しました。`);}
     if(e.type==='enemyIntro'){const enemy=ENEMY_TYPES[e.enemyType];toast(`${enemy.name}：${enemy.hint}`);announce(`${enemy.name}が出現。${enemy.hint}`);}
@@ -516,7 +516,7 @@ function updateHud(){
   const objectiveBox=$('#objective'),crystalBox=$('#stage-crystal-hud');
   if(getComputedStyle(objectiveBox).display!=='none'){crystalBox.style.width=`${objectiveBox.offsetWidth}px`;crystalBox.style.height=`${objectiveBox.offsetHeight}px`;}
   $('#exit-guide').classList.toggle('hidden',!game.exitOpen);$('#exit-instruction').textContent=game.wave===6?'最後の光を届けよう':'光る輪へ進もう';$('#exit-guide small').textContent=game.wave===6?`月の門へ移動すると、${actLabel(game.act)}クリア・報酬獲得`:'矢印の先へ移動すると、次のステージへ';
-  const boss=game.enemies.find(e=>e.type==='boss');$('#boss-hud').classList.toggle('hidden',!boss);if(boss){$('#boss-fill').style.width=`${boss.hp/boss.maxHp*100}%`;$('#boss-hud span').textContent=boss.name;$('#boss-hud small').textContent=boss.mochiWeakenUntil>game.time?`ふぇ〜：攻撃 −${Math.round(boss.mochiAttackDown*100)}% ／ 防御 −${Math.round(boss.mochiDefenseDown*100)}% · ${Math.ceil(boss.mochiWeakenUntil-game.time)}秒`:game.actConfig.apex?(boss.apexAwakened?'夢蝕覚醒 · 包囲魔法と星弾が増加':'全EX最難関 · HP半分で夢蝕覚醒'):boss.elite?`DANGER · ${ELITE_BOSS_LABEL}`:boss.enraged?'猛攻 · 連続攻撃が増加':BOSSES[boss.bossId].subtitle;}
+  const boss=game.enemies.find(e=>e.type==='boss');$('#boss-hud').classList.toggle('hidden',!boss);if(boss){$('#boss-fill').style.width=`${boss.hp/boss.maxHp*100}%`;$('#boss-hud span').textContent=boss.name;$('#boss-hud small').textContent=boss.mochiWeakenUntil>game.time?`ふぇ〜：攻撃 −${Math.round(boss.mochiAttackDown*100)}% ／ 防御 −${Math.round(boss.mochiDefenseDown*100)}% · ${Math.ceil(boss.mochiWeakenUntil-game.time)}秒`:game.actConfig.apex?(boss.apexAwakened?'夢蝕覚醒 · 包囲魔法と星弾が増加':'Lv.50 EX最難関 · HP半分で夢蝕覚醒'):boss.elite?`DANGER · ${ELITE_BOSS_LABEL}`:boss.enraged?'猛攻 · 連続攻撃が増加':BOSSES[boss.bossId].subtitle;}
   $('#combo').classList.toggle('visible',game.combo>=3);$('#combo strong').textContent=game.combo;
   const signature=game.ultimateSpec(),casting=game.ultimateActive(p.hero),ready=p.charge>=100&&!casting;
   $('#ultimate').style.setProperty('--charge',`${p.charge*3.6}deg`);$('#ultimate').classList.toggle('ready',ready);$('#ultimate').classList.toggle('casting',casting);$('#ult-label').textContent=casting?'発動中':ready?(game.duetReady?'特殊連携':'必殺技'):`${Math.floor(p.charge)}%`;$('#ultimate').setAttribute('aria-label',`${signature.name}（E）${casting?'発動中':`ゲージ${Math.floor(p.charge)}%`}`);$('#ultimate').setAttribute('aria-disabled',String(!ready||game.phase!=='playing'));

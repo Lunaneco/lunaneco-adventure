@@ -23,7 +23,7 @@ const gate=g=>{g.phase='playing';g.wave=6;g.exitOpen=true;g.exitDelay=0;g.pendin
 test('chapter three opens after chapter two; existing extras, wallets and heroes survive migration',()=>{
  for(const n of [0,4,7])assert.equal(isActUnlocked(profile(n),8),false);
  const old=profile(8);old.story.extraClears=[true,false];old.inventory.starBud=456;const restored=normalizeProgression(JSON.parse(JSON.stringify(old)),HEROES);
- assert.ok(isActUnlocked(restored,8));assert.equal(isActUnlocked(restored,9),false);assert.deepEqual(restored.story.extraClears,[true,false,false]);assert.equal(restored.inventory.starBud,456);assert.equal(restored.characters.mochinyafe.level,1);
+ assert.ok(isActUnlocked(restored,8));assert.equal(isActUnlocked(restored,9),false);assert.deepEqual(restored.story.extraClears,[true,false,false,false,false,false]);assert.equal(restored.inventory.starBud,456);assert.equal(restored.characters.mochinyafe.level,1);
  for(const a of EXTRA_ACTS)assert.equal(isActUnlocked(restored,a.id),a.chapter<2);assert.equal(isHeroUnlocked(restored,'mochinyafe'),false);
 });
 test('only the last chapter-three gate recruits Mochinyafe once and saves it permanently',()=>{

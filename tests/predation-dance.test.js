@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {Adventure,HEROES} from '../src/model.js';
 import {tickUltimates} from '../src/ultimate-combat.js';
-import {finishPredation,predationUltimate,PREDATION_KILL_ATTACK_RATE} from '../src/hehereal-predation.js';
+import {finishPredation,predationUltimate,PREDATION_KILL_ATTACK_BONUS} from '../src/hehereal-predation.js';
 import {ULTIMATE_ART} from '../src/ultimate-art.js';
 import {statSync} from 'node:fs';
 import {TALENT_NODES} from '../src/talents.js';
@@ -15,12 +15,20 @@ test('eight mobile-following dance pulses hit nearby enemies and not distant one
  const g=game(),inside=enemy(g),outside=enemy(g,17,0);g.healthFor(6).hp=131;cast(g);const after=inside.hp;assert.ok(after<1e9);assert.equal(outside.hp,1e9);assert.equal(g.player.hp,131);
  for(let i=0;i<180;i++){inside.x=0;inside.z=3;inside.knockX=inside.knockZ=0;g.tick(1/60);}assert.equal(g.drainEvents().filter(e=>e.type==='predationPulse').length,8);assert.equal(g.ultimateEffects.length,0);assert.equal(g.player.charge,0);assert.equal(g.player.hp,131);
 });
-test('each kill during the dance adds a fixed 10% of Hehereal own transformation attack, not compounding',()=>{
- const g=game(),own=g.statsFor(6).attack;enemy(g,0,2,1);enemy(g,1,2,1);cast(g);const base=g.predation.baseAttack;near(base,own);assert.equal(g.predation.danceKills,2);near(g.predation.attackBonus,own*PREDATION_KILL_ATTACK_RATE*2);near(g.statsFor(6).attack,own+own*.2);const third=enemy(g,10,0,1);g.hit(third,999,0,0,false,false,'hehereal');assert.equal(g.predation.danceKills,3);near(g.statsFor(6).attack,own+own*.3);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);
+test('each kill during the dance adds exactly one attack point, not a percentage or compounding',()=>{
+ assert.equal(PREDATION_KILL_ATTACK_BONUS,1);
+ const g=game(),own=g.statsFor(6).attack;enemy(g,0,2,1);enemy(g,1,2,1);cast(g);const base=g.predation.baseAttack;near(base,own);assert.equal(g.predation.danceKills,2);assert.equal(g.predation.attackBonus,2);near(g.statsFor(6).attack,own+2);const third=enemy(g,10,0,1);g.hit(third,999,0,0,false,false,'hehereal');assert.equal(g.predation.danceKills,3);assert.equal(g.predation.attackBonus,3);near(g.statsFor(6).attack,own+3);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);
+ assert.deepEqual(g.drainEvents().filter(e=>e.type==='predationPower').map(e=>e.attackBonus),[1,2,3]);
+ assert.match(g.ultimateSpec().note,/攻撃力を＋1/);assert.match(HEROES[6].traitText,/撃破1体ごとに攻撃力が＋1/);
+});
+test('Hehereal level and growth upgrades never change the flat +1 per kill',()=>{
+ const attacks=[];
+ for(const [level,tree] of [[1,[]],[60,[]],[80,TALENT_NODES.map(n=>n.id)]]){const g=game();Object.assign(g.progression.characters.hehereal,{level,tree});const own=g.statsFor(6).attack;attacks.push(own);enemy(g,0,2,1);cast(g);assert.equal(g.predation.attackBonus,1);near(g.statsFor(6).attack,own+1);}
+ assert.ok(new Set(attacks).size>1);
 });
 test('Omsolo upgrades cannot affect either transformation base attack or the kill bonus',()=>{
  const results=[];
- for(const level of [1,40,80]){const g=game();g.progression.characters.omsolo.level=level;const own=g.statsFor(6).attack;enemy(g,0,2,1);cast(g);assert.equal(g.predation.baseAttack,own);near(g.predation.attackBonus,own*.1);results.push(g.statsFor(6).attack);}
+ for(const level of [1,40,80]){const g=game();g.progression.characters.omsolo.level=level;const own=g.statsFor(6).attack;enemy(g,0,2,1);cast(g);assert.equal(g.predation.baseAttack,own);assert.equal(g.predation.attackBonus,1);results.push(g.statsFor(6).attack);}
  assert.ok(results.every(attack=>attack===results[0]));
 });
 test('normal attacks and chained nova kills during the ultimate also qualify; non-ultimate kills never do',()=>{
@@ -31,7 +39,7 @@ test('same dead enemy, training enemies, rare escape and other owners cannot far
  const other=enemy(g,10,0,1);g.hit(other,999,0,0,false,false,'omsolo');assert.equal(g.predation.danceKills,1);const rare=g.spawnEnemy('goldenHehe',10,0);rare.expiresAt=g.time;g.hit(rare,1e9,0,0);assert.equal(g.predation.danceKills,1);
 });
 test('power scales subsequent dance hits immediately, persists after dance and waves, and accumulates across casts',()=>{
- const g=game();g.predate();const base=g.predation.baseAttack;g.player.charge=100;g.ultimate();const effect=g.ultimateEffects[0],normalDamage=g.skillDamage('hehereal',effect.spec.baseDamage);const kill=enemy(g,10,0,1);g.hit(kill,999,0,0);near(g.skillDamage('hehereal',effect.spec.baseDamage),normalDamage*1.1);tickUltimates(g,10);near(g.statsFor(6).attack,base*1.1);g.startWave();near(g.statsFor(6).attack,base*1.1);g.enemies=[];enemy(g,0,2,1);g.player.charge=100;g.ultimate();assert.equal(g.predation.danceKills,2);near(g.statsFor(6).attack,base*1.2);
+ const g=game();g.predate();const base=g.predation.baseAttack;g.player.charge=100;g.ultimate();const effect=g.ultimateEffects[0],normalDamage=g.skillDamage('hehereal',effect.spec.baseDamage);const kill=enemy(g,10,0,1);g.hit(kill,999,0,0);near(g.skillDamage('hehereal',effect.spec.baseDamage),normalDamage*(base+1)/base);tickUltimates(g,10);near(g.statsFor(6).attack,base+1);g.startWave();near(g.statsFor(6).attack,base+1);g.enemies=[];enemy(g,0,2,1);g.player.charge=100;g.ultimate();assert.equal(g.predation.danceKills,2);assert.equal(g.predation.attackBonus,2);near(g.statsFor(6).attack,base+2);
 });
 test('movement relocates the dance; pause freezes it and stage doors cancel only the dance, not earned power',()=>{
  const g=game();enemy(g,0,2,1);cast(g);const bonus=g.predation.attackBonus;g.player.x=5;g.player.z=0;const nearNew=enemy(g,7,0);tickUltimates(g,.35);assert.ok(nearNew.hp<1e9);assert.equal(g.ultimateEffects[0].x,5);g.pause();const effect=structuredClone(g.ultimateEffects);g.tick(3);assert.deepEqual(g.ultimateEffects,effect);g.resume();g.openExit();assert.equal(g.ultimateEffects.length,0);assert.equal(g.predation.active,true);assert.equal(g.predation.attackBonus,bonus);

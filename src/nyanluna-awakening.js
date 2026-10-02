@@ -2,7 +2,7 @@ import {FIELD_THEMES} from './field-themes.js';
 
 export const NYAN_UNLOCK_LEVEL=50;
 export const NYAN_QUEST_ID=32;
-export const NYAN_AWAKENING_RULES=Object.freeze({duration:20,cooldown:60,ultimatePower:2});
+export const NYAN_AWAKENING_RULES=Object.freeze({duration:20,cooldown:60,attackPower:1.5,ultimatePower:2});
 const stage=(name,theme,note,index)=>Object.freeze({name,theme,image:FIELD_THEMES[theme].image,note,waves:`WAVE 0${index*2+1}–0${index*2+2}`});
 export const NYAN_QUEST=Object.freeze({
   id:NYAN_QUEST_ID,chapter:0,number:1,awakening:'nyanluna',soloHero:'nyanluna',recommendedLevel:NYAN_UNLOCK_LEVEL,difficulty:'normal',
@@ -12,7 +12,7 @@ export const NYAN_QUEST=Object.freeze({
 });
 export const nyanQuestUnlocked=profile=>Number.isFinite(profile?.characters?.nyanluna?.level)&&profile.characters.nyanluna.level>=NYAN_UNLOCK_LEVEL;
 export const hasNyanAwakening=profile=>profile?.awakenings?.nyanluna===true&&nyanQuestUnlocked(profile);
-export const NYAN_AWAKENING_HELP=`にゃんるな操作中に「覚醒」（G）で${NYAN_AWAKENING_RULES.duration}秒間変身。通常攻撃が貫通弾1発＋追尾弾2発に変わり、必殺技は覚醒版・威力${NYAN_AWAKENING_RULES.ultimatePower}倍。解除後${NYAN_AWAKENING_RULES.cooldown}秒で再使用。交代しても残り時間は進み、戦闘終了で元に戻ります。`;
+export const NYAN_AWAKENING_HELP=`にゃんるな操作中に「覚醒」（G）で${NYAN_AWAKENING_RULES.duration}秒間変身。覚醒中は基本攻撃力${NYAN_AWAKENING_RULES.attackPower}倍、通常攻撃が貫通弾1発＋追尾弾2発に変わり、必殺技は覚醒版・固有威力${NYAN_AWAKENING_RULES.ultimatePower}倍（攻撃力補正込みで通常時の${NYAN_AWAKENING_RULES.attackPower*NYAN_AWAKENING_RULES.ultimatePower}倍）。解除後${NYAN_AWAKENING_RULES.cooldown}秒で再使用。交代しても残り時間は進み、戦闘終了で元に戻ります。`;
 export const createNyanAwakening=()=>({active:false,remaining:0,cooldown:0});
 export function canAwakenNyan(game){
   return game?.phase==='playing'&&!game.exitOpen&&!game.travelOpen&&!game.tutorial?.active&&game.player.hero===0&&game.player.hp>0&&hasNyanAwakening(game.progression)&&!game.nyanAwakening.active&&game.nyanAwakening.cooldown<=1e-8&&!game.ultimateActive(0);
@@ -38,7 +38,7 @@ export function tickNyanAwakening(game,dt){
 }
 export function awakenedNyanUltimate(normal){
   return {...normal,id:'moon-awakening-sanctuary',name:'月華覚醒・双星の聖域',awakened:true,color:0xe7c9ff,baseDamage:normal.baseDamage*NYAN_AWAKENING_RULES.ultimatePower,radius:normal.radius+2,
-    note:`覚醒の月華結界を展開。通常版の${NYAN_AWAKENING_RULES.ultimatePower}倍の威力で月光が脈動し、広い範囲の敵を攻撃・減速。育成した必殺技の効果も引き継ぐ。`};
+    note:`覚醒の月華結界を展開。必殺技の固有威力は通常版の${NYAN_AWAKENING_RULES.ultimatePower}倍（覚醒中の攻撃力${NYAN_AWAKENING_RULES.attackPower}倍補正込みで通常時の${NYAN_AWAKENING_RULES.attackPower*NYAN_AWAKENING_RULES.ultimatePower}倍）。月光が脈動し、広い範囲の敵を攻撃・減速。育成した必殺技の効果も引き継ぐ。`};
 }
 export function fireAwakenedNyan(game,source,{enemy,angle,damage,crit,range}){
   const base={owner:'player',heroId:'nyanluna',x:source.x,z:source.z,damage,crit,awakened:true};

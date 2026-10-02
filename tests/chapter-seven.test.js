@@ -4,7 +4,7 @@ import {existsSync,readFileSync} from 'node:fs';
 import {Adventure,HEROES} from '../src/model.js';
 import {normalizeProgression,combatStats} from '../src/progression.js';
 import {ACTS,CHAPTERS,actFor,completeAct,nextStoryAct,isActUnlocked} from '../src/acts.js';
-import {LUMI_ACT_IDS,SEVENTH_CHAPTER_SCENES} from '../src/chapter-seven.js';
+import {LUMI_ACT_IDS,SEVENTH_CHAPTER_SCENES,SEVENTH_CHAPTER_STORY_BACKGROUND} from '../src/chapter-seven.js';
 import {hasNekoLumi} from '../src/lumi-combat.js';
 import {ANTI_KEMO_ENEMIES,ANTI_KEMO_BOSSES} from '../src/chapter-seven-enemies.js';
 import {enemyRosterForAct} from '../src/enemies.js';
@@ -23,6 +23,14 @@ const profile=(cleared=32)=>normalizeProgression({story:{version:2,actClears:Arr
 const quiet=(options={})=>{const g=new Adventure({act:0,seed:17,progression:profile(),hero:7,party:['lumi'],...options});g.enemies=[];g.waveSpawned=g.waveGoal;g.waveBreak=-999;g.player.attack=g.partner.attack=999;g.rng=()=>1;g.drainEvents();return g;};
 const finish=g=>{g.wave=6;g.area=2;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.ok(g.crossExit());};
 const target=(g,x,z)=>{const e=g.spawnEnemy('moss',x,z);Object.assign(e,{hp:1e6,maxHp:1e6,speed:0,special:999,attack:999});return e;};
+
+test('every chapter-seven dialogue uses the character-free village background, not the Lumi cast illustration',()=>{
+ assert.equal(SEVENTH_CHAPTER_STORY_BACKGROUND,'assets/story/kemo-village-background-v2.png');
+ assert.ok(readFileSync('public/'+SEVENTH_CHAPTER_STORY_BACKGROUND).length>10000);
+ const scenes=SEVENTH_CHAPTER_SCENES.flatMap(act=>Object.values(act));assert.equal(scenes.length,16);
+ for(const scene of scenes)assert.equal(scene.image,SEVENTH_CHAPTER_STORY_BACKGROUND,scene.title);
+ assert.ok(existsSync('public/assets/story/lumi-village-story-v1.png'),'original cast art is retained');
+});
 
 test('chapter seven preserves all previous IDs and saves, unlocks sequentially, and recruits only at the last gate',()=>{
  const p=profile(28);assert.equal(p.story.actClears.length,32);assert.deepEqual(p.story.actClears.slice(28),[false,false,false,false]);assert.equal(nextStoryAct(27),28);assert.ok(isActUnlocked(p,28));assert.ok(!isHeroUnlocked(p,'lumi'));assert.equal(CHAPTERS[6].start,28);assert.equal(ACTS.length,28);

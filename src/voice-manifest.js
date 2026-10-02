@@ -12,6 +12,7 @@ import {MOCHI_VOICE_MANIFEST} from './mochi-voice-manifest.js';
 // v1.46: Measured battle loudness supports per-clip normalization before 50% playback. Removed Tsukineko damage grunt.
 // v1.47: Tsukineko damage reaction retaken as a soft, cute ita; calibrated to the existing battle level.
 // 2026-10-01: Nyanluna battle clips denoised; faded boundaries and content-addressed URLs.
+// 2026-10-03: All 27 Nyanluna battle clips re-cleaned from original takes: declick, denoise, calibrated gain.
 export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_MANIFEST,...CHAPTER_SIX_VOICE_MANIFEST,...CHAPTER_FIVE_VOICE_MANIFEST,...CHAPTER_FOUR_VOICE_MANIFEST,...MOCHI_VOICE_MANIFEST,
   "nyanluna-a4069723": {
     "file": "assets/voices/nyanluna/nyanluna-a4069723-47459080630d.mp3",
@@ -36,12 +37,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-hurt-1": {
-    "file": "assets/voices/nyanluna/nyanluna-hurt-1-c72086bfd5e0.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-hurt-1-e0428977c3d5.mp3",
     "who": "nyanluna",
     "text": "いたっ！",
     "duration": 1.44,
     "kind": "battle",
-    "normalizationDb": 1.49
+    "normalizationDb": 1.27
   },
   "narrator-465249cc": {
     "file": "assets/voices/narrator/narrator-465249cc.mp3",
@@ -58,12 +59,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-lowhp-1": {
-    "file": "assets/voices/nyanluna/nyanluna-lowhp-1-426264874cd9.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-lowhp-1-61bb22f07f39.mp3",
     "who": "nyanluna",
     "text": "少し、距離をとろう……！",
     "duration": 2.23,
     "kind": "battle",
-    "normalizationDb": 0.25
+    "normalizationDb": 0.32
   },
   "tsukineko-heal-1": {
     "file": "assets/voices/tsukineko/tsukineko-heal-1-7f64150a65b2.mp3",
@@ -89,12 +90,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.05
   },
   "nyanluna-levelup-1": {
-    "file": "assets/voices/nyanluna/nyanluna-levelup-1-1f4505e10b99.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-levelup-1-b240ee101c4e.mp3",
     "who": "nyanluna",
     "text": "また一つ、強くなれたね！",
     "duration": 2.56,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.3
   },
   "omsolo-lowhp-1": {
     "file": "assets/voices/omsolo/omsolo-lowhp-1.mp3",
@@ -121,12 +122,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.41
   },
   "nyanluna-dash-1": {
-    "file": "assets/voices/nyanluna/nyanluna-dash-1-eeabe83cd0a6.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-dash-1-3383915fbfd8.mp3",
     "who": "nyanluna",
     "text": "こっちだよ！",
     "duration": 0.72,
     "kind": "battle",
-    "normalizationDb": 0.22
+    "normalizationDb": 0.32
   },
   "tsukineko-wave-1": {
     "file": "assets/voices/tsukineko/tsukineko-wave-1-a0698d8480fe.mp3",
@@ -137,12 +138,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.4
   },
   "nyanluna-equip-1": {
-    "file": "assets/voices/nyanluna/nyanluna-equip-1-bbd9e83d3d27.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-equip-1-76d32a29a18a.mp3",
     "who": "nyanluna",
     "text": "新しい相棒だね。よろしく！",
     "duration": 2.92,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.35
   },
   "tsukineko-ultimate-1": {
     "file": "assets/voices/tsukineko/tsukineko-ultimate-1-d5821d60ada6.mp3",
@@ -161,12 +162,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.26
   },
   "nyanluna-start-1": {
-    "file": "assets/voices/nyanluna/nyanluna-start-1-7376c1dee6ef.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-start-1-e827b8187d02.mp3",
     "who": "nyanluna",
     "text": "月の灯りを探しに、出発！",
     "duration": 3.21,
     "kind": "battle",
-    "normalizationDb": -0.98
+    "normalizationDb": -0.91
   },
   "omsolo-levelup-1": {
     "file": "assets/voices/omsolo/omsolo-levelup-1.mp3",
@@ -224,12 +225,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.0106
   },
   "nyanluna-switch-1": {
-    "file": "assets/voices/nyanluna/nyanluna-switch-1-26db91c9837d.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-switch-1-4ee2a721e234.mp3",
     "who": "nyanluna",
     "text": "わたしに任せて！",
     "duration": 1.18,
     "kind": "battle",
-    "normalizationDb": 0.27
+    "normalizationDb": 0.3
   },
   "omsolo-exit-1": {
     "file": "assets/voices/omsolo/omsolo-exit-1.mp3",
@@ -240,7 +241,7 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -1.48
   },
   "nyanluna-attack-1": {
-    "file": "assets/voices/nyanluna/nyanluna-attack-1-ed7646160e42.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-attack-1-e1d202f630df.mp3",
     "who": "nyanluna",
     "text": "それっ！",
     "duration": 0.69,
@@ -263,28 +264,28 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "tutorial"
   },
   "nyanluna-treasure-1": {
-    "file": "assets/voices/nyanluna/nyanluna-treasure-1-9b11eb126aa3.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-treasure-1-5a6642e56764.mp3",
     "who": "nyanluna",
     "text": "見て！ 特別な宝物だよ！",
     "duration": 2.87,
     "kind": "battle",
-    "normalizationDb": 0.25
+    "normalizationDb": 0.28
   },
   "nyanluna-blessing-1": {
-    "file": "assets/voices/nyanluna/nyanluna-blessing-1-5fbcb4a9beee.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-blessing-1-5a43fac90037.mp3",
     "who": "nyanluna",
     "text": "この光、力を貸してね！",
     "duration": 2.78,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.29
   },
   "nyanluna-recruit-1": {
-    "file": "assets/voices/nyanluna/nyanluna-recruit-1-1c02ee5cc929.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-recruit-1-8553edfa2696.mp3",
     "who": "nyanluna",
     "text": "一緒に行こう！ きっと楽しい旅になるよ。",
     "duration": 3.57,
     "kind": "battle",
-    "normalizationDb": 0.25
+    "normalizationDb": 0.28
   },
   "komusubi-2af428d": {
     "file": "assets/voices/komusubi/komusubi-2af428d.mp3",
@@ -302,12 +303,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.06
   },
   "nyanluna-defeat-1": {
-    "file": "assets/voices/nyanluna/nyanluna-defeat-1-57c9079ea40a.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-defeat-1-de3421e40e19.mp3",
     "who": "nyanluna",
     "text": "まだ、あきらめない。また、挑戦しよう。",
     "duration": 3.69,
     "kind": "battle",
-    "normalizationDb": -0.61
+    "normalizationDb": -0.54
   },
   "narrator-585bc08": {
     "file": "assets/voices/narrator/narrator-585bc08.mp3",
@@ -324,12 +325,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-heal-1": {
-    "file": "assets/voices/nyanluna/nyanluna-heal-1-980323754011.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-heal-1-e768be2da1db.mp3",
     "who": "nyanluna",
     "text": "ほっとした。もう大丈夫！",
     "duration": 2.83,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.35
   },
   "nyanluna-80e6eae7": {
     "file": "assets/voices/nyanluna/nyanluna-80e6eae7-08e56b1ba56c.mp3",
@@ -384,12 +385,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.42
   },
   "nyanluna-wave-1": {
-    "file": "assets/voices/nyanluna/nyanluna-wave-1-46a04304eb75.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-wave-1-16d057ca3e4e.mp3",
     "who": "nyanluna",
     "text": "次の魔物が来るよ。気をつけて！",
     "duration": 2.88,
     "kind": "battle",
-    "normalizationDb": 0.25
+    "normalizationDb": 0.31
   },
   "tsukineko-241cff32": {
     "file": "assets/voices/tsukineko/tsukineko-241cff32-63312e44afc0.mp3",
@@ -428,12 +429,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "tutorial"
   },
   "nyanluna-boss-1": {
-    "file": "assets/voices/nyanluna/nyanluna-boss-1-9bdb724932e4.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-boss-1-e75310c4e72b.mp3",
     "who": "nyanluna",
     "text": "強い気配……。落ち着いて、動きを見よう！",
     "duration": 4.11,
     "kind": "battle",
-    "normalizationDb": -4.04
+    "normalizationDb": -3.98
   },
   "omsolo-recruit-1": {
     "file": "assets/voices/omsolo/omsolo-recruit-1.mp3",
@@ -451,12 +452,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-down-1": {
-    "file": "assets/voices/nyanluna/nyanluna-down-1-cb62f1cecaea.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-down-1-9301ed8253cd.mp3",
     "who": "nyanluna",
     "text": "ごめん……あとは、お願い……。",
     "duration": 3.22,
     "kind": "battle",
-    "normalizationDb": -0.51
+    "normalizationDb": -0.46
   },
   "tsukineko-34c8da3e": {
     "file": "assets/voices/tsukineko/tsukineko-34c8da3e-492be5939bcb.mp3",
@@ -481,12 +482,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.06
   },
   "nyanluna-victory-1": {
-    "file": "assets/voices/nyanluna/nyanluna-victory-1-cc76ef41579e.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-victory-1-65677d7b490d.mp3",
     "who": "nyanluna",
     "text": "やったね！ みんな、ありがとう！",
     "duration": 3.25,
     "kind": "battle",
-    "normalizationDb": 0.24
+    "normalizationDb": 0.3
   },
   "narrator-3e075149": {
     "file": "assets/voices/narrator/narrator-3e075149.mp3",
@@ -536,12 +537,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.16
   },
   "nyanluna-victory-2": {
-    "file": "assets/voices/nyanluna/nyanluna-victory-2-aa42ce5b18ff.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-victory-2-729a427b53e4.mp3",
     "who": "nyanluna",
     "text": "この先へ、一緒に進もう！",
     "duration": 2.69,
     "kind": "battle",
-    "normalizationDb": 0.31
+    "normalizationDb": 0.42
   },
   "tsukineko-treasure-1": {
     "file": "assets/voices/tsukineko/tsukineko-treasure-1-a4b3be9d6138.mp3",
@@ -789,20 +790,20 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-switch-2": {
-    "file": "assets/voices/nyanluna/nyanluna-switch-2-f24126a0214f.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-switch-2-21f094049cf1.mp3",
     "who": "nyanluna",
     "text": "うん、交代だね！",
     "duration": 1.58,
     "kind": "battle",
-    "normalizationDb": 0.23
+    "normalizationDb": 0.26
   },
   "nyanluna-attack-2": {
-    "file": "assets/voices/nyanluna/nyanluna-attack-2-f033563b151b.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-attack-2-8193a867ae21.mp3",
     "who": "nyanluna",
     "text": "光よ！",
     "duration": 0.66,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.29
   },
   "narrator-b3a71b84": {
     "file": "assets/voices/narrator/narrator-b3a71b84.mp3",
@@ -812,12 +813,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-support-1": {
-    "file": "assets/voices/nyanluna/nyanluna-support-1-97e03bf920c1.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-support-1-b85664d87cbf.mp3",
     "who": "nyanluna",
     "text": "こっちから援護するよ！",
     "duration": 1.25,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.31
   },
   "narrator-eac8ec41": {
     "file": "assets/voices/narrator/narrator-eac8ec41.mp3",
@@ -827,12 +828,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-dash-2": {
-    "file": "assets/voices/nyanluna/nyanluna-dash-2-50eea2facc04.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-dash-2-e22b6ecbace8.mp3",
     "who": "nyanluna",
     "text": "よっと！",
     "duration": 0.77,
     "kind": "battle",
-    "normalizationDb": 0.29
+    "normalizationDb": 0.31
   },
   "tsukineko-defeat-1": {
     "file": "assets/voices/tsukineko/tsukineko-defeat-1-049fb796ed2e.mp3",
@@ -888,12 +889,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.0
   },
   "nyanluna-exit-1": {
-    "file": "assets/voices/nyanluna/nyanluna-exit-1-069621be6cd9.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-exit-1-b5dce10c7b6d.mp3",
     "who": "nyanluna",
     "text": "月の門が開いたよ！",
     "duration": 2.01,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.29
   },
   "nyanluna-81da10c": {
     "file": "assets/voices/nyanluna/nyanluna-81da10c-f99784fd8171.mp3",
@@ -903,12 +904,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-ultimate-1": {
-    "file": "assets/voices/nyanluna/nyanluna-ultimate-1-9201874d83a0.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-ultimate-1-0e4dbc6a271a.mp3",
     "who": "nyanluna",
     "text": "月の光よ、みんなを守って！ 月華の聖域！",
     "duration": 5.22,
     "kind": "battle",
-    "normalizationDb": 0.24
+    "normalizationDb": 0.29
   },
   "omsolo-attack-1": {
     "file": "assets/voices/omsolo/omsolo-attack-1-ef1671171fb6.mp3",
@@ -919,12 +920,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.1
   },
   "nyanluna-levelup-2": {
-    "file": "assets/voices/nyanluna/nyanluna-levelup-2-a77ae5f3446b.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-levelup-2-b22a13713d35.mp3",
     "who": "nyanluna",
     "text": "もっと、みんなの力になれる！",
     "duration": 2.96,
     "kind": "battle",
-    "normalizationDb": 0.22
+    "normalizationDb": 0.3
   },
   "komusubi-68b175da": {
     "file": "assets/voices/komusubi/komusubi-68b175da.mp3",
@@ -972,20 +973,20 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.05
   },
   "nyanluna-hurt-2": {
-    "file": "assets/voices/nyanluna/nyanluna-hurt-2-0fa2357bf4cf.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-hurt-2-1fc109197a0c.mp3",
     "who": "nyanluna",
     "text": "まだ、大丈夫！",
     "duration": 2.04,
     "kind": "battle",
-    "normalizationDb": 0.24
+    "normalizationDb": 0.37
   },
   "nyanluna-attack-3": {
-    "file": "assets/voices/nyanluna/nyanluna-attack-3-bd06c50d09ea.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-attack-3-0ac35738a20f.mp3",
     "who": "nyanluna",
     "text": "届けっ！",
     "duration": 1.13,
     "kind": "battle",
-    "normalizationDb": 1.12
+    "normalizationDb": 0.67
   },
   "omsolo_hurt-ca8c565f": {
     "file": "assets/voices/omsolo_hurt/omsolo_hurt-ca8c565f-a66d7fcd252d.mp3",

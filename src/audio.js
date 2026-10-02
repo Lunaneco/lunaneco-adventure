@@ -76,6 +76,8 @@ export class Soundscape {
   }
   play(name,detail){
     if(!this.enabled)return;
+    // Nyanluna keeps her voice; omit the synthetic attack/impact thump in both forms.
+    if(['attack','hit'].includes(name)&&(detail?.hero===0||detail?.heroId==='nyanluna'))return;
     if(name.startsWith('summon')){this.summon(name,detail);return;}
     if(name==='attack')this.tone(540,.12,'sine',.1,0,180);
     if(name==='shot'){this.tone(720,.055,'sawtooth',.075,0,95);this.tone(180,.11,'triangle',.11,0,55);}

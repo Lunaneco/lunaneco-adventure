@@ -17,9 +17,9 @@ export function heheBossAttack(g,e,h){
  const {angle,action,color,empowered,line,circle,ring,charge,lockCast,volley}=h;
  if(action===0){
   if(e.bossId==='heheGuard')ring(g,e,e.x,e.z,2.8,9,1.1,43,color);
-  else if(e.bossId==='heheKing')for(const offset of [-2,0,2])circle(g,e,g.player.x+offset,g.player.z,2.2,1.1+Math.abs(offset)*.16,40,color);
+  else if(e.bossId==='heheKing')for(const offset of g.actConfig.endgame?[-4,0,4]:[-2,0,2])circle(g,e,g.player.x+offset,g.player.z,2.2,1.1+Math.abs(offset)*.16,40,color);
   else line(g,e,angle,e.bossId==='heheArcher'?20:7,2,1.1,42,color);
   lockCast(g,e,1.1,{kind:'chant',angle});
- }else if(action===1)volley(g,e,{angle,offsets:empowered?[-.48,-.24,0,.24,.48]:[-.3,0,.3],waves:empowered?3:2,interval:.45,delay:1.05,speed:11,damage:34,kind:'enemyArrow',color});
+ }else if(action===1)volley(g,e,{angle,offsets:empowered?[-.48,-.24,0,.24,.48]:[-.3,0,.3],waves:empowered?3:2,turn:g.actConfig.endgame?.12:0,interval:.45,delay:1.05,speed:11,damage:34,kind:'enemyArrow',color});
  else charge(g,e,angle,empowered?.8:1.15,15,.8,3,color);
 }

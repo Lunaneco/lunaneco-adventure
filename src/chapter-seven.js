@@ -1,6 +1,7 @@
 import {FIELD_THEMES} from './field-themes.js';
 export const LUMI_ACT_IDS=Object.freeze([28,29,30,31]);
 export const isLumiAct=id=>LUMI_ACT_IDS.includes(id);
+export const SEVENTH_CHAPTER_STORY_BACKGROUND='assets/story/kemo-village-background-v2.png';
 const stage=(name,theme,note,i)=>({name,theme,image:FIELD_THEMES[theme].image,note,waves:`WAVE 0${i*2+1}–0${i*2+2}`});
 export const SEVENTH_CHAPTER_ACTS=Object.freeze([
  {id:28,title:'壊れたケモみみの門',summary:'かつてケモミミ族が暮らした村は、アンチケモみみ集団に荒らされていた。ひとりで訪れたもちにゃふぇは、指先の光で村を守るるみに出会う。',boss:'アンチケモみみ・門封じ隊長',bossId:'antiGate',bossHp:11500,counts:[28,30,32,34,36,1],stages:[stage('荒らされた村の入口',23,'初回はもちにゃふぇ一人で村へ',0),stage('指先の灯る路地',23,'るみと出会い、共闘を始める',1),stage('壊れたケモみみの門',23,'排斥する隊長から村を守る',2)]},
@@ -8,7 +9,7 @@ export const SEVENTH_CHAPTER_ACTS=Object.freeze([
  {id:30,title:'好きでいても、いい',summary:'姿が違うだけで追い出そうとする集団の包囲。好きなものと帰る場所を守るため、るみともちにゃふぇは避難所へ進む。',boss:'アンチケモみみ・装甲包囲長',bossId:'antiGuard',bossHp:14000,counts:[32,34,36,38,40,1],stages:[stage('包囲された住居跡',25,'盾の列と時間差の攻撃を越える',0),stage('小さな避難所の庭',25,'安心して暮らせる場所を守る',1),stage('包囲陣の中庭',25,'見た目で分ける壁を破る',2)]},
  {id:31,title:'どこまでも、いっしょ',summary:'アンチケモみみ集団の首領が占拠した村の広場へ。小さなふぇ〜と指先のレールガンで、ケモミミ族の帰る村を取り戻す。',boss:'アンチケモみみ集団・首領',bossId:'antiLeader',bossHp:17000,counts:[34,36,38,40,42,1],recruit:'lumi',stages:[stage('帰り道をつなぐ参道',26,'避難した村人を迎えるために',0),stage('ねこみみの鐘の階段',26,'二人の光で最後の包囲へ',1),stage('みんなの村の広場',26,'首領を退け、るみを仲間に迎える',2)]},
 ].map((act,i)=>Object.freeze({...act,chapter:6,number:i+1,recommendedLevel:60,soloHero:'mochinyafe',soloFirstClear:true,storyAlly:'lumi'})));
-const scene=(act,area,title,lines,extra={})=>({act,area,kicker:`第7章 · 第${act-27}幕`,title,next:'村を守りに行く',...extra,lines:lines.map(([who,text])=>({who,text,voiced:who==='lumi'||who==='nekolumi'||who==='mochinyafe'}))});
+const scene=(act,area,title,lines,extra={})=>({act,area,kicker:`第7章 · 第${act-27}幕`,title,next:'村を守りに行く',image:SEVENTH_CHAPTER_STORY_BACKGROUND,...extra,lines:lines.map(([who,text])=>({who,text,voiced:who==='lumi'||who==='nekolumi'||who==='mochinyafe'}))});
 export const SEVENTH_CHAPTER_SCENES=Object.freeze([
  {
   opening:scene(28,0,'返事のない、ケモみみの村。',[
@@ -16,7 +17,7 @@ export const SEVENTH_CHAPTER_SCENES=Object.freeze([
    ['narrator','村を荒らしたのは、ケモみみを毛嫌いするアンチケモみみ集団。魔物を従えた兵士たちは、まだ残る住民まで追い出そうとしている。'],
    ['mochinyafe','ふぇ〜……'],
    ['narrator','奥から、青い光が一筋走った。ひとりの普通の女の子が、指先を兵士へ向けている。もちにゃふぇは彼女のいる路地へ進んだ。'],
-  ],{image:'assets/story/lumi-village-story-v1.png'}),
+  ]),
   ruins:scene(28,1,'指先の光、となりのぬくもり。',[
    ['lumi','わたし、るみです。この村を、これ以上壊させたくなくて……。あなたも、逃げ遅れたんですか？'],
    ['mochinyafe','ふぇ〜！'],
