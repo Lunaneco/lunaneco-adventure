@@ -1,5 +1,5 @@
 import {NYAN_AWAKENING_RULES,createNyanAwakening,canAwakenNyan,startNyanAwakening,finishNyanAwakening,tickNyanAwakening,awakenedNyanUltimate,fireAwakenedNyan,hasNyanAwakening} from './nyanluna-awakening.js';
-import {hasNekoLumi,lumiUltimate,fireLumiRail} from './lumi-combat.js';
+import {hasNekoLumi,lumiUltimate,fireLumiRail,fireNekoLumiAttack,tickLumiAttacks} from './lumi-combat.js';
 import {canPredate,startPredation,finishPredation,predationUltimate,predationKill} from './hehereal-predation.js';
 import {advanceFloors,tickFloors,floorMovementScale} from './special-floors.js';
 import {PRIM_BOND,PRIM_MOUNT,PRIM_DUET,hasPrimBond,canPrimDuet,canMount,startMount,endMount,tickMount} from './prim-combat.js';
@@ -37,7 +37,7 @@ export const HEROES = [
   {id:'shizuku',name:'雫',title:'紅月の鎌使い',color:'#e5a0ba',moveSpeed:7,dashSpeed:30,range:3.9,damage:39,baseHp:230,baseDefense:16,interval:.64,skillPower:1.15,chargeRate:1.15,role:'近接・HP吸収',trait:'不器用な守り手',traitText:'鎌で与えた実ダメージの10%を自分のHPへ吸収。にゃんるなと編成すると二人のHP・攻撃+12%、必殺ゲージ獲得+20%。二人のゲージ100で特殊連携技。'},
   {id:'prim',name:'プリム',title:'七彩の小竜',color:'#bceaff',moveSpeed:6.2,dashSpeed:26,range:3.5,damage:41,baseHp:265,baseDefense:20,interval:.62,skillPower:1.15,chargeRate:1.15,role:'爪・直線ブレス・搭乗',trait:'キュ〜の約束',traitText:'爪で近接攻撃。必殺技は一直線のプリズムブレス。つきねこと組むとHP・攻撃+12%、ゲージ+20%。搭乗中12秒は二人がメインで攻撃・個別に被弾し、オムソロと同じ速さで移動。終了後20秒待機。'},
   {id:'hehereal',name:'へへりある',title:'桜心の花弓使い',color:'#ff9dc9',moveSpeed:5.6,dashSpeed:24,range:15,damage:28,baseHp:190,baseDefense:10,interval:.65,skillPower:1.1,chargeRate:1.2,role:'遠距離・追尾弓',trait:'おむすびの約束',traitText:'桜の魔法矢で遠くの敵を追尾。必殺技は追尾矢9連射。第6章ではオムソロの援護として共闘。二人編成時は捕食でオムソロを取り込み、へへへに変身。攻撃力・弓・HP・防御は自分のものを維持。必殺技は捕食の舞に変わり、発動中の撃破1体ごとに攻撃力が＋1。戦闘終了まで解除不可。'},
-  {id:'lumi',name:'るみ',title:'指先の光をつなぐ少女',color:'#b8c9ff',moveSpeed:5.6,dashSpeed:24,range:14,damage:30,baseHp:185,baseDefense:9,interval:.72,skillPower:1.1,chargeRate:1.15,role:'直線貫通・レールガン',trait:'ねこみみに、ときめいて',traitText:'指先から色の違う光を放つ。通常は武器ごとの有限射程。もちにゃふぇと編成するとねこみみが生えてねこるみに変わり、通常攻撃・援護・必殺技の射程が無限になる。第7章クリア後に仲間になる。'},
+  {id:'lumi',name:'るみ',title:'指先の光をつなぐ少女',color:'#b8c9ff',moveSpeed:5.6,dashSpeed:24,range:14,damage:30,baseHp:185,baseDefense:9,interval:.72,skillPower:1.1,chargeRate:1.15,role:'直線貫通・レールガン',trait:'ねこみみに、ときめいて',traitText:'指先から色の違う光を放つ。通常は武器ごとの有限射程。もちにゃふぇと編成するとねこみみが生えてねこるみに変わり、通常攻撃・援護・必殺技の射程が無限になる。ねこるみの通常攻撃は直線上の最大3体を貫く3連撃。第7章クリア後に仲間になる。'},
 ];
 export {SKILLS} from './blessings.js';
 export const AREAS = [
@@ -61,7 +61,7 @@ export class Adventure {
       hp:{enumerable:true,get:()=>this.healthFor(this.player.hero).hp,set:value=>{if(Number.isFinite(value))this.healthFor(this.player.hero).hp=clamp(value,0,this.player.maxHp);}},
       maxHp:{enumerable:true,get:()=>this.healthFor(this.player.hero).maxHp,set:value=>{if(Number.isFinite(value)&&value>0)this.healthFor(this.player.hero).maxHp=value;}},
     });
-    this.ultimateCharges=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.ultimateEffects=[];
+    this.ultimateCharges=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.ultimateEffects=[];this.lumiBursts=[];
     Object.defineProperty(this.player,'charge',{enumerable:true,get:()=>this.chargeFor(this.player.hero),set:value=>{this.ultimateCharges[this.heroId(this.player.hero)]=Number.isFinite(value)?clamp(value,0,100):0;}});
     this.floorRooms=new Map();this.mount={active:false,remaining:0,cooldown:0};this.partner={x:-1.7,z:4.5,attack:0,face:Math.PI};this.enemies=[];this.projectiles=[];this.orbs=[];this.hazards=[];
     this.skills={};this.offers=[];this.pendingBlessings=0;this.blessingTier=0;this.stageCrystals=0;this.crystalGoal=8;this.totalCrystals=0;this.blessingsTaken=0;this.time=0;this.kills=0;this.combo=0;this.comboTimer=0;this.maxCombo=0;this.damageDealt=0;
@@ -86,7 +86,7 @@ export class Adventure {
     if(this.travelOpen||this.phase!=='playing')return false;
     this.cancelRice();
     this.travelOpen=this.field.kind==='floors'?'stairs':'branch';this.travelDelay=.65;this.travelOrigin={x:this.player.x,z:this.player.z};
-    this.projectiles=[];this.hazards=[];this.ultimateEffects=[];this.collectAll();this.emit('passageOpen',{kind:this.travelOpen});return true;
+    this.projectiles=[];this.hazards=[];this.ultimateEffects=[];this.lumiBursts=[];this.collectAll();this.emit('passageOpen',{kind:this.travelOpen});return true;
   }
   enterPassage(id){
     const target=this.travelTargets.find(t=>t.id===id);
@@ -179,6 +179,7 @@ export class Adventure {
     Object.assign(this.partner,{x:this.player.x-1.7,z:this.player.z+1.5,attack:0,face:Math.PI});this.emit('guestJoin',{heroId:'lumi'});return true;
   }
   startWave(){
+    this.lumiBursts=[];
     this.wave++;this.waveSpawned=0;this.waveGoal=this.actConfig.counts[this.wave-1];this.spawnTimer=.6;this.waveBreak=0;
     this.area=Math.min(2,Math.floor((this.wave-1)/2));
     const scheduledRare=goldenSlimeWave(this.actConfig,this.rareRng,this.wave);if(scheduledRare)this.goldenSlimeWave=scheduledRare;
@@ -193,12 +194,12 @@ export class Adventure {
   openExit(){
     if(this.exitOpen||this.phase!=='playing')return false;
     this.cancelRice();
-    this.exitOpen=true;this.exitDelay=.65;this.ultimateEffects=[];this.projectiles=[];this.hazards=[];this.collectAll();
+    this.exitOpen=true;this.exitDelay=.65;this.ultimateEffects=[];this.lumiBursts=[];this.projectiles=[];this.hazards=[];this.collectAll();
     this.emit('exitOpen',{area:this.area,final:this.wave===6});return true;
   }
   crossExit(){
     if(this.phase!=='playing'||!this.exitOpen||this.exitDelay>0||this.pendingBlessings>0||Math.hypot(this.player.x-this.exitPoint.x,this.player.z-this.exitPoint.z)>this.exitPoint.radius)return false;
-    this.exitOpen=false;this.stagesCleared=this.area+1;this.trackMission('clears');
+    this.exitOpen=false;this.lumiBursts=[];this.stagesCleared=this.area+1;this.trackMission('clears');
     for(const mission of missionsFor(this.area,this.act))if(mission.trial&&trialStatus(mission,this).eligible)this.pendingTrials.add(mission.id);
     this.collectMaterials(gateMaterials(this.area,this.act,this.difficulty),'gate');this.combo=0;this.comboTimer=0;this.player.dash=0;this.player.moving=false;this.partner.moving=false;
     if(this.wave===6){
@@ -285,8 +286,8 @@ export class Adventure {
     const angle=Math.atan2(enemy.x-source.x,enemy.z-source.z);source.face=angle;
     const heroId=HEROES[hero].id;let damage=this.statsFor(hero).attack*(1+this.rank('prismBond')*.15+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*(support?.43*(1+this.rank('echo')*.35+this.rank('starBlade')*.2):1);
     const crit=this.rng()<.05+this.effectRank('crit')*.15;if(crit)damage*=2+this.rank('preciseAim')*.25;
-    this.emit('attack',{x:source.x,z:source.z,angle,hero,support,range,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor});
-    if(hero===7){return fireLumiRail(this,source,{range,damage:damage*(1+this.effectRank('lumiPower')*.2),crit,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor,pierce:stats.pierce});}
+    this.emit('attack',{x:source.x,z:source.z,angle,hero,support,range,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor,nekoBurst:hero===7&&hasNekoLumi(this.party)});
+    if(hero===7){const fire=hasNekoLumi(this.party)?fireNekoLumiAttack:fireLumiRail;return fire(this,source,{range,damage:damage*(1+this.effectRank('lumiPower')*.2),crit,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor,pierce:stats.pierce});}
     if(hero===3){
       if(support){this.projectiles.push({id:this.ids++,owner:'player',heroId,kind:'mochiCry',x:source.x,z:source.z,vx:Math.sin(angle)*MOCHI_SUPPORT.speed,vz:Math.cos(angle)*MOCHI_SUPPORT.speed,life:(range+2)/MOCHI_SUPPORT.speed,damage,crit:false,radius:1.05,pierce:stats.supportPierce+this.effectRank('mochiReach'),hitIds:[]});if(this.effectRank('mochiMend'))this.heal(this.effectRank('mochiMend')*2+this.rank('mochiCharge')*2);if(this.rank('mochiCharge'))this.gainUltimateCharge(heroId,this.rank('mochiCharge')*3);}
       else this.projectiles.push({id:this.ids++,owner:'player',heroId,kind:'mochiNote',x:source.x,z:source.z,vx:Math.sin(angle)*12,vz:Math.cos(angle)*12,speed:12,life:(range+3)/12,damage:Math.max(1,damage*(1+this.rank('mochiBrave')*.3)),crit,target:enemy.id,radius:.42,color:equippedWeapon(this.progression,heroId)?.weapon.effectColor});
@@ -303,12 +304,12 @@ export class Adventure {
     }
     return true;
   }
-  hit(e,damage,x,z,crit=false,chain=false,heroId=HEROES[this.player.hero].id,canCharge=true){
+  hit(e,damage,x,z,crit=false,chain=false,heroId=HEROES[this.player.hero].id,canCharge=true,chargeScale=1){
     if(e.hp<=0||this.phase==='defeat'||this.phase==='victory'||this.expireGoldenSlime(e))return 0;damage*=mochiDefenseMultiplier(this,e);const dealt=Math.min(e.hp,Math.max(0,damage));e.hp-=damage;e.hit=.15;if(!e.training)this.damageDealt+=Math.min(damage,e.hp+damage);
     const dx=e.x-x,dz=e.z-z,d=Math.hypot(dx,dz)||1;const knock=e.type==='boss'?.5:3.5;e.knockX=dx/d*knock;e.knockZ=dz/d*knock;
     this.emit('hit',{id:e.id,x:e.x,z:e.z,damage:Math.round(damage),crit,heroId});
     if(e.training){if(e.hp<=0){this.emit('death',{id:e.id,x:e.x,z:e.z,enemyType:e.type,training:true});this.observeTutorial('defeat');}return;}
-    if(canCharge)this.gainUltimateCharge(heroId,.65);
+    if(canCharge)this.gainUltimateCharge(heroId,.65*chargeScale);
     if(e.hp<=0){
       if(e.type==='boss'&&this.act===7&&this.wave===6&&this.rescue?.active){this.rescue.active=false;this.rescue.saved=true;this.emit('rescueSaved');}
       predationKill(this,heroId);this.kills++;this.trackMission('kills');this.combo++;this.comboTimer=4;this.maxCombo=Math.max(this.maxCombo,this.combo);
@@ -336,12 +337,13 @@ export class Adventure {
     this.emit('hurt',{damage:Math.round(damage),hero:p.hero,x,z});
     if(p.hp<=0){
       endMount(this);if(p.hero===0)finishNyanAwakening(this);const heroId=this.heroId(p.hero);this.emit('heroDown',{hero:p.hero,heroId});
+      if(heroId==='lumi')this.lumiBursts=[];
       this.ultimateEffects=this.ultimateEffects.filter(effect=>effect.heroId!==heroId&&!effect.heroIds?.includes(heroId));
       // Mark in-flight shots too: a knockout can happen during the projectile loop.
       for(const bullet of this.projectiles)if(bullet.owner==='player'&&bullet.heroId===heroId)bullet.life=0;
       this.projectiles=this.projectiles.filter(bullet=>bullet.life>0);
       if(this.hasLivingPartner&&!['hehereal','lumi'].includes(this.guestHeroId))this.activateHero(this.partnerHero,true);
-      else{this.cancelRice();this.phase='defeat';this.ultimateEffects=[];this.projectiles=[];this.hazards=[];finishPredation(this);finishNyanAwakening(this,{reset:true});this.emit('defeat');}
+      else{this.cancelRice();this.phase='defeat';this.ultimateEffects=[];this.lumiBursts=[];this.projectiles=[];this.hazards=[];finishPredation(this);finishNyanAwakening(this,{reset:true});this.emit('defeat');}
     }
     return true;
   }
@@ -398,6 +400,7 @@ export class Adventure {
       this.exitDelay=Math.max(0,this.exitDelay-dt);this.crossExit();return;
     }
     tickFloors(this,dt);if(this.phase!=='playing')return;
+    tickLumiAttacks(this,dt);
     if(!training)tickUltimates(this,dt);
     if(p.attack<=0&&this.attackFrom(p,p.hero))p.attack=this.attackProfile(p.hero).interval*Math.pow(.85,this.effectRank('haste'));
     if(this.hasLivingPartner&&partner.attack<=0&&this.attackFrom(partner,this.partnerHero,!this.mount.active))partner.attack=this.partnerHero===3?this.attackProfile(3).supportInterval:this.attackProfile(this.partnerHero).interval*(this.mount.active?1:2.6)*Math.pow(.85,this.effectRank('haste'));

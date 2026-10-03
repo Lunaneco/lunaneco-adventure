@@ -1,4 +1,5 @@
-import {lumiRailVisual} from './lumi-visuals.js';
+import {lumiRailVisual,updateNekoRailVisual} from './lumi-visuals.js';
+import {NEKO_LUMI_ATTACK} from './lumi-attack-motion.js';
 import {hasNekoLumi} from './lumi-combat.js';
 import {prismBeamVisual} from './prim-visuals.js';
 import {publicUrl} from './public-url.js';
@@ -121,7 +122,7 @@ export class World {
     if(game){this.surface=game.layout;this.terrain.update(game,this.time);}
     for(const e of events){
       if(e.type==='riceStarted'||e.type==='riceReflected'){this.ring(e.x,e.z,0xaaffba,e.type==='riceReflected'?.7:2.1,.35);this.burst(e.x,e.z,0xcaffb9,12,2);}
-      if(e.type==='attack'){const hero=this.heroes[e.hero];hero.userData.attackTime=ATTACK_DURATION;if(e.hero===0&&game.nyanAwakening.active)this.awakenedNyan.userData.attackTime=ATTACK_DURATION;if(e.hero===1)this.burst(e.x+Math.sin(e.angle)*1.05,e.z+Math.cos(e.angle)*1.05,0xb8f4ff,7,2);if(e.hero===2||e.hero===4||e.hero===5){const slash=createSwordSlash({...e,color:e.color??(e.hero===4?0xf2a6c7:0x85ffae),name:e.hero===4?'shizuku-scythe-slash':'omsolo-saber-slash'});slash.mesh.position.y+=game.layout.height;this.fx.add(slash.mesh);this.rings.push(slash);}}
+      if(e.type==='attack'){const hero=this.heroes[e.hero];hero.userData.attackTime=e.nekoBurst?NEKO_LUMI_ATTACK.duration:ATTACK_DURATION;if(e.hero===7){hero.userData.nekoAttack=!!e.nekoBurst;hero.userData.lumiAttackAngle=e.angle;}if(e.hero===0&&game.nyanAwakening.active)this.awakenedNyan.userData.attackTime=ATTACK_DURATION;if(e.hero===1)this.burst(e.x+Math.sin(e.angle)*1.05,e.z+Math.cos(e.angle)*1.05,0xb8f4ff,7,2);if(e.hero===2||e.hero===4||e.hero===5){const slash=createSwordSlash({...e,color:e.color??(e.hero===4?0xf2a6c7:0x85ffae),name:e.hero===4?'shizuku-scythe-slash':'omsolo-saber-slash'});slash.mesh.position.y+=game.layout.height;this.fx.add(slash.mesh);this.rings.push(slash);}}
       if(e.type==='hit'){this.burst(e.x,e.z,e.crit?0xffdd99:0xc8eef5,e.crit?12:5,2.4);this.numbers.push({x:e.x,y:(this.surface?.height??0)+2.25,z:e.z,text:e.damage,crit:e.crit,life:.7,max:.7});if(this.numbers.length>40)this.numbers.shift();}
       if(e.type==='death'){this.burst(e.x,e.z,e.enemyType==='boss'||e.enemyType==='goldenSlime'?0xffe3a8:0xb6ead3,e.enemyType==='boss'?150:23,4);this.ring(e.x,e.z,0xc8f5d3,1.1,.35);}
       if(e.type==='dash'){this.burst(e.x,e.z,0xcde7ff,24,1.8);this.ring(e.x,e.z,0xcdeaff,1.4,.3);}
@@ -144,7 +145,14 @@ export class World {
       if(e.type==='lifeDrain'){this.ring(e.x,e.z,0xef99b6,.8,.35);this.numbers.push({x:e.x,y:(this.surface?.height??0)+2.5,z:e.z,text:`吸収 +${Math.round(e.amount)}`,crit:false,life:.75,max:.75});}
       if(e.type==='mochiCryHit'){this.ring(e.x,e.z,0xffbddb,e.boss?2:1,.6);this.numbers.push({x:e.x,y:(this.surface?.height??0)+2.7,z:e.z,text:e.boss?'攻↓ 防↓':'すやぁ…',crit:false,life:.85,max:.85});}
       if(e.type==='ultimatePulse'){this.ring(e.x,e.z,e.heroId==='shizuku'?0xf2a6c7:e.heroId==='mochinyafe'?0xffb8d4:0xe8c3ff,e.radius,.5);this.burst(e.x,e.z,0xe3c5ff,44,6);}
-      if(e.type==='lumiRail'){const hero=this.heroes[7];hero.userData.attackTime=ATTACK_DURATION;hero.updateMatrixWorld(true);const origin=hero.userData.weapon.getWorldPosition(new THREE.Vector3());const mesh=lumiRailVisual(origin,e);this.fx.add(mesh);this.rings.push({mesh,kind:'shockwave',life:e.ultimate?.4:.22,max:e.ultimate?.4:.22});}
+      if(e.type==='lumiRail'){
+        const hero=this.heroes[7],source=game.sourceFor('lumi');
+        if(!e.nekoBurst){hero.userData.attackTime=ATTACK_DURATION;hero.userData.nekoAttack=false;}
+        // Pose before sampling the fingertip, including the first frame after a swap.
+        hero.rotation.y=e.angle;animateHero(hero,{...source,neko:e.neko,invincible:0},this.time,0,game.player.hero===7);hero.position.y=heightAt(game.layout,source.x,source.z);hero.updateMatrixWorld(true);
+        const origin=hero.userData.weapon.getWorldPosition(new THREE.Vector3()),mesh=lumiRailVisual(origin,e),life=e.nekoBurst?.18:e.ultimate?.4:.22;
+        this.fx.add(mesh);this.rings.push({mesh,kind:e.nekoBurst?'lumi-rail':'shockwave',life,max:life});
+      }
       if(e.type==='ultimateShot'){const index=HEROES.findIndex(h=>h.id===e.heroId);if(index>=0)this.heroes[index].userData.attackTime=ATTACK_DURATION;this.burst(e.x+Math.sin(e.angle)*1.05,e.z+Math.cos(e.angle)*1.05,0xb8f4ff,14,3);}
       if(e.type==='hurt')this.shake=this.settings.motion===false?0:.18;
       if(e.type==='nova')this.ring(e.x,e.z,0xffdda3,e.radius??3.8,.4);
@@ -166,7 +174,7 @@ export class World {
   render(game,dt){
     this.renderer.info.reset();this.terrain.update(game,this.time);if(game)this.surface=game.layout;this.time+=dt;const t=this.time;this.shake=Math.max(0,this.shake-dt);
     if(game){
-      const p=game.player;this.heroes.forEach((h,i)=>{h.visible=game.isHeroAlive(i)&&!(i===0&&game.nyanAwakening.active);if(h.visible){setHeroWeapon(h,equippedWeapon(game.progression,game.heroId(i)));animateHero(h,{...(i===p.hero?p:game.partner),moving:game.phase==='playing'&&(i===p.hero?p:game.partner).moving,neko:i===7&&hasNekoLumi(game.party),riding:game.mount.active&&i===1,mounted:game.mount.active&&i===5,...(i===5&&game.ultimateEffects.some(e=>e.kind==='prismBeam')?{face:game.ultimateEffects.find(e=>e.kind==='prismBeam').angle}:{})},t,dt,i===p.hero||game.mount.active);const source=i===p.hero?p:game.partner;h.position.y=heightAt(game.layout,source.x,source.z);}});
+      const p=game.player;this.heroes.forEach((h,i)=>{h.visible=game.isHeroAlive(i)&&!(i===0&&game.nyanAwakening.active);if(h.visible){setHeroWeapon(h,equippedWeapon(game.progression,game.heroId(i)));animateHero(h,{...(i===p.hero?p:game.partner),moving:game.phase==='playing'&&(i===p.hero?p:game.partner).moving,neko:i===7&&hasNekoLumi(game.party),riding:game.mount.active&&i===1,mounted:game.mount.active&&i===5,...(i===5&&game.ultimateEffects.some(e=>e.kind==='prismBeam')?{face:game.ultimateEffects.find(e=>e.kind==='prismBeam').angle}:{})},t,i===7&&h.userData.nekoAttack&&game.phase!=='playing'?0:dt,i===p.hero||game.mount.active);const source=i===p.hero?p:game.partner;h.position.y=heightAt(game.layout,source.x,source.z);}});
       this.awakenedNyan.visible=game.nyanAwakening.active&&game.isHeroAlive(0);if(this.awakenedNyan.visible){const source=p.hero===0?p:game.partner;animateHero(this.awakenedNyan,{...source,moving:game.phase==='playing'&&source.moving},t,game.phase==='playing'?dt:0,p.hero===0);this.awakenedNyan.position.y=heightAt(game.layout,source.x,source.z);}
       this.heheForm.visible=!!game.predation.active&&game.isHeroAlive(6);if(this.heheForm.visible){this.heroes[6].visible=false;updateHeheForm(this.heheForm,this.heroes[6],{...p,dancing:game.ultimateEffects.some(e=>e.kind==='predationDance')},t,dt,equippedWeapon(game.progression,'hehereal'));}
       if(game.mount.active){
@@ -197,7 +205,7 @@ export class World {
     this.riceRing.visible=!!game?.rice?.active;
     if(this.riceRing.visible){const p=game.player;this.riceRing.position.set(p.x,heightAt(game.layout,p.x,p.z)+.25,p.z);this.riceRing.scale.setScalar(RICE_RULES.radius);this.riceRing.material.opacity=.6+Math.sin(t*8)*.15;}
     if(this.grassShader)this.grassShader.uniforms.uTime.value=t;this.portalCore.rotation.y=t*.7;this.portalCore.position.y=3.45+Math.sin(t*1.5)*.18;this.portalGlow.rotation.z=t*.1;this.motes.rotation.y=t*.008;
-    for(let i=this.rings.length-1;i>=0;i--){const r=this.rings[i];if(r.kind==='sword-slash')updateSwordSlash(r,dt);else if(r.prism){const dragon=this.heroes[5];dragon.updateMatrixWorld(true);dragon.userData.bones.get('head').bone.getWorldPosition(r.mesh.position);r.mesh.position.add(new THREE.Vector3(0,-.18,.65).multiplyScalar(dragon.scale.x).applyAxisAngle(new THREE.Vector3(0,1,0),r.mesh.rotation.y));r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.65;});}else if(r.kind==='shockwave'){r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.7;});}else{r.life-=dt;r.mesh.material.opacity=Math.max(0,r.life/r.max)*.8;r.mesh.scale.setScalar(.7+(1-r.life/r.max)*.65);}if(r.life<=0){r.mesh.removeFromParent();r.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.rings.splice(i,1);}}
+    for(let i=this.rings.length-1;i>=0;i--){const r=this.rings[i];if(r.kind==='sword-slash')updateSwordSlash(r,dt);else if(r.kind==='lumi-rail')updateNekoRailVisual(r,game&&game.phase!=='playing'?0:dt);else if(r.prism){const dragon=this.heroes[5];dragon.updateMatrixWorld(true);dragon.userData.bones.get('head').bone.getWorldPosition(r.mesh.position);r.mesh.position.add(new THREE.Vector3(0,-.18,.65).multiplyScalar(dragon.scale.x).applyAxisAngle(new THREE.Vector3(0,1,0),r.mesh.rotation.y));r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.65;});}else if(r.kind==='shockwave'){r.life-=dt;r.mesh.traverse(o=>{if(o.material)o.material.opacity=Math.max(0,r.life/r.max)*.7;});}else{r.life-=dt;r.mesh.material.opacity=Math.max(0,r.life/r.max)*.8;r.mesh.scale.setScalar(.7+(1-r.life/r.max)*.65);}if(r.life<=0){r.mesh.removeFromParent();r.mesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});this.rings.splice(i,1);}}
     for(let i=0;i<this.capacity;i++){const p=this.particleData[i];p.life-=dt;if(p.life>0){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=5*dt;this.particlePositions[i*3]=p.x;this.particlePositions[i*3+1]=p.y;this.particlePositions[i*3+2]=p.z;}else this.particlePositions[i*3+1]=-100;}
     this.particleMesh.geometry.attributes.position.needsUpdate=true;this.particleMesh.geometry.attributes.color.needsUpdate=true;
     this.numbers=this.numbers.filter(n=>{n.life-=dt;n.y+=dt*1.4;return n.life>0;});

@@ -1,4 +1,5 @@
 import {createLumiFingerLight,createLumiEars,updateLumiEars} from './lumi-visuals.js';
+import {NEKO_LUMI_ATTACK,nekoLumiAttackPose} from './lumi-attack-motion.js';
 import {createHeherealBow} from './hehereal-visuals.js';
 import {createPrimClaw} from './prim-visuals.js';
 import {PRIM_MOUNT} from './prim-combat.js';
@@ -241,14 +242,17 @@ export function animateHero(root, state, time, dt, active) {
   }
   d.rig.rotation.set(0,0,0);d.rig.position.x=0;d.weapon.visible=true;
   root.position.set(state.x, 0, state.z);
-  const turn = Math.atan2(Math.sin(state.face - root.rotation.y), Math.cos(state.face - root.rotation.y));
+  const aiming=d.hero===7&&state.neko&&d.nekoAttack&&d.attackTime>0?d.lumiAttackAngle??state.face:state.face;
+  const turn = Math.atan2(Math.sin(aiming - root.rotation.y), Math.cos(aiming - root.rotation.y));
   root.rotation.y += turn * Math.min(1, dt * 14);
   d.movement = THREE.MathUtils.damp(d.movement, state.moving ? 1 : 0, 13, dt);
   const stride = Math.sin(time * 13) * d.movement;
   const ground = Math.hypot(state.x, state.z) < 6.3 ? .105 : .025;
   d.rig.position.y = ground + Math.abs(Math.sin(time * 13)) * .045 * d.movement;
   d.attackTime = Math.max(0, d.attackTime - dt);
-  const attack = d.attackTime > 0 ? Math.sin(d.attackTime / ATTACK_DURATION * Math.PI) : 0;
+  const attackDuration=d.hero===7&&d.nekoAttack?NEKO_LUMI_ATTACK.duration:ATTACK_DURATION;
+  const attack = d.attackTime > 0 ? Math.sin(d.attackTime / attackDuration * Math.PI) : 0;
+  const nekoShot=d.hero===7&&state.neko&&d.nekoAttack&&d.attackTime>0?nekoLumiAttackPose(d.attackTime):null;
   pose(d, 'thigh.L', stride * .30);
   pose(d, 'thigh.R', -stride * .30);
   pose(d, 'shin.L', Math.max(0, -stride) * .16);
@@ -262,7 +266,19 @@ export function animateHero(root, state, time, dt, active) {
   pose(d, 'forearm.L', -.12);
   pose(d, 'forearm.R', d.hero===1?-.48-attack*.09:-.20-attack*.20);
   if(d.awakened){pose(d,'upper_arm.R',-.12-attack*.22,attack*.18,1.03-attack*.04);pose(d,'forearm.R',-.30-attack*.12);pose(d,'upper_arm.L',-.12-attack*.28,-attack*.15,-1.02+attack*.12);}
-  if(d.hero===7){pose(d,'upper_arm.R',-.05,1.55,.08);pose(d,'forearm.R',.02,.10+attack*.03,0);}
+  if(d.hero===7){
+    pose(d,'upper_arm.R',-.05,1.55,.08);pose(d,'forearm.R',.02,.10+attack*.03,0);
+    if(nekoShot){
+      const {stance,recoil}=nekoShot;
+      pose(d,'chest',-.045*stance,-.16*stance+.075*recoil,-.025*stance);
+      pose(d,'head',.025*stance,.08*stance,.025*stance);
+      pose(d,'upper_arm.R',-.05-.22*recoil,1.55+.12*recoil,.08+.10*recoil);
+      pose(d,'forearm.R',.02+.12*recoil,.10-.10*recoil,0);
+      pose(d,'upper_arm.L',-stride*.18-.25*stance,-.65*stance,-lowerArm+.48*stance);
+      pose(d,'forearm.L',-.12-.60*stance);
+      if(d.movement<.15){pose(d,'thigh.L',-.06*stance);pose(d,'thigh.R',.10*stance);pose(d,'shin.R',.06*stance);}
+    }
+  }
   if(d.hero===6){
     // Both arms start along character X. Turn them forward about Y, keeping
     // the bow ahead of the chest and the drawing hand behind its string.
@@ -304,7 +320,9 @@ export function animateHero(root, state, time, dt, active) {
   }
   if(d.hero===7){
     d.bones.get('hand.R').bone.getWorldQuaternion(handRotation);d.rig.getWorldQuaternion(rigRotation).invert();handRotation.premultiply(rigRotation);
-    d.weapon.position.copy(handPosition).add(new THREE.Vector3(0,.16,0).applyQuaternion(handRotation));d.weapon.rotation.set(0,0,0);d.weapon.userData.light.material.opacity=.4+attack*.6;updateLumiEars(root,!!state.neko);
+    d.weapon.position.copy(handPosition).add(new THREE.Vector3(0,.16,0).applyQuaternion(handRotation));d.weapon.rotation.set(0,0,0);
+    const glow=nekoShot?nekoShot.flash:attack;
+    d.weapon.userData.light.material.opacity=.4+glow*.6;d.weapon.userData.light.scale.setScalar(1+glow*(nekoShot?1.5:0));updateLumiEars(root,!!state.neko);
   }
   else if(d.awakened){
     d.bones.get('hand.R').bone.getWorldQuaternion(handRotation);d.rig.getWorldQuaternion(rigRotation).invert();handRotation.premultiply(rigRotation);

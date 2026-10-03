@@ -61,9 +61,43 @@ export function updateLumiEars(root,neko){
  d.ears.position.copy(p).add(d.earsOffset.clone().applyQuaternion(rotation));d.ears.quaternion.copy(rotation);
 }
 export function lumiRailVisual(origin,event){
+ if(event.nekoBurst)return nekoRailVisual(origin,event);
  const g=new THREE.Group(),distance=Math.min(90,Math.max(.1,event.range)),direction=new THREE.Vector3(Math.sin(event.angle),0,Math.cos(event.angle));
  const beam=new THREE.Mesh(new THREE.CylinderGeometry(event.ultimate?.075:.035,event.ultimate?.075:.035,distance,8),new THREE.MeshBasicMaterial({color:event.color??0x8feaff,transparent:true,opacity:.9,depthWrite:false,blending:THREE.AdditiveBlending}));
  beam.position.copy(direction).multiplyScalar(distance/2);beam.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction);g.add(beam);g.position.copy(origin);g.userData.mechanicalRange=event.range;return g;
+}
+function nekoRailVisual(origin,event){
+ const g=new THREE.Group(),distance=Math.min(90,Math.max(.1,event.range)),color=event.color??0x8feaff,finisher=event.pulse===2;
+ g.name='Neko Lumi · triple piercing rail';g.position.copy(origin);g.rotation.y=event.angle;
+ const layers=[];
+ const add=(geometry,tint,opacity)=>{
+  const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({color:tint,transparent:true,opacity,depthWrite:false,blending:THREE.AdditiveBlending}));
+  mesh.userData.baseOpacity=opacity;layers.push(mesh);g.add(mesh);return mesh;
+ };
+ const ray=(radius,tint,opacity,x=0)=>{
+  const mesh=add(new THREE.CylinderGeometry(radius,radius,distance,6).rotateX(Math.PI/2),tint,opacity);
+  mesh.position.set(x,0,distance/2);return mesh;
+ };
+ ray(finisher?.10:.075,color,.25);ray(finisher?.034:.025,0xf5fbff,.95);
+ for(const sign of [-1,1])ray(.009,color,.6,sign*.11);
+ const muzzle=add(new THREE.TorusGeometry(.18,.017,6,24),color,.8);muzzle.position.z=.10;
+ const flash=add(new THREE.OctahedronGeometry(.13),0xf4faff,.85);flash.scale.set(.65,.65,2.8);flash.position.z=.13;
+ const travel=[];
+ for(let i=0;i<2;i++){
+  const ring=add(new THREE.TorusGeometry(.14+i*.045,.013,6,20),color,.6);ring.position.z=.25;travel.push(ring);
+ }
+ g.userData={mechanicalRange:event.range,distance,layers,muzzle,flash,travel,pulse:event.pulse};return g;
+}
+export function updateNekoRailVisual(effect,dt){
+ effect.life=Math.max(0,effect.life-dt);
+ const progress=1-effect.life/effect.max,{distance,layers,muzzle,flash,travel}=effect.mesh.userData;
+ const fade=(1-progress)**1.5;
+ for(const mesh of layers)mesh.material.opacity=mesh.userData.baseOpacity*fade;
+ muzzle.scale.setScalar(.75+progress*2.1);flash.scale.set(.65*(1-progress),.65*(1-progress),2.8*(1-progress));
+ for(const [i,ring] of travel.entries()){
+  ring.position.z=Math.min(distance,.25+distance*Math.min(1,progress*1.5+i*.12));
+  ring.scale.setScalar(1+progress*.7);
+ }
 }
 export function buildKemoVillage(group,index,{part}){
  // All decorative rubble is outside the walking footprint.
