@@ -2,13 +2,14 @@ import {hasNekoLumi} from './lumi-combat.js';
 import {hasPredationPair} from './hehereal-predation.js';
 import {isHeroUnlocked,recruitmentNote} from './recruitment.js';
 import {icon} from './icons.js';
-import {skillsForParty,skillUpgradeLabel,blessingSource,partyTitle} from './blessings.js';
+import {skillsForParty,skillUpgradeLabel,blessingSource,partyTitle,hasFreeSkillLoadout} from './blessings.js';
+import {blessingLoadoutView} from './blessing-loadout-ui.js';
 import {hasPrimBond} from './prim-combat.js';
 import {hasShizukuBond} from './shizuku-combat.js';
 import {PARTY_LIMIT,requiredPartyMember} from './party.js';
 import {actLabel,actFor} from './acts.js';
 
-export function partyView(party,lead,roster,levelFor,profile,backLabel='戻る',act=null){
+export function partyView(party,lead,roster,levelFor,profile,backLabel='戻る',act=null,{skillHero=null,skillSlot=0}={}){
   const pool=skillsForParty(party,profile),required=requiredPartyMember(profile,act),heheSolo=actFor(act)?.chapter===5;
   return `<div class="modal-heading party-heading"><span class="eyebrow">ADVENTURE PARTY</span><h2>パーティ編成</h2><p>${isHeroUnlocked(profile,'tsukineko')?'一緒に出発する仲間を、2人まで。':'仲間は、物語を進めると増えていきます。'}</p></div>
   ${required?`<p class="party-required-note" role="status">${actLabel(act)}${required==='omsolo'?(heheSolo?'は初回クリアまでオムソロ操作固定。食事イベント後、へへりあるが援護します。捕食変身中のみへへりあるの単独操作になります。この幕のクリア後は自由編成、2人編成ならNPCへへりあるは参加しません。':'は再挑戦もオムソロ単独で出撃します。') :required==='mochinyafe'?'は初回クリアまで、もちにゃふぇ操作固定。るみがNPC援護に参加します。':required==='tsukineko'?'は初回クリアまで、つきねこ単独で出撃します。':'は初回クリアまで、にゃんるなが必須です。先頭・援護のどちらでも出撃できます。'}${required==='omsolo'?'保存した編成はそのまま残ります。':'この幕のクリア後は自由に編成できます。'}</p>`:''}
@@ -19,5 +20,12 @@ export function partyView(party,lead,roster,levelFor,profile,backLabel='戻る',
   ${hasPrimBond(party)?`<section class="prim-bond" aria-label="つきねことプリムの特別ボーナス"><strong>星虹のパートナーボーナス</strong><p>二人の最大HP・攻撃力 +12% ／ 必殺ゲージ獲得 +20%</p><p>二人のゲージ100で「星虹・ふたりの帰り道」。搭乗ボタン（R）でプリムが大きくなり、12秒間二人の通常攻撃を同時に行えます。二人ともメイン扱いで、それぞれのHPと防御力で被弾します。移動速度はオムソロと同じ。終了後20秒待機。</p></section>`:''}
   ${hasShizukuBond(party)?`<section class="shizuku-bond" aria-label="雫とにゃんるなの特別ボーナス"><strong>月と雫の親友ボーナス</strong><p>二人の最大HP・攻撃力 +12% ／ 必殺ゲージ獲得 +20%</p><p>二人のゲージが100なら、必殺ボタンで「月雫・おかえりの約束」。二人の掛け声で6連撃・二人を回復。</p></section>`:''}
   <details class="party-blessings" aria-label="この編成の祝福"><summary>この編成の祝福・スキル</summary><div class="party-blessings-title"><span>${icon(party.length===2?'link':'star')} この編成の祝福</span><b>${pool.length}種類</b></div><strong>${partyTitle(party,roster)}</strong><p>${party.length===2?'共通＋ふたりそれぞれの祝福＋連携の祝福。':'共通＋出撃キャラの祝福。単独出撃では援護・交代は使いません。'}<br>クリスタルを集めると、この候補から3択。対象キャラが指定された効果を除き、出撃メンバーで共有します。にゃんるなの必殺技・星屑・周回星は威力1.5倍。</p><div class="party-blessing-list">${pool.map(skill=>`<span data-party-blessing="${skill.id}" data-source="${skill.requires?.length===2?'pair':skill.requires?.[0]??'common'}" title="${blessingSource(skill,roster)}：${skill.text}">${icon(skill.icon)}${skill.name}<small>${skillUpgradeLabel(skill)||blessingSource(skill,roster)}</small></span>`).join('')}</div><button class="skill-loadout-link" data-open-skill-loadout>スキル候補を付け替える ${icon('arrow')}</button></details>
-  <p class="party-save-note" role="status">編成は自動保存されます。</p><button class="primary" data-close>${backLabel} ${icon('check')}</button>`;
+  ${hasFreeSkillLoadout(profile)?partySkillEditor(party,lead,roster,profile,skillHero,skillSlot):''}
+  <p class="party-save-note" role="status">編成${hasFreeSkillLoadout(profile)?'・スキル候補':''}は自動保存されます。</p><button class="primary" data-close>${backLabel} ${icon('check')}</button>`;
+}
+
+function partySkillEditor(party,lead,roster,profile,selected,slot){
+ const hero=roster.find(h=>h.id===selected&&party.includes(h.id))??(party.includes(roster[lead]?.id)?roster[lead]:roster.find(h=>party.includes(h.id)));
+ if(!hero)return '';
+ return `<section class="party-free-skills" aria-label="極宴クリア報酬のスキル付け替え"><h3>全員のスキルを自由にセット</h3><p>付け替えるキャラを選択。どの編成でも全3枠を変更できます。</p><div class="party-skill-heroes" role="group" aria-label="スキルを設定する仲間">${party.map(id=>roster.find(h=>h.id===id)).filter(Boolean).map(h=>`<button data-party-skill-hero="${h.id}" aria-pressed="${h.id===hero.id}">${h.name}</button>`).join('')}</div>${blessingLoadoutView(profile,hero,slot,{party:true})}<p id="party-skill-feedback" role="status"></p></section>`;
 }

@@ -13,12 +13,12 @@ import {tickEnemyBehavior} from './enemy-combat.js';
 import {actFor,isActUnlocked,completeAct,clearTicketReward} from './acts.js';
 import {extraCombatFor} from './extra-stages.js';
 import {hasRicePower} from './rice-awakening.js';
-import {canUseRice,grabRice,moveRice,releaseRice,cancelRice,tickRice} from './rice-combat.js';
+import {createRicePower,canActivateRice,activateRice,cancelRice,tickRice,reflectRiceBullet} from './rice-combat.js';
 import {castUltimate,tickUltimates,enemySpeedScale} from './ultimate-combat.js';
 import {ultimateFor} from './abilities.js';
 import {bossWeaponTicket,grantWeaponTickets,weaponAttackProfile,equippedWeapon} from './weapons.js';
 import {advanceMissions,claimActMissions,missionsFor,trialStatus} from './missions.js';
-import {skillsForParty,skillEffectRank} from './blessings.js';
+import {skillsForParty,skillEffectRank,hasFreeSkillLoadout} from './blessings.js';
 import {partyForAct} from './party.js';
 import {availableHeroes,isHeroUnlocked} from './recruitment.js';
 import {FirstBattleTutorial} from './tutorial.js';
@@ -53,7 +53,7 @@ export class Adventure {
     this.nyanAwakening=createNyanAwakening();this.nyanAwakeningNewlyLearned=false;this.predation={active:false,used:false,baseAttack:0,attackBonus:0,danceKills:0};this.progression=normalizeProgression(progression,HEROES);this.guestHeroId=null;this.recruitedHeroId=null;this.act=isActUnlocked(this.progression,act)?act:0;this.actConfig=actFor(this.act);this.pendingTrials=new Set();this.rescue=null;
     this.party=Object.freeze(partyForAct(party,availableHeroes(this.progression,HEROES),this.progression,this.act,HEROES[hero]?.id));this.partyHeroes=this.party.map(id=>HEROES.findIndex(h=>h.id===id));hero=this.partyHeroes.includes(hero)?hero:this.partyHeroes[0];this.skillPool=Object.freeze(skillsForParty(this.party,this.progression));
     this.goldenSlimeKills=0;this.goldenSlimeLastWave=0;this.earnedRareStones=0;this.clearRewardTickets=0;this.earnedWeaponTickets=0;this.earnedMissions=[];this.earnedXp=Object.fromEntries(HEROES.map(h=>[h.id,0]));this.earnedMaterials=Object.fromEntries(Object.keys(MATERIALS).map(id=>[id,0]));
-    this.rng=seededRandom(seed);this.lootRng=seededRandom(seed^0x57EA90C1);this.materialRng=seededRandom(seed^0x4D41544C);this.rareRng=seededRandom(seed^0x604D5A1E);this.heheRng=seededRandom(seed^0x27436060);this.goldenHeheWave=goldenHeheWave(this.actConfig,this.heheRng);this.goldenHehe=null;this.goldenHeheKills=0;this.goldenSlime=null;this.goldenSlimeWave=guaranteedExtraRareWave(this.actConfig);this.seed=seed;this.difficulty=this.actConfig.difficulty??(this.actConfig.extra?'hard':difficulty);this.phase='playing';this.events=[];this.ids=1;this.rice={held:null,cooldown:0};this.riceNewlyLearned=false;
+    this.rng=seededRandom(seed);this.lootRng=seededRandom(seed^0x57EA90C1);this.materialRng=seededRandom(seed^0x4D41544C);this.rareRng=seededRandom(seed^0x604D5A1E);this.heheRng=seededRandom(seed^0x27436060);this.goldenHeheWave=goldenHeheWave(this.actConfig,this.heheRng);this.goldenHehe=null;this.goldenHeheKills=0;this.goldenSlime=null;this.goldenSlimeWave=guaranteedExtraRareWave(this.actConfig);this.seed=seed;this.difficulty=this.actConfig.difficulty??(this.actConfig.extra?'hard':difficulty);this.phase='playing';this.events=[];this.ids=1;this.rice=createRicePower();this.riceNewlyLearned=false;
     this.heroHealth=Object.fromEntries(HEROES.map(h=>{const maxHp=this.statsFor(HEROES.indexOf(h)).maxHp;return [h.id,{hp:maxHp,maxHp}];}));
     this.player={x:0,z:3,hero,face:Math.PI,invincible:1,dash:0,dashCooldown:0,dx:0,dz:-1,attack:0,charge:0,switchCooldown:0};
     // HP follows the controlled character; switching never copies another character's damage.
@@ -206,10 +206,11 @@ export class Adventure {
       const tickets=grantWeaponTickets(this.progression,clearTicketReward(this.progression,this.act));
       this.clearRewardTickets=tickets;this.earnedWeaponTickets+=tickets;
       if(tickets)this.emit('weaponTicket',{count:tickets,total:this.progression.inventory.weaponTicket,source:'actClear'});
-      const knewRice=hasRicePower(this.progression),knewNyan=hasNyanAwakening(this.progression);
+      const knewRice=hasRicePower(this.progression),knewNyan=hasNyanAwakening(this.progression),knewFreeSkills=hasFreeSkillLoadout(this.progression);
       if(completeAct(this.progression,this.act)){this.recruitedHeroId=this.actConfig.recruit;this.emit('recruited',{heroId:this.recruitedHeroId});}
       if(!knewRice&&hasRicePower(this.progression)){this.riceNewlyLearned=true;this.emit('riceAwakened');}
       if(!knewNyan&&hasNyanAwakening(this.progression)){this.nyanAwakeningNewlyLearned=true;this.emit('nyanAwakeningLearned');}
+      if(!knewFreeSkills&&hasFreeSkillLoadout(this.progression))this.emit('freeSkillsUnlocked');
       finishNyanAwakening(this,{reset:true});this.guestHeroId=null;this.phase='victory';finishPredation(this);this.emit('victory');
     }
     else{this.phase='transition';this.emit('stageClear',{area:this.area,nextArea:this.area+1});}
@@ -353,7 +354,7 @@ export class Adventure {
     // Keep the party's identity visible: a duo blessing, or a deployed hero's blessing.
     const signatures=available.filter(s=>s.requires?.length===(this.hasPartner&&available.some(s=>s.requires?.length===2)?2:1));
     if(signatures.length&&!this.offers.some(s=>signatures.includes(s)))this.offers[this.offers.length-1]=signatures[0];
-    this.cancelRice();this.phase='upgrade';this.emit('upgrade',{offers:this.offers});
+    this.phase='upgrade';this.emit('upgrade',{offers:this.offers});
   }
   chooseSkill(id){
     const skill=this.skillPool.find(s=>s.id===id);
@@ -363,12 +364,10 @@ export class Adventure {
     this.pendingBlessings=Math.max(0,this.pendingBlessings-1);this.offers=[];this.phase='playing';this.emit('skill',{id});
     if(this.pendingBlessings>0)this.offerSkills();return true;
   }
-  get riceAvailable(){return canUseRice(this);}
-  grabRice(kind,id){return grabRice(this,kind,id);}
-  moveRice(point){return moveRice(this,point);}
-  releaseRice(){return releaseRice(this);}
+  get riceAvailable(){return canActivateRice(this);}
+  activateRice(){return activateRice(this);}
   cancelRice(){return cancelRice(this);}
-  pause(){if(this.phase==='playing'){this.cancelRice();this.phase='paused';return true;}return false;}
+  pause(){if(this.phase==='playing'){this.phase='paused';return true;}return false;}
   resume(){if(this.phase==='paused')this.phase='playing';}
   tick(dt,input={x:0,z:0}){
     if(this.phase!=='playing')return;const training=this.tutorial?.active;
@@ -416,7 +415,7 @@ export class Adventure {
     }
     for(const bullet of this.projectiles){
       if(bullet.life<=0||bullet.riceHeld)continue;
-      bullet.life-=dt;if(bullet.owner==='player'&&['magic','mochiNote','magicArrow'].includes(bullet.kind)){
+      bullet.life-=dt;if(bullet.owner==='player'&&['magic','mochiNote','magicArrow','riceReturn'].includes(bullet.kind)){
         const target=this.enemies.find(e=>e.id===bullet.target&&e.hp>0&&!e.riceHeld)??(bullet.kind==='magicArrow'||bullet.awakened?this.nearest(bullet.x,bullet.z,bullet.life*bullet.speed):null);if(target){bullet.target=target.id;}if(target){const x=target.x-bullet.x,z=target.z-bullet.z,d=Math.hypot(x,z)||1;bullet.vx=x/d*bullet.speed;bullet.vz=z/d*bullet.speed;}
       }
       if(bullet.owner==='enemy'&&bullet.homing>0){const target=Math.atan2(p.x-bullet.x,p.z-bullet.z),current=Math.atan2(bullet.vx,bullet.vz),turn=Math.atan2(Math.sin(target-current),Math.cos(target-current)),angle=current+clamp(turn,-bullet.turnRate*dt,bullet.turnRate*dt);bullet.vx=Math.sin(angle)*bullet.speed;bullet.vz=Math.cos(angle)*bullet.speed;bullet.homing=Math.max(0,bullet.homing-dt);}
@@ -428,6 +427,7 @@ export class Adventure {
         for(const {e} of hits){if(bullet.kind==='mochiCry')mochiCryHit(this,e);if(['magic','moonPierce'].includes(bullet.kind)&&bullet.heroId==='nyanluna'&&this.rank('moonFrost')){e.frostUntil=this.time+2;e.frostSlow=.25+this.rank('moonFrost')*.1;}this.hit(e,bullet.damage,fromX,fromZ,bullet.crit,false,bullet.heroId,!bullet.ultimate);if(bullet.hitIds){bullet.hitIds.push(e.id);bullet.pierce--;if(bullet.pierce>0)continue;}bullet.life=0;break;}
       }
       else{
+        if(reflectRiceBullet(this,bullet,fromX,fromZ))continue;
         const dx=bullet.x-fromX,dz=bullet.z-fromZ,l=dx*dx+dz*dz,t=clamp(((p.x-fromX)*dx+(p.z-fromZ)*dz)/(l||1),0,1);
         if(Math.hypot(p.x-fromX-dx*t,p.z-fromZ-dz*t)<.6+bullet.radius){this.hurt(mochiIncomingDamage(this,bullet.damage,bullet.sourceId),bullet.x,bullet.z);bullet.life=0;if(this.phase==='defeat')return;}
       }
@@ -447,5 +447,5 @@ export class Adventure {
     }
     if(this.pendingBlessings>0){this.offerSkills();return;}
   }
-  snapshot(){return {nyanAwakening:{...this.nyanAwakening},predation:{active:this.predation.active,used:this.predation.used,attackBonus:this.predation.attackBonus,danceKills:this.predation.danceKills},goldenHeheKills:this.goldenHeheKills,goldenHehe:this.goldenHehe?{...this.goldenHehe}:null,mount:{...this.mount},goldenSlimeKills:this.goldenSlimeKills,goldenSlime:this.goldenSlime?{...this.goldenSlime}:null,earnedRareStones:this.earnedRareStones,earnedWeaponTickets:this.earnedWeaponTickets,heroHealth:Object.fromEntries(this.party.map(id=>[id,{...this.heroHealth[id]}])),rescue:this.rescue?{...this.rescue}:null,layout:this.layout.id,travelOpen:this.travelOpen,travelTargets:this.travelTargets,route:this.route,routeRewards:[...this.routeRewards],act:this.act,actTitle:this.actConfig.title,phase:this.phase,ultimateCharges:{...this.ultimateCharges},ultimateEffects:this.ultimateEffects.map(e=>({...e})),tutorial:this.tutorial?{active:this.tutorial.active,step:this.tutorial.step.id,distance:this.tutorial.distance}:null,guestHeroId:this.guestHeroId,recruitedHeroId:this.recruitedHeroId,party:[...this.party],partnerHero:this.partnerHero,skillPool:this.skillPool.map(s=>s.id),exitOpen:this.exitOpen,stagesCleared:this.stagesCleared,wave:this.wave,area:this.area,kills:this.kills,time:this.time,characterLevels:Object.fromEntries(HEROES.map((h,i)=>[h.id,{...this.progressFor(i)}])),earnedXp:{...this.earnedXp},stageCrystals:this.stageCrystals,crystalGoal:this.crystalGoal,blessingTier:this.blessingTier,blessingsTaken:this.blessingsTaken,player:{...this.player},enemyCount:this.enemies.length,projectiles:this.projectiles.length,earnedMissions:[...this.earnedMissions],skills:{...this.skills},offers:this.offers.map(s=>s.id),boss:this.enemies.find(e=>e.type==='boss')?.hp||0};}
+  snapshot(){return {rice:{...this.rice},nyanAwakening:{...this.nyanAwakening},predation:{active:this.predation.active,used:this.predation.used,attackBonus:this.predation.attackBonus,danceKills:this.predation.danceKills},goldenHeheKills:this.goldenHeheKills,goldenHehe:this.goldenHehe?{...this.goldenHehe}:null,mount:{...this.mount},goldenSlimeKills:this.goldenSlimeKills,goldenSlime:this.goldenSlime?{...this.goldenSlime}:null,earnedRareStones:this.earnedRareStones,earnedWeaponTickets:this.earnedWeaponTickets,heroHealth:Object.fromEntries(this.party.map(id=>[id,{...this.heroHealth[id]}])),rescue:this.rescue?{...this.rescue}:null,layout:this.layout.id,travelOpen:this.travelOpen,travelTargets:this.travelTargets,route:this.route,routeRewards:[...this.routeRewards],act:this.act,actTitle:this.actConfig.title,phase:this.phase,ultimateCharges:{...this.ultimateCharges},ultimateEffects:this.ultimateEffects.map(e=>({...e})),tutorial:this.tutorial?{active:this.tutorial.active,step:this.tutorial.step.id,distance:this.tutorial.distance}:null,guestHeroId:this.guestHeroId,recruitedHeroId:this.recruitedHeroId,party:[...this.party],partnerHero:this.partnerHero,skillPool:this.skillPool.map(s=>s.id),exitOpen:this.exitOpen,stagesCleared:this.stagesCleared,wave:this.wave,area:this.area,kills:this.kills,time:this.time,characterLevels:Object.fromEntries(HEROES.map((h,i)=>[h.id,{...this.progressFor(i)}])),earnedXp:{...this.earnedXp},stageCrystals:this.stageCrystals,crystalGoal:this.crystalGoal,blessingTier:this.blessingTier,blessingsTaken:this.blessingsTaken,player:{...this.player},enemyCount:this.enemies.length,projectiles:this.projectiles.length,earnedMissions:[...this.earnedMissions],skills:{...this.skills},offers:this.offers.map(s=>s.id),boss:this.enemies.find(e=>e.type==='boss')?.hp||0};}
 }

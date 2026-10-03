@@ -60,9 +60,9 @@ test('golden rewards are exactly twice slime materials plus abundant rarity-3 ma
  const paused=quiet();paused.goldenHeheWave=1;paused.spawnGoldenHehe();paused.pause();step(paused,25);assert.equal(paused.time,0);assert.equal(paused.goldenHehe.status,'active');
  assert.deepEqual(enemyMaterials({type:GOLDEN_HEHE.type},24,'hard',()=>{throw Error('rare drop rolled');}),GOLDEN_HEHE.materials);
 });
-test('five bald enemy classes and four bosses have readable attacks; boss bodies stay ungrabbable but their arrows can be thrown',()=>{
+test('five bald enemy classes and four bosses have readable attacks; boss arrows can be reflected without grabbing bodies',()=>{
  assert.equal(Object.keys(HEHE_ENEMIES).length,5);for(const type of Object.keys(HEHE_ENEMIES)){const g=quiet(),e=g.spawnEnemy(type,0,-3);e.special=0;tickEnemyBehavior(g,e,.01);assert.ok(e.cast||e.rush,type);assert.ok(g.hazards.every(h=>h.total>=.65));}
- const g=quiet(),boss=g.spawnEnemy('boss',0,6);assert.equal(g.grabRice('enemy',boss.id),false);boss.special=0;boss.action=1;tickEnemyBehavior(g,boss,.01);tickEnemyBehavior(g,boss,boss.cast.remaining+.01);assert.ok(g.projectiles.length);const b=g.projectiles[0];assert.equal(g.grabRice('bullet',b.id),true);g.cancelRice();assert.equal(g.rice.held,null);
+ const g=quiet(),boss=g.spawnEnemy('boss',0,6);assert.equal(typeof g.grabRice,'undefined');boss.special=0;boss.action=1;tickEnemyBehavior(g,boss,.01);tickEnemyBehavior(g,boss,boss.cast.remaining+.01);assert.ok(g.projectiles.length);const b=g.projectiles[0];Object.assign(b,{x:0,z:1.5,vx:0,vz:-8,homing:0});assert.equal(g.activateRice(),true);g.tick(.05);assert.equal(b.life,0);assert.equal(g.projectiles.find(p=>p.kind==='riceReturn').target,boss.id);assert.equal(g.runHits,0);assert.equal(boss.riceHeld,undefined);
 });
 test('chapter-six terrain, generated art, voices, starter bow and all ten weapon ranks are available',()=>{
  for(const id of HEHE_ACT_IDS)for(let area=0;area<3;area++)for(const room of fieldFor(id,area).rooms){assert.ok(contains(room,room.entrance.x,room.entrance.z));assert.ok(contains(room,room.exit.x,room.exit.z));assert.ok(room.hehe);}

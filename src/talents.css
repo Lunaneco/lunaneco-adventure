@@ -37,3 +37,6 @@
 .tier-one-guide{border-color:#9ecbb13d;background:#86b39f0a}.tier-one-guide>strong{color:#cce4d0}
 @media(max-width:760px){.material-wallet{grid-template-columns:repeat(2,minmax(0,1fr))}.material-item{padding:12px}.material-item>div{padding-left:0;grid-template-columns:1fr;gap:4px}.material-item>.icon{left:auto;right:12px;top:60px}.material-item strong{font-size:25px}.material-item span{font-size:max(11px,var(--ui-min-font,0px))}.material-item small{font-size:max(9px,var(--ui-min-font,0px))}.rarity-tag{font-size:max(8px,var(--ui-min-font,0px))}.material-item small{padding-right:0}}
 @media(min-width:761px) and (max-width:1100px){.material-item>div{grid-template-columns:1fr}.material-item strong{font-size:25px}}
+.tree-hero-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tree-hero-picker button{min-width:0;width:100%}
+@media(max-width:760px){.tree-hero-picker{grid-template-columns:repeat(2,minmax(0,1fr))}}

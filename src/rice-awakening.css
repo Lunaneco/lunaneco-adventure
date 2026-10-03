@@ -4,6 +4,8 @@
 .rice-reward small{display:block;line-height:1.7;color:#668274}
 .rice-result{margin:14px 0;padding:16px;border:1px solid #84ba94;border-radius:8px;background:#1d3a30;color:#ddf6d9;line-height:1.8}
 .rice-result strong{display:block;font-size:18px}
-.rice-control-hint{position:absolute;bottom:calc(125px + var(--safe-bottom,0px));right:20px;max-width:min(320px,calc(100% - 180px));padding:8px 11px;border:1px solid #99d4a4;border-radius:7px;background:#102d29e8;color:#e4ffe5;font-size:12px;line-height:1.6;pointer-events:none}
-@media(max-width:600px){.rice-control-hint{right:12px;bottom:calc(120px + var(--safe-bottom,0px));max-width:calc(100% - 160px);font-size:11px}.rice-quest-note{font-size:11px}}
-@media(max-height:500px) and (orientation:landscape){.rice-control-hint{right:12px;bottom:120px;max-width:280px}}
+.rice-button{position:absolute;bottom:calc(100% + 165px);right:0;min-width:128px;min-height:50px;border:1px solid #b8eec1;border-radius:16px;background:linear-gradient(120deg,#234637,#48735a);color:#f0ffe9;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 10px;touch-action:manipulation;box-shadow:0 3px 18px #102d2944}
+.rice-button span{font-size:14px;font-weight:750}.rice-button small{font-size:11px}.rice-button:disabled{opacity:.65}.rice-button.reflecting{opacity:1;background:linear-gradient(120deg,#377450,#65946b);box-shadow:0 0 18px #aaffba55}
+.rice-control-hint{position:absolute;bottom:calc(348px + var(--safe-bottom,0px));right:20px;max-width:min(280px,calc(100% - 40px));padding:6px 9px;border:1px solid #99d4a4;border-radius:7px;background:#102d29e8;color:#e4ffe5;font-size:11px;line-height:1.6;pointer-events:none}
+@media(max-width:600px){.rice-button{min-height:45px;min-width:120px}.rice-button kbd{display:none}.rice-control-hint{right:12px;bottom:calc(352px + var(--safe-bottom,0px));max-width:calc(100% - 24px);font-size:10px}.rice-quest-note{font-size:11px}}
+@media(max-height:500px) and (orientation:landscape){.rice-button{right:calc(100% + 8px);bottom:64px;min-width:112px;min-height:50px}.rice-button kbd{display:none}.rice-control-hint{right:12px;bottom:192px;max-width:260px}}

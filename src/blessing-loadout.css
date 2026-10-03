@@ -29,6 +29,18 @@
 
 .skill-upgrade-label{display:block;color:#f2dca0;font-size:max(11px,var(--ui-min-font,0px));line-height:1.8;font-weight:600;overflow-wrap:anywhere}
 .blessing-options .skill-upgrade-label{font-size:max(10px,var(--ui-min-font,0px));margin-bottom:4px}
+.free-skill-unlocked{padding:12px;border:1px solid #d3bd89;border-radius:6px}
+.party-free-skills{margin-top:24px;border-top:1px solid #bfb8a855;padding-top:14px}
+.party-free-skills>p,.party-free-skills h3{line-height:1.8;overflow-wrap:anywhere}
+.party-skill-heroes{display:flex;flex-wrap:wrap;gap:8px}
+.party-skill-heroes button{min-height:44px;padding:10px 16px;border:1px solid #a9bfd044;border-radius:6px}
+.party-skill-heroes button[aria-pressed=true]{box-shadow:inset 0 0 0 2px #b79964}
+.party-free-skills .blessing-loadout{padding:16px 12px}
+.party-free-skills .blessing-options{grid-template-columns:1fr}
+.party-free-skills .blessing-options button{min-height:44px}
+.party-free-skills .blessing-loadout h4{overflow-wrap:anywhere}
+#party-skill-feedback{font-size:max(12px,var(--ui-min-font,0px));line-height:1.8}
+body:has(#chapter-menu:not(.hidden)) #modal .party-free-skills .blessing-loadout{background:#f9f5eb;border-color:#d0c8b9}
 @media(max-width:760px){
   .skill-card>.skill-upgrade-label{grid-column:2;grid-row:3;font-size:max(9px,var(--ui-min-font,0px));line-height:1.6;margin:0 0 5px}
   .skill-card:has(>.skill-upgrade-label)>p{grid-row:4}

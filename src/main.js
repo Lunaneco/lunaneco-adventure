@@ -33,7 +33,7 @@ import {STAGE_MISSIONS,missionsFor,trialStatus} from './missions.js';
 import {equipUnique,uniqueEquipment} from './equipment.js';
 import {PARTY_KEY,normalizeParty,changeParty} from './party.js';
 import {partyView} from './party-ui.js';
-import {skillUpgradeLabel,blessingSource,partyTitle,equipSkill} from './blessings.js';
+import {skillUpgradeLabel,blessingSource,partyTitle,equipSkill,hasFreeSkillLoadout} from './blessings.js';
 import './style.css';
 import './chapter.css';
 import './story-cast.css';
@@ -105,6 +105,7 @@ const heroLevel=id=>characterProgress(progression,id).level;
 let selectedAct=0;
 let equipmentHero=HEROES[0].id,equipmentCategory='weapons';
 let treeHero=HEROES[0].id,treeSelection='origin',blessingSlot=0;
+let partySkillHero=null,partySkillSlot=0;
 const savedParty=read(PARTY_KEY,{});let selectedParty=normalizeParty(savedParty.members,unlockedRoster());
 let selectedHero=Math.max(0,HEROES.findIndex(h=>h.id===(selectedParty.includes(savedParty.lead)?savedParty.lead:selectedParty[0]))),difficulty='normal',game=null,world=null,last=performance.now(),accumulator=0,activeDialog=null,returnFocus=null,resultSaved=false,toastTimer=0,bannerTimer=0,ultimateBannerTimer=0,renderFrames=0,storyEnabled=true,pendingStory=null;
 let lastSkills='',lastHero=-1;
@@ -116,7 +117,6 @@ story.onVoiceStop=()=>voice.stop();
 tutorialView.onVoice=step=>{void voice.dialogue('nyanluna',step.text,'tutorial');};
 document.addEventListener('pointerdown',()=>{voice.init();if(voice.suspended&&activeDialog!=='pause')voice.resume();},{passive:true});
 const keys=new Set();const stick={id:null,x:0,y:0,cx:0,cy:0};const previousPad={};
-let ricePointer=null;
 const portrait=(hero,cls='')=>`<span class="portrait ${HEROES[hero].id} ${cls}" role="img" aria-label="${HEROES[hero].name}"></span>`;
 const minutes=t=>`${Math.floor(t/60).toString().padStart(2,'0')}:${Math.floor(t%60).toString().padStart(2,'0')}`;
 $('#app').innerHTML=`
@@ -137,7 +137,7 @@ $('#app').innerHTML=`
     <div id="stage-crystal-hud" class="stage-crystal-hud">${icon('crystal')}<div><span>クリスタル <small>この幕の間</small></span><strong id="crystal-count">0 / 8</strong><div class="crystal-track" role="progressbar" aria-label="次の祝福までのクリスタル" aria-valuemin="0" aria-valuemax="8" aria-valuenow="0"><i id="crystal-fill"></i></div><small id="blessing-count">次の祝福まで</small></div></div>
     <div id="combo" class="combo"><strong>0</strong><span>CHAIN</span></div>
     <div id="acquired" class="acquired" aria-label="獲得した冒険スキル"></div>
-    <div class="controls"><button id="nyan-awakening" data-action="awakening" class="nyan-awakening-button hidden" aria-label="にゃんるなが覚醒（G）"><span id="nyan-awakening-label">覚醒</span><small id="nyan-awakening-status">20秒</small><kbd>G</kbd></button><button id="predation" data-action="predation" class="predation-button hidden" aria-label="へへりあるがオムソロを捕食して変身（F）。戦闘終了まで解除できません"><span class="portrait hehereal"></span><span id="predation-label">捕食</span><small id="predation-status">単独変身</small><kbd>F</kbd></button><button id="mount" data-action="mount" class="mount-button hidden" aria-label="プリムに搭乗（R）"><span id="mount-label">搭乗</span><small id="mount-time">12秒</small><kbd>R</kbd></button><button id="switch-action" data-action="switch" class="action-button switch-action" aria-label="つきねこに操作を切り替え（Q）">${portrait(1)}<span class="swap-badge">${icon('swap')}</span><span class="switch-label">交代</span><small id="switch-target" class="switch-target">つきねこへ</small><kbd>Q</kbd><i class="cooldown-mask"></i></button><button id="dash" data-action="dash" class="action-button dash-button" aria-label="回避（Space）">${icon('wind')}<span>回避</span><kbd>SPACE</kbd><i class="cooldown-mask"></i></button><button id="ultimate" data-action="ultimate" class="action-button ultimate-button" aria-label="月華の聖域（E）"><div class="charge-ring"></div>${icon('moon')}<span id="ult-label">0%</span><kbd>E</kbd></button></div>
+    <div class="controls"><button id="rice" data-action="rice" class="rice-button hidden" aria-label="ライスの力で5秒間、敵の遠距離攻撃を反射（T）"><span id="rice-label">ライス</span><small id="rice-status">5秒反射</small><kbd>T</kbd></button><button id="nyan-awakening" data-action="awakening" class="nyan-awakening-button hidden" aria-label="にゃんるなが覚醒（G）"><span id="nyan-awakening-label">覚醒</span><small id="nyan-awakening-status">20秒</small><kbd>G</kbd></button><button id="predation" data-action="predation" class="predation-button hidden" aria-label="へへりあるがオムソロを捕食して変身（F）。戦闘終了まで解除できません"><span class="portrait hehereal"></span><span id="predation-label">捕食</span><small id="predation-status">単独変身</small><kbd>F</kbd></button><button id="mount" data-action="mount" class="mount-button hidden" aria-label="プリムに搭乗（R）"><span id="mount-label">搭乗</span><small id="mount-time">12秒</small><kbd>R</kbd></button><button id="switch-action" data-action="switch" class="action-button switch-action" aria-label="つきねこに操作を切り替え（Q）">${portrait(1)}<span class="swap-badge">${icon('swap')}</span><span class="switch-label">交代</span><small id="switch-target" class="switch-target">つきねこへ</small><kbd>Q</kbd><i class="cooldown-mask"></i></button><button id="dash" data-action="dash" class="action-button dash-button" aria-label="回避（Space）">${icon('wind')}<span>回避</span><kbd>SPACE</kbd><i class="cooldown-mask"></i></button><button id="ultimate" data-action="ultimate" class="action-button ultimate-button" aria-label="月華の聖域（E）"><div class="charge-ring"></div>${icon('moon')}<span id="ult-label">0%</span><kbd>E</kbd></button></div>
     <div id="exit-guide" class="exit-guide hidden" aria-live="polite"><span>月の門が開いた</span><strong id="exit-instruction">光る輪へ進もう</strong><small>矢印の先へ移動すると、次のステージへ</small></div>
     <div id="field-map" class="field-map" role="img" aria-label="現在のフィールドの地図"></div><div id="passage-guide" class="passage-guide hidden" role="status"></div>
     <div id="control-hint" class="control-hint"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移動</span><i></i><span>近くの敵を自動で攻撃</span><i></i><span>ドラッグでも移動</span></div>
@@ -188,7 +188,7 @@ $('#weapon-summon').addEventListener('pointercancel',()=>{summonPointer=null;});
 $('#weapon-summon').addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
 const dialogs={
   stage:()=>stageBriefingView(selectedAct,difficulty,progression),
-  party:()=>partyView(selectedParty,selectedHero,HEROES,heroLevel,progression,$('#chapter-menu').classList.contains('hidden')?'タイトルへ戻る':'メニューへ戻る'),
+  party:()=>partyView(selectedParty,selectedHero,HEROES,heroLevel,progression,$('#chapter-menu').classList.contains('hidden')?'タイトルへ戻る':'メニューへ戻る',null,{skillHero:partySkillHero,skillSlot:partySkillSlot}),
   guide:()=>`<div class="modal-heading"><span class="eyebrow">ADVENTURE GUIDE</span><h2>ふたりなら、もっと遠くへ。</h2><p>移動に集中。攻撃は、仲間にまかせよう。</p></div><div class="guide-grid"><article>${icon('compass')}<h3>撃って、かわして</h3><p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> または画面をドラッグして移動。近くの敵へ自動攻撃。<kbd>Space</kbd> で無敵時間のある回避。</p></article><article>${icon('swap')}<h3>ふたりの力を重ねる</h3><p>最初はにゃんるなだけで出発。第4幕の最後で親友のつきねこと再会・共闘し、クリアすると正式加入します。加入後は冒険画面の「パーティ」で1〜2体を選択。2体編成なら右下の「交代」で、表示された仲間の操作に切り替え。移動しながらでも押せます。<kbd>Q</kbd> または左上の顔でも交代。にゃんるなは遠距離魔法、つきねこは貫通する銃撃。第2章の最後ではオムソロを救出し、クリア後に近接の光剣使いとして加入します。第3章ではもちにゃふぇ、第4章ではHP吸収の鎌使い・雫、第5章では爪とブレスで戦うプリムが加入。第5章の各幕は初回クリアまでつきねこ一人で出撃し、クリアした幕は自由に編成できます。第6章「へへへランド」は推奨Lv.60。各幕の初回クリアまではオムソロ単独で出撃し、クリアした幕は自由編成。2人編成ではNPCのへへりあるは参加しません。おむすびを分けた後は、へへりあるが魔法の弓で援護し、最後の幕をクリアすると正式加入します。登場人物が増えても出撃は最大2人です。控えの仲間も援護します。HPはキャラ別。援護中の仲間は無敵。つきねこ＋プリムでは搭乗ボタン（PCはR）でプリムが大きくなり、12秒間二人ともメインとして攻撃・被弾します。移動はオムソロと同じ速さ。終了後20秒で再搭乗できます。通常の冒険では倒れると生存中の相方へ自動交代し、全員が倒れると終了します。第6章のNPCへへりあるは援護専用。操作役が倒れると終了します。クリア後に選んだ2人編成では、交代・自動交代を通常どおり使えます。戦闘不能からの復帰は次の冒険です。</p></article><article>${icon('spark')}<h3>経験値とクリスタル</h3><p>敵を倒したキャラに経験値100%、もう一人の出撃キャラに50%が入り、レベルと基礎能力が成長。援護の撃破も倒した本人に100%。端数の0.5も保存します。戦闘不能でも出撃中なら50%を獲得。未出撃のキャラとLv.80には入りません。落ちたクリスタルを集めると、出撃メンバーに応じた候補から3つの祝福を提示。共通・キャラ由来・2体の連携があり、効果は編成内で共有します。祝福は同じ幕の全6WAVEで維持されます。にゃんるなはスキルダメージ+50%・ゲージ獲得+50%。つきねこは基礎HP・攻撃力・防御力と通常射撃に優れます。</p></article><article>${icon('moon')}<h3>キャラ固有の必殺技</h3><p>攻撃した本人のゲージが増加し、100%で <kbd>E</kbd> または右下の必殺ボタン。にゃんるな「月華の聖域」は範囲攻撃・減速・HP回復。つきねこ「星銃・彗星連射」は貫通弾の8連射。オムソロ「翠光・守り手の円舞」は周囲への連続斬撃と回復・短い無敵。雫「紅月の鎌」は連続斬撃とHP吸収。にゃんるなと雫の二人が生存し、両ゲージ100%なら特殊連携「月雫・おかえりの約束」に変化します。へへりあるの「花弓・追いかける約束」は遠くの敵を追尾する魔法矢9連射。プリムの「プリズムブレス」は一直線の貫通攻撃。つきねことプリムの両ゲージが100%なら、二人の攻撃を重ねる「星虹・ふたりの帰り道」が発動します。専用イラストとボイスの演出後に発動します。演出中は画面をタップ（PCはEnter／Space）すると省略して即発動します。演出中は敵も味方も止まり、救出の制限時間も進みません。ゲージはキャラ別に保持し、援護でも蓄積。必殺技自体では増えません。</p></article></div><div class="guide-note">全6章・各章4幕・各幕6WAVE。地形はステージごとに変化。2フロアでは下階を制圧して青い階段から上階へ。分岐では左の緑の門が通常、右の赤い門が強ボスと追加素材。強ボスは同じ難易度の通常ボスに対して${ELITE_BOSS_LABEL}。地図を見て歩いて選ぼう。2WAVEごとに月の門が開きます。光る輪へ移動して次へ進もう。各幕の最後の門でクリア。ミッション報酬を受け取り、メニューから次の幕へ進みます。橙の照準線・突進の帯、紫や桃色の魔法陣から離れよう。<br>ゲームパッド：左スティック移動 / A回避 / B交代 / Y必殺 / Start一時停止。<br>祝福・クリスタルは新しい出撃でリセット。キャラ別のレベル・経験値・覚醒の輝石はこのブラウザに自動保存されます。成長ツリーは素材を使ってキャラごとに解放。「スキルの星」では新しい祝福候補を解放し、出撃前に3枠へセット。共通・二人の連携は枠を使わず自動で候補に入ります。星の芽は通常敵から50%で入手。月のしずくは月の門から1個ずつ、守護者の欠片はボスから入手。1段目はレア度1素材のみ。2段目には第2章・チャレンジモードで集めるレア度2素材も必要です。防御力はキャラ固有値＋レベル成長＋ツリー効果で被ダメージを軽減します。初期上限Lv.20。各章の第4幕クリアでもらえる覚醒の輝石と育成素材で、上限を10ずつ最大Lv.80まで解放できます。石は段階ごとに1・2・4・5・6・8個、Lv.40以降はレア度2素材も必要です。Lv.60の上限解放からは、第4〜6章で集めるレア度3素材も使います。成長ツリーの3段目はLv.60から解放されます。上限到達後の経験値も蓄積されます。<br>ステージミッションで育成素材を入手。ユニーク装備は全キャラ共通の各1枠。同じ装備は一人だけ使用でき、装備画面で仲間どうしの付け替えが可能です。チャレンジモードの時間・被弾条件を達成して入手します。専用武器は別枠の★1〜★4。各幕の全6WAVEクリアで毎回ガチャ券を1枚確定入手。ボスからも5%で追加の専用武器ガチャ券が落ち、メニュー「武器ガチャ」で1枚につき1回使えます。7人の専用武器から均等に抽選。★2が75%、★3が20%、★4が5%。★2〜★4は各キャラ・各レア度に性能の違う3種類。装備画面で自由に付け替えられます。同じ武器・同じレア度の重複だけを星の芽に変換。ガチャでは装備を変更しません。高難度の章ミッションでは追加の覚醒の輝石も入手できます。</div><button id="tutorial-replay" class="secondary">にゃんるなと操作を練習する</button><p class="tutorial-replay-note">にゃんるな1体で最初の戦闘から開始。育成・所持品は引き継ぎます。</p><button class="primary" data-close>準備はできた ${icon('arrow')}</button>`,
   settings:()=>`<div class="modal-heading"><span class="eyebrow">SETTINGS</span><h2>あなたの冒険に合わせて。</h2></div><div class="settings-list"><label><span>${icon('volume')}全体サウンド</span><input id="setting-sound" type="checkbox" ${settings.sound?'checked':''}></label><label><span>${icon('volume')}キャラクターボイス</span><input id="setting-voice" type="checkbox" ${settings.voice?'checked':''}></label><label class="voice-volume-setting"><span>ボイス音量 <output id="voice-volume-value">${Math.round(settings.voiceVolume*100)}%</output></span><input id="setting-voice-volume" aria-label="ボイス音量" type="range" min="0" max="100" value="${Math.round(settings.voiceVolume*100)}"></label><label><span>${icon('moon')}BGM</span><input id="setting-music" type="checkbox" ${settings.music?'checked':''}></label><label><span>${icon('spark')}画質</span><select id="setting-quality"><option value="high" ${settings.quality==='high'?'selected':''}>高画質</option><option value="low" ${settings.quality==='low'?'selected':''}>軽量</option></select></label><label><span>${icon('wind')}画面の揺れ・演出</span><input id="setting-motion" type="checkbox" ${settings.motion?'checked':''}></label></div><p class="subtle">動きが重い場合は「軽量」を選択してください。設定は自動保存されます。</p><button class="primary" data-close>閉じる ${icon('check')}</button>`,
   records:()=>`<div class="modal-heading"><span class="eyebrow">YOUR ADVENTURE</span><h2>星が覚えている、ふたりの軌跡。</h2></div><div class="record-feature">${icon('trophy')}<small>BEST SCORE</small><strong>${record.best.toLocaleString()}</strong></div><div class="record-grid"><div><strong>${record.runs}</strong><span>冒険した回数</span></div><div><strong>${record.wins}</strong><span>守護者の討伐</span></div><div><strong>${record.bestCombo}</strong><span>最大チェイン</span></div><div><strong>${progression.inventory.limitStone}</strong><span>所持する覚醒の輝石</span></div></div><p class="subtle">${record.runs?'次の冒険が、新しい記録になる。':'物語はこれから。最初の冒険へ出発しよう。'}</p><button class="primary" data-close>閉じる ${icon('arrow')}</button>`,
@@ -219,7 +219,7 @@ function updatePartyLabels(){
   if($('#journey-party-faces'))$('#journey-party-faces').innerHTML=selectedParty.map(id=>portrait(HEROES.findIndex(h=>h.id===id))).join('');
 
 }
-function renderPartyDialog(){if(activeDialog!=='party')return;$('#modal-content').innerHTML=dialogs.party()+`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`;if(!storageAvailable)$('.party-save-note').textContent='この環境では編成を保存できません。この画面では編成を維持します。';}
+function renderPartyDialog(){if(activeDialog!=='party')return;const scroll=$('#modal').scrollTop,expanded=$('.party-blessings')?.open;$('#modal-content').innerHTML=dialogs.party()+`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`;if(expanded)$('.party-blessings').open=true;$('#modal').scrollTop=scroll;if(!storageAvailable)$('.party-save-note').textContent='この環境では編成・スキル候補を保存できません。この画面では設定を維持します。';}
 function openDialog(type){
   if(activeDialog||(type==='party'&&game))return;if(type==='party'||type==='stage')updatePartyLabels();audio.init();audio.play('click');returnFocus=document.activeElement;activeDialog=type;$('#modal-content').innerHTML=dialogs[type]()+(type==='stage'?'':`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`);if(type==='stage')$('#modal').setAttribute('aria-labelledby','stage-brief-title');else $('#modal').removeAttribute('aria-labelledby');$('#modal').showModal();if(type==='stage'){updateDifficultyLabels();$('#stage-brief-title').focus({preventScroll:true});}bindSettings();
 }
@@ -247,7 +247,7 @@ function start({withStory=true,withTutorial=withStory&&selectedAct===0&&needsFir
 function goHome(){updateDifficultyLabels();ultimatePresentation.cancel();voice.setMode('menu');voice.stop();persistProgression();updateGrowthLabels();story.cancel();pendingStory=null;$('#chapter-menu').classList.add('hidden');$('#exit-guide').classList.add('hidden');game=null;audio.tick('menu');tutorialView.render(null);updatePartyLabels();numberContext.clearRect(0,0,numberCanvas.width,numberCanvas.height);$('#modal').close();$('#modal').removeAttribute('aria-labelledby');$('#modal-content').replaceChildren();$('#modal').classList.remove('wide');activeDialog=null;$('#hud').classList.add('hidden');$('#home').classList.remove('hidden');titleVideo.setVisible(true);$('#boss-hud').classList.add('hidden');$('#wave-banner').classList.remove('visible');$('#ultimate-banner').classList.remove('visible');$('#toast').classList.remove('visible');document.body.classList.remove('playing');world.reset();resetInput();clearTimeout(bannerTimer);clearTimeout(ultimateBannerTimer);clearTimeout(toastTimer);$('#start').focus();}
 function toast(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),2300);}
 function announce(message){$('#announcer').textContent=message;}
-function resetInput(){keys.clear();stick.id=null;stick.x=stick.y=0;ricePointer=null;game?.cancelRice();$('#joystick').classList.add('hidden');}
+function resetInput(){keys.clear();stick.id=null;stick.x=stick.y=0;$('#joystick').classList.add('hidden');}
 function playStory(id,done){
   if(!storyScenesFor(game?.act??selectedAct)){done?.();return;}
   if(!storyEnabled&&id!=='replay'){done?.();return;}
@@ -325,7 +325,8 @@ function goMenu(result){
     <section id="missions-panel" class="hidden" aria-label="ステージミッション">${missionsView(progression,actFor(selectedAct).extra?chapterForAct(selectedAct).start:selectedAct)}</section><section id="equipment-panel" class="hidden" aria-label="装備"><p id="equipment-feedback" class="equipment-feedback" role="status"></p><div id="equipment-content">${equipmentView(progression,equipmentHero,equipmentCategory)}</div></section><section id="weapons-panel" class="hidden" aria-label="専用武器ガチャ">${weaponGachaView(progression)}</section>
     <footer class="journey-footer"><span>月の旅路</span><div><button data-open="guide">${icon('book')} 遊び方</button><button data-open="records">${icon('trophy')} 記録</button></div></footer></div>`;
   if(result&&actFor(result.act).awakening==='nyanluna'&&hasNyanAwakening(progression))$('#adventure-panel').insertAdjacentHTML('afterbegin',`<section class="rice-result" aria-label="にゃんるな覚醒 習得"><strong>にゃんるなの覚醒を習得！</strong><p>${NYAN_AWAKENING_HELP}</p></section>`);
-  if(result&&actFor(result.act).awakening==='rice'&&hasRicePower(progression))$('#adventure-panel').insertAdjacentHTML('afterbegin',`<section class="rice-result" aria-label="ライスの力 習得"><strong>ライスの力を習得！</strong><p>${RICE_HELP}</p><small>掴める距離は14m、保持は4秒。指を離すと投げ、ポーズ・交代・画面離脱では安全に解除します。</small></section>`);
+  if(result&&actFor(result.act).awakening==='rice'&&hasRicePower(progression))$('#adventure-panel').insertAdjacentHTML('afterbegin',`<section class="rice-result" aria-label="ライスの力 習得"><strong>ライスの力を習得！</strong><p>${RICE_HELP}</p><small>効果終了後10秒で再使用。ポーズ・会話・必殺技カットイン中は残り時間が停止します。交代・戦闘終了で反射を解除します。</small></section>`);
+  if(result&&actFor(result.act).endgame&&hasFreeSkillLoadout(progression))$('#adventure-panel').insertAdjacentHTML('afterbegin','<section class="rice-result" aria-label="全員のスキル付け替え 解放"><strong>全員のスキル・全3枠の付け替えを解放！</strong><p>どの編成でも、パーティ画面から全員のスキルを自由に設定できます。未解放の上位版も選べます。設定は無料・自動保存です。</p><button class="secondary" data-open="party">パーティでスキルを設定する</button></section>');
   if(chapter.id===6)$('#adventure-panel').insertAdjacentHTML('afterbegin','<p class="chapter-seven-brief">推奨Lv.60 · 各幕の初回はもちにゃふぇ固定。荒らされた村を守り、アンチケモみみ集団と戦います。第1幕の出会いの後、るみがNPC援護。2人編成ではNPCなし。第4幕クリアでるみ正式加入、クリアした幕は自由編成。もちにゃふぇとるみを組むとねこるみになり、レールガンの射程は無限。</p>');
   if(chapter.id===5)$('#adventure-panel').insertAdjacentHTML('afterbegin','<p class="chapter-six-brief">推奨 Lv.60 · 各幕の初回クリアまではオムソロ操作固定。クリアした幕は自由編成。2人編成ではNPCへへりあるは参加しません。第1幕でおむすびを分けた後、へへりあるが援護に参加。第4幕クリアで正式加入。黄金のへへへは各幕で一度だけ20%抽選。</p>');
   updateDifficultyLabels();updatePartyLabels();$('#chapter-menu').classList.remove('hidden');$('#chapter-menu').focus({preventScroll:true});$('#chapter-menu').scrollTop=0;announce(`第${chapter.id+1}章${cleared?'クリア':''}。メニューで編成やステージを選べます。`);
@@ -337,7 +338,7 @@ function axes(){
   const pad=navigator.getGamepads?.()[0];if(pad){x+=Math.abs(pad.axes[0])>.17?pad.axes[0]:0;y+=Math.abs(pad.axes[1])>.17?pad.axes[1]:0;}
   const len=Math.hypot(x,y);if(len>1){x/=len;y/=len;}return {x:x*.789+y*.614,z:-x*.614+y*.789};
 }
-function action(kind){audio.init();if(!game||game.phase!=='playing')return;const a=axes();if(kind==='awakening'){if(game.awakenNyan()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='predation'){if(game.predate()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='mount'){if(game.mountPrim()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='dash')game.dash(a.x,a.z);if(kind==='switch'&&game.switchHero())updateHud();if(kind==='ultimate'){if(ultimatePresentation.start(game)){cutinPointer=null;cutinTap=false;audio.play('ultimateReveal');resetInput();clearTimeout(toastTimer);$('#toast').classList.remove('visible');clearTimeout(bannerTimer);$('#wave-banner').classList.remove('visible');$('#ultimate-banner').classList.remove('visible');updateHud();}else toast(game.ultimateActive(game.player.hero)?'この仲間の必殺技は発動中':`${HEROES[game.player.hero].name}の必殺ゲージをためよう · ${Math.floor(game.player.charge)}%`);}}
+function action(kind){audio.init();if(!game||game.phase!=='playing')return;const a=axes();if(kind==='rice'){if(game.activateRice()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='awakening'){if(game.awakenNyan()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='predation'){if(game.predate()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='mount'){if(game.mountPrim()){handleEvents(game.drainEvents());updateHud();}return;}if(kind==='dash')game.dash(a.x,a.z);if(kind==='switch'&&game.switchHero())updateHud();if(kind==='ultimate'){if(ultimatePresentation.start(game)){cutinPointer=null;cutinTap=false;audio.play('ultimateReveal');resetInput();clearTimeout(toastTimer);$('#toast').classList.remove('visible');clearTimeout(bannerTimer);$('#wave-banner').classList.remove('visible');$('#ultimate-banner').classList.remove('visible');updateHud();}else toast(game.ultimateActive(game.player.hero)?'この仲間の必殺技は発動中':`${HEROES[game.player.hero].name}の必殺ゲージをためよう · ${Math.floor(game.player.charge)}%`);}}
 document.addEventListener('click',event=>{
   const target=event.target.closest('button');if(!target)return;
   if(target.id==='tutorial-next'&&game?.advanceTutorial()){resetInput();handleEvents(game.drainEvents());updateHud();canvas.focus();}
@@ -349,6 +350,14 @@ document.addEventListener('click',event=>{
 
   if(target.dataset.partyToggle&&!game){selectedParty=changeParty(selectedParty,target.dataset.partyToggle,unlockedRoster());if(!selectedParty.includes(HEROES[selectedHero].id))selectedHero=HEROES.findIndex(h=>h.id===selectedParty[0]);persistParty();updatePartyLabels();renderPartyDialog();$(`[data-party-toggle="${target.dataset.partyToggle}"]`)?.focus({preventScroll:true});}
   if(target.dataset.partyLead&&!game){const index=Number(target.dataset.partyLead);if(selectedParty.includes(HEROES[index]?.id)){selectedHero=index;persistParty();updatePartyLabels();renderPartyDialog();}}
+  if(!game&&activeDialog==='party'&&hasFreeSkillLoadout(progression)){
+    if(target.dataset.partySkillHero&&selectedParty.includes(target.dataset.partySkillHero)){partySkillHero=target.dataset.partySkillHero;partySkillSlot=0;renderPartyDialog();$(`[data-party-skill-hero="${partySkillHero}"]`)?.focus({preventScroll:true});}
+    if(target.hasAttribute('data-party-skill-slot')){const slot=Number(target.dataset.partySkillSlot);if(Number.isInteger(slot)&&slot>=0&&slot<3){partySkillSlot=slot;renderPartyDialog();$(`[data-party-skill-slot="${slot}"]`)?.focus({preventScroll:true});}}
+    const hero=$('#party-skill-loadout [data-blessing-hero]')?.dataset.blessingHero;
+    if(target.dataset.partyEquipSkill&&target.dataset.blessingHero===hero&&selectedParty.includes(hero)&&equipSkill(progression,hero,partySkillSlot,target.dataset.partyEquipSkill)){
+      persistProgression();renderPartyDialog();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.partyEquipSkill),message=`枠${partySkillSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#party-skill-feedback').textContent=message;announce(message);$(`[data-party-skill-slot="${partySkillSlot}"]`)?.focus({preventScroll:true});
+    }
+  }
   if(target.dataset.equipWeapon&&!game&&!$('#chapter-menu').classList.contains('hidden')&&(!activeDialog||activeDialog==='weapon-result')){
     const id=target.dataset.equipWeapon,hero=target.dataset.weaponHero;
     if(equipWeapon(progression,hero,id)){voice.cue(hero,'equip');persistProgression();renderRewards();$('#growth-cards').innerHTML=growthCards(progression);const message=`${weaponVariant(id).weapon.name}を装備しました。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#equipment-feedback').textContent=message;announce(message);audio.play('upgrade');if(activeDialog==='weapon-result'&&currentWeaponDraw){weaponSummon.updateResult(weaponResultMarkup());$('#weapon-draw-result [data-close]').focus({preventScroll:true});}else{$(`[data-weapon-option="${id}"]`).scrollIntoView({block:'nearest'});$(`[data-weapon-option="${id}"] summary`)?.focus({preventScroll:true});}}
@@ -400,7 +409,7 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Enter'&&game.tutorial?.active&&game.tutorial.step.button&&document.activeElement?.tagName!=='BUTTON'){e.preventDefault();if(!e.repeat&&game.advanceTutorial()){handleEvents(game.drainEvents());updateHud();}return;}
   if(['Space','Enter'].includes(e.code)&&document.activeElement?.tagName==='BUTTON')return;
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();keys.add(e.code);
-  if(!e.repeat){if(e.code==='Space')action('dash');if(e.code==='KeyG')action('awakening');if(e.code==='KeyF')action('predation');if(e.code==='KeyR')action('mount');if(e.code==='KeyQ')action('switch');if(e.code==='KeyE')action('ultimate');}
+  if(!e.repeat){if(e.code==='Space')action('dash');if(e.code==='KeyT')action('rice');if(e.code==='KeyG')action('awakening');if(e.code==='KeyF')action('predation');if(e.code==='KeyR')action('mount');if(e.code==='KeyQ')action('switch');if(e.code==='KeyE')action('ultimate');}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>{audio.setSuspended(true);voice.suspend();resetInput();if(game?.phase==='playing'||ultimatePresentation.active)pause();});
@@ -409,16 +418,13 @@ document.addEventListener('visibilitychange',()=>{audio.setSuspended(document.hi
 window.addEventListener('pagehide',()=>{audio.setSuspended(true);ultimatePresentation.cancel();voice.stop();persistProgression();});
 const canvas=$('#scene');
 canvas.addEventListener('pointerdown',e=>{
-  if(!game||game.phase!=='playing'||game.tutorial?.active&&!game.tutorial.practicing||stick.id!==null||ricePointer!==null||e.button!==0)return;e.preventDefault();audio.init();
-  const target=world.pickRice(e.clientX,e.clientY,game),point=target&&world.stagePoint(e.clientX,e.clientY,game);
-  if(target&&point&&game.grabRice(target.kind,target.object.id)){ricePointer={id:e.pointerId,object:target.object,offset:{x:target.object.x-point.x,z:target.object.z-point.z}};canvas.setPointerCapture(e.pointerId);handleEvents(game.drainEvents());updateHud();return;}
+  if(!game||game.phase!=='playing'||game.tutorial?.active&&!game.tutorial.practicing||stick.id!==null||e.button!==0)return;e.preventDefault();audio.init();
   stick.id=e.pointerId;stick.cx=e.clientX;stick.cy=e.clientY;stick.x=stick.y=0;canvas.setPointerCapture(e.pointerId);$('#joystick').classList.remove('hidden');$('#joystick').style.left=`${e.clientX}px`;$('#joystick').style.top=`${e.clientY}px`;$('#joystick i').style.transform='translate(-50%, -50%)';
 });
 canvas.addEventListener('pointermove',e=>{
-  if(e.pointerId===ricePointer?.id){const point=world.stagePoint(e.clientX,e.clientY,game);if(point&&game?.rice.held?.object===ricePointer.object)game.moveRice({x:point.x+ricePointer.offset.x,z:point.z+ricePointer.offset.z});return;}
   if(e.pointerId!==stick.id)return;const dx=e.clientX-stick.cx,dy=e.clientY-stick.cy,d=Math.hypot(dx,dy),m=Math.min(1,52/(d||1));stick.x=dx*m/52;stick.y=dy*m/52;$('#joystick i').style.transform=`translate(calc(-50% + ${dx*m}px),calc(-50% + ${dy*m}px))`;
 });
-const endPointer=e=>{if(e.pointerId===ricePointer?.id){if(e.type==='pointerup')game?.releaseRice();else game?.cancelRice();ricePointer=null;}if(e.pointerId===stick.id){stick.id=null;stick.x=stick.y=0;$('#joystick').classList.add('hidden');}};
+const endPointer=e=>{if(e.pointerId===stick.id){stick.id=null;stick.x=stick.y=0;$('#joystick').classList.add('hidden');}};
 canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);canvas.addEventListener('lostpointercapture',endPointer);
 function handleEvents(events){
   world.handle(events,game);
@@ -432,10 +438,11 @@ function handleEvents(events){
     if(e.type==='nyanAwakeningLearned'){growthChanged=true;toast('にゃんるなの覚醒を習得！ 覚醒ボタンで月光の力を解放');announce(NYAN_AWAKENING_HELP);}
     if(e.type==='nyanAwakeningStarted'){audio.play('upgrade');toast(`覚醒！ ${NYAN_AWAKENING_RULES.duration}秒間、基本攻撃力${NYAN_AWAKENING_RULES.attackPower}倍・貫通弾＋追尾弾×2`);announce(`にゃんるな覚醒。基本攻撃力が${NYAN_AWAKENING_RULES.attackPower}倍になりました。`);}
     if(e.type==='nyanAwakeningEnded'&&game.phase==='playing'){toast(`覚醒終了 · 再使用まで${NYAN_AWAKENING_RULES.cooldown}秒`);announce('覚醒が終了し、元の姿に戻りました。');}
-    if(e.type==='riceAwakened'){growthChanged=true;toast('ライスの力を習得！ 敵や敵の攻撃をドラッグして掴めます');announce(RICE_HELP);}
+    if(e.type==='riceAwakened'){growthChanged=true;toast('ライスの力を習得！ ライスボタンで5秒間、敵弾を反射');announce(RICE_HELP);}
+    if(e.type==='freeSkillsUnlocked'){growthChanged=true;toast('極宴クリア！ パーティ画面で全員のスキル付け替え解放');announce('全員のスキルと全3枠を自由に付け替えられるようになりました。どの編成でもパーティ画面から設定できます。');}
     if(e.type==='predationPower'){announce(`捕食の舞で敵撃破。攻撃力上昇${e.kills}回、追加攻撃力${Math.round(e.attackBonus)}。幕終了まで維持。`);}
-    if(e.type==='riceGrab')audio.play('switch');
-    if(e.type==='riceImpact')audio.play('hit');
+    if(e.type==='riceStarted'){audio.play('switch');announce('ライスの力発動。5秒間、敵の遠距離攻撃を跳ね返します。');}
+    if(e.type==='riceEnded'&&game.phase==='playing')announce('ライスの力終了。再使用まで10秒。');
     if(e.type==='weaponTicket'){growthChanged=true;toast(`専用武器ガチャ券 +${e.count}枚！ メニューの武器ガチャで使えます`);announce(`${e.source==='actClear'?'幕クリア報酬として':e.source==='goldenSlime'?'金色のスライムから':'ボスから'}専用武器ガチャ券を${e.count}枚獲得。所持${e.total}枚。`);}
     if(e.type==='missionProgress')growthChanged=true;
     if(e.type==='missionComplete'){growthChanged=true;const mission=STAGE_MISSIONS.find(m=>m.id===e.id);toast(`ミッション達成：${mission.name} · ${missionRewardText(mission)}`);announce(`${mission.name}を達成。${missionRewardText(mission)}を獲得。`);}
@@ -482,8 +489,14 @@ updatePartyLabels();
 function updateHud(){
   tutorialView.render(game,!!activeDialog);if(!game)return;const p=game.player;
   const riceHint=$('#rice-control-hint'),riceLearned=hasRicePower(game.progression)&&p.hero===2;
+  const riceButton=$('#rice'),riceActive=game.rice.active,riceWait=Math.ceil(game.rice.cooldown);
+  riceButton.classList.toggle('hidden',!riceLearned);riceButton.disabled=!game.riceAvailable;riceButton.classList.toggle('reflecting',riceActive);
+  $('#rice-label').textContent=riceActive?'反射中':riceWait>0?'準備中':'ライス';
+  $('#rice-status').textContent=riceActive?`${Math.ceil(game.rice.remaining)}秒`:riceWait>0?`${riceWait}秒`:'5秒反射';
+  riceButton.setAttribute('aria-label',riceActive?`ライスの力で反射中、残り${Math.ceil(game.rice.remaining)}秒`:riceWait>0?`ライスの力、再使用まで${riceWait}秒`:'ライスの力で5秒間、敵の遠距離攻撃を反射（T）');
+  riceButton.title=RICE_HELP;
   riceHint.classList.toggle('hidden',!riceLearned||!!activeDialog||game.phase!=='playing');
-  riceHint.textContent=game.rice.held?`ライスの力 · 掴み中 ${game.rice.held.remaining.toFixed(1)}秒 — 敵へぶつけよう`:game.rice.cooldown>0?'ライスの力 · ひと呼吸…':'ライスの力 · 敵や敵の攻撃をドラッグ → 別の敵へ';
+  riceHint.textContent=riceActive?'ライスの力 · 敵弾を自動反射中':riceWait>0?`ライスの力 · 再使用まで${riceWait}秒`:'ライス（T）· 5秒反射／終了後10秒待機';
   if(lastHero!==p.hero){lastHero=p.hero;$('#switch .portrait').className=`portrait ${HEROES[p.hero].id}`;$('#switch .portrait').setAttribute('aria-label',HEROES[p.hero].name);$('#hero-name').textContent=HEROES[p.hero].name;$('#ultimate').dataset.hero=p.hero;const signature=game.ultimateSpec();$('#ultimate > .icon').outerHTML=icon(signature.icon);$('#ultimate').title=`${signature.name}：${signature.note}`;
     const partner=game.partnerHero,name=partner===null?'':HEROES[partner].name;
     $('.partner-label').innerHTML=game.hasPartner?`<b id="partner-name">${name}</b> <span id="partner-status"></span>`:game.predation.active?'<b id="partner-name">オムソロ取り込み中</b> · 単独変身中':'<b id="partner-name">単独出撃</b> · この仲間で挑戦中';
@@ -556,7 +569,7 @@ window.addEventListener('resize',resize);
 // Safari's dynamic viewport can change with the address bar, without a window
 // resize. Observe the actual canvas so projection and overlays stay aligned.
 new ResizeObserver(resize).observe(canvas);
-function gamepad(){const pad=navigator.getGamepads?.()[0];if(!pad)return;for(const [i,kind] of [[0,'dash'],[1,'switch'],[2,'predation'],[3,'ultimate'],[10,'awakening'],[9,'pause']]){const pressed=!!pad.buttons[i]?.pressed;if(pressed&&!previousPad[i]){if(kind==='pause'){if(activeDialog==='pause')closeDialog();else pause();}else if(kind==='dash'&&game?.tutorial?.active&&game.tutorial.step.button){if(game.advanceTutorial()){handleEvents(game.drainEvents());updateHud();}}else action(kind);}previousPad[i]=pressed;}}
+function gamepad(){const pad=navigator.getGamepads?.()[0];if(!pad)return;for(const [i,kind] of [[0,'dash'],[1,'switch'],[2,'predation'],[3,'ultimate'],[10,'awakening'],[11,'rice'],[9,'pause']]){const pressed=!!pad.buttons[i]?.pressed;if(pressed&&!previousPad[i]){if(kind==='pause'){if(activeDialog==='pause')closeDialog();else pause();}else if(kind==='dash'&&game?.tutorial?.active&&game.tutorial.step.button){if(game.advanceTutorial()){handleEvents(game.drainEvents());updateHud();}}else action(kind);}previousPad[i]=pressed;}}
 function frame(now){
   const dt=Math.min((now-last)/1000,.1);last=now;renderFrames++;gamepad();if(!document.hidden){ultimatePresentation.tick(dt);weaponSummon.tick(dt);}
   if(game?.phase==='playing'){accumulator+=dt;let ticks=0;while(accumulator>=1/60&&ticks<6){game.tick(1/60,axes());accumulator-=1/60;ticks++;if(game.phase!=='playing'){accumulator=0;break;}}handleEvents(game.drainEvents());}else accumulator=0;

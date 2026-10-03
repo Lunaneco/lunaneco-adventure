@@ -4,7 +4,7 @@ import {Adventure,HEROES} from '../src/model.js';
 import {normalizeProgression,awardCharacterXp,xpRequired} from '../src/progression.js';
 import {ACTS,PLAYABLE_ACTS,isActUnlocked,isActCleared,clearTicketReward} from '../src/acts.js';
 import {RICE_QUEST,RICE_QUEST_ID,RICE_SCENES,hasRicePower} from '../src/rice-awakening.js';
-import {RICE_RULES,riceTargets} from '../src/rice-combat.js';
+import {RICE_RULES} from '../src/rice-combat.js';
 import {partyForAct} from '../src/party.js';
 import {stageSelectionView,stageBriefingView} from '../src/stage-selection-ui.js';
 import {fieldFor,contains,layoutFor} from '../src/terrain.js';
@@ -61,53 +61,67 @@ test('quest terrain, menu, rewards and the Yuda story are independent of later c
   const text=Object.values(RICE_SCENES).flatMap(s=>s.lines.map(l=>l.text)).join('');for(const word of ['ユーダ','退屈','楽にできる方法','破門','仲間','ライスの力','繰り返'])assert.ok(text.includes(word));
   assert.ok(Object.values(RICE_SCENES).every(s=>s.lines.every(l=>['omsolo','narrator'].includes(l.who)&&!l.voiced)));
 });
-test('unlearned rice, other heroes, out-of-range targets and friendly attacks cannot be grabbed',()=>{
-  for(const options of [{progression:profile(50,false)},{hero:0},{progression:profile(49,true)}]){const g=quiet(options),e=target(g,2,0);assert.equal(g.grabRice('enemy',e.id),false);}
-  const g=quiet(),e=target(g,RICE_RULES.range+1,0);assert.equal(g.grabRice('enemy',e.id),false);
-  const b=bullet(g);b.owner='player';assert.equal(g.grabRice('bullet',b.id),false);
-  const h=hazard(g);h.damage=0;assert.equal(g.grabRice('hazard',h.id),false);
-  assert.equal(g.grabRice('enemy',-1),false);
+test('only learned, living, controlled Omsolo can activate rice during combat',()=>{
+  for(const options of [{progression:profile(50,false)},{hero:0},{progression:profile(49,true)}])assert.equal(quiet(options).activateRice(),false);
+  for(const mutate of [g=>g.phase='paused',g=>g.exitOpen=true,g=>g.travelOpen='stairs',g=>g.mount.active=true,g=>g.player.hp=0,g=>g.tutorial={active:true}]){
+    const g=quiet();mutate(g);assert.equal(g.activateRice(),false);
+  }
+  const g=quiet(),charge=g.player.charge,attack=g.statsFor(2).attack;assert.equal(g.riceAvailable,true);assert.equal(g.activateRice(),true);
+  assert.deepEqual(g.rice,{active:true,remaining:5,cooldown:0});assert.equal(g.riceAvailable,false);assert.equal(g.activateRice(),false);
+  assert.equal(g.player.charge,charge);assert.equal(g.statsFor(2).attack,attack);assert.equal(g.drainEvents().filter(e=>e.type==='riceStarted').length,1);
+  assert.equal(typeof g.grabRice,'undefined');assert.equal(typeof g.moveRice,'undefined');assert.equal(typeof g.releaseRice,'undefined');
 });
-test('dragged enemy is suspended and swept impact damages another enemy once without moving the player',()=>{
-  const g=quiet(),body=target(g,2,0),other=target(g,7,0),player={x:g.player.x,z:g.player.z};
-  assert.ok(g.grabRice('enemy',body.id));assert.equal(g.grabRice('enemy',other.id),false);assert.equal(riceTargets(g).length,0);
-  g.player.attack=0;step(g,.2);assert.equal(body.x,2);assert.equal(body.riceHeld,true);assert.equal(body.hp,body.maxHp);
-  assert.ok(g.moveRice({x:9,z:0}));assert.ok(other.hp<other.maxHp);assert.equal(body.hp,body.maxHp);assert.equal(g.rice.held,null);assert.equal(body.riceHeld,false);
-  assert.deepEqual({x:g.player.x,z:g.player.z},player);const hp=other.hp;assert.equal(g.moveRice({x:7,z:0}),false);assert.equal(other.hp,hp);assert.equal(g.grabRice('enemy',other.id),false);
+test('rice lasts five combat seconds, then cools down for ten seconds without stacking',()=>{
+  const g=quiet();g.activateRice();step(g,4.9);assert.equal(g.rice.active,true);assert.ok(g.rice.remaining<=.101);
+  step(g,.1);assert.deepEqual(g.rice,{active:false,remaining:0,cooldown:10});assert.equal(g.activateRice(),false);
+  step(g,9.9);assert.equal(g.riceAvailable,false);step(g,.1);assert.equal(g.riceAvailable,true);assert.equal(g.activateRice(),true);
+  assert.equal(g.rice.remaining,RICE_RULES.duration);assert.equal(g.rice.cooldown,0);
 });
-test('enemy bullets and damaging telegraphs pause while held and are consumed on direct impact',()=>{
-  for(const kind of ['bullet','hazard']){
-    const g=quiet(),other=target(g,7,0),object=kind==='bullet'?bullet(g):hazard(g),remaining=object.life??object.timer;
-    assert.ok(g.grabRice(kind,object.id));step(g,.2);assert.equal(object.x,2);assert.equal(object.life??object.timer,remaining);
-    g.moveRice({x:9,z:0});assert.ok(other.hp<other.maxHp);assert.equal(object.riceHeld,false);assert.equal(object.life??object.timer,0);assert.equal(g.rice.held,null);
-    // A consumed area warning must not explode on the player on the following tick.
-    g.player.x=object.x;g.player.z=object.z;const health=g.player.hp;
-    const hp=other.hp;step(g,.05);assert.equal(other.hp,hp);assert.equal(g.player.hp,health);assert.equal((kind==='bullet'?g.projectiles:g.hazards).includes(object),false);
+test('pause, dialogue, cut-ins and blessing selection freeze rice rather than cancelling it',()=>{
+  const g=quiet();g.activateRice();step(g,1);const before={...g.rice};g.pause();step(g,20);assert.deepEqual(g.rice,before);g.resume();
+  for(const phase of ['story','cutin','upgrade']){g.phase=phase;step(g,20);assert.deepEqual(g.rice,before);}g.phase='playing';
+  g.pendingBlessings=1;g.offerSkills();assert.equal(g.phase,'upgrade');assert.deepEqual(g.rice,before);g.chooseSkill(g.offers[0].id);
+  step(g,1);assert.ok(g.rice.remaining<before.remaining);g.cancelRice();g.pause();step(g,20);assert.equal(g.rice.cooldown,10);
+});
+test('switching, death and stage exit end reflection but repeated cancellation cannot reset cooldown',()=>{
+  for(const finish of [g=>g.switchHero(),g=>g.hurt(1e9,0,0),g=>g.openExit(),g=>g.openPassage()]){
+    const g=quiet();g.activateRice();finish(g);assert.equal(g.rice.active,false);assert.equal(g.rice.remaining,0);assert.equal(g.rice.cooldown,10);
+  }
+  const g=quiet();g.activateRice();g.cancelRice();step(g,1);assert.equal(g.cancelRice(),false);assert.ok(Math.abs(g.rice.cooldown-9)<1e-8);
+});
+test('incoming normal and boss shots return to their shooter without any hurt or hit-counter event',()=>{
+  for(const type of ['reaper','boss']){
+    const g=quiet(),shooter=target(g,7,0,type),b=bullet(g);b.sourceId=shooter.id;const hp=g.player.hp;g.activateRice();g.tick(.05);
+    const returned=g.projectiles.find(b=>b.kind==='riceReturn');assert.ok(returned);assert.equal(b.life,0);assert.equal(returned.owner,'player');
+    assert.equal(returned.heroId,'omsolo');assert.equal(returned.target,shooter.id);assert.equal(returned.damage,b.damage);
+    assert.equal(returned.homing,undefined);assert.equal(returned.turnRate,undefined);assert.notEqual(returned.id,b.id);
+    assert.ok(returned.vx>0);step(g,.5);assert.ok(shooter.hp<shooter.maxHp);assert.equal(g.player.hp,hp);assert.equal(g.runHits,0);assert.equal(g.stageTrial.hits,0);
+    assert.equal(shooter.riceHeld,undefined);assert.equal(shooter.riceThrown,undefined);assert.equal(g.drainEvents().some(e=>e.type==='hurt'),false);
   }
 });
-test('release throws bodies and returns attacks as friendly non-homing Omsolo damage',()=>{
-  for(const kind of ['enemy','bullet','hazard']){
-    const g=quiet(),other=target(g,8,0),object=kind==='enemy'?target(g,2,0):kind==='bullet'?bullet(g):hazard(g);
-    g.grabRice(kind,object.id);g.moveRice({x:3,z:0});assert.ok(g.releaseRice());
-    if(kind==='enemy')assert.ok(object.riceThrown);else{const returned=g.projectiles.find(b=>b.kind==='riceReturn');assert.equal(returned.owner,'player');assert.equal(returned.heroId,'omsolo');assert.equal(returned.homing,undefined);assert.equal(object.life??object.timer,0);assert.ok(returned.vx>0);}
-    step(g,.4);assert.ok(other.hp<other.maxHp);assert.equal(g.player.hp,g.player.maxHp);
-  }
+test('a single activation reflects repeated homing shots throughout its five-second window',()=>{
+  const g=quiet(),shooter=target(g,9,0);g.activateRice();
+  for(let i=0;i<5;i++){const b=bullet(g);b.sourceId=shooter.id;step(g,.2);assert.equal(b.life,0);}
+  assert.equal(g.rice.active,true);assert.equal(g.drainEvents().filter(e=>e.type==='riceReflected').length,5);assert.equal(g.runHits,0);
 });
-test('holds expire and cancellation covers pause, upgrade, switching and death',()=>{
-  const timed=quiet(),body=target(timed,2,0);timed.grabRice('enemy',body.id);step(timed,RICE_RULES.holdSeconds+.05);assert.equal(timed.rice.held,null);assert.equal(body.riceHeld,false);
-  for(const finish of [g=>g.pause(),g=>g.switchHero(),g=>{g.pendingBlessings=1;g.offerSkills();},g=>g.hurt(1e9,0,0)]){
-    const g=quiet(),e=target(g,2,0);g.grabRice('enemy',e.id);finish(g);assert.equal(g.rice.held,null);assert.equal(e.riceHeld,false);
-  }
-  const g=quiet(),e=target(g,2,0);g.grabRice('enemy',e.id);assert.equal(g.moveRice({x:NaN,z:0}),false);g.moveRice({x:999,z:999});assert.ok(Math.hypot(e.x,e.z)<=RICE_RULES.range+.001);assert.ok(contains(g.walkLayout,e.x,e.z));
-  for(const kind of ['bullet','hazard']){const run=quiet(),object=kind==='bullet'?bullet(run):hazard(run);run.grabRice(kind,object.id);if(kind==='bullet')object.life=0;else object.timer=0;step(run,.05);assert.equal(run.rice.held,null);assert.equal(object.life??object.timer,0);}
+test('swept reflection catches a fast shot crossing the entire player between frames',()=>{
+  const g=quiet(),shooter=target(g,12,0),b=bullet(g,10,0);Object.assign(b,{vx:-400,homing:0,speed:400,sourceId:shooter.id});
+  g.activateRice();g.tick(.05);assert.equal(b.life,0);assert.equal(g.runHits,0);assert.equal(g.projectiles.find(b=>b.kind==='riceReturn').target,shooter.id);
 });
-test('boss bodies cannot be grabbed, but their ranged attacks can be returned and other enemies can hit them',()=>{
-  for(const kind of ['bullet','hazard','enemy']){
-    const g=quiet(),boss=target(g,7,0,'boss');assert.equal(riceTargets(g).some(t=>t.kind==='enemy'&&t.object===boss),false);assert.equal(g.grabRice('enemy',boss.id),false);
-    const object=kind==='bullet'?bullet(g):kind==='hazard'?hazard(g):target(g,2,0);
-    if(kind!=='enemy')object.sourceId=boss.id;
-    assert.equal(g.grabRice(kind,object.id),true);g.moveRice({x:9,z:0});assert.ok(boss.hp<boss.maxHp);assert.equal(g.rice.held,null);assert.equal(boss.riceHeld,undefined);
-  }
+test('reflection falls back to another living enemy when the original shooter is absent',()=>{
+  const g=quiet(),e=target(g,7,0),b=bullet(g);b.sourceId=-1;g.activateRice();g.tick(.05);
+  assert.equal(g.projectiles.find(b=>b.kind==='riceReturn').target,e.id);step(g,.5);assert.ok(e.hp<e.maxHp);
+  const empty=quiet(),orphan=bullet(empty);empty.activateRice();empty.tick(.05);const returned=empty.projectiles.find(b=>b.kind==='riceReturn');
+  assert.ok(returned.vx>0);assert.equal(returned.target,undefined);assert.equal(orphan.life,0);assert.equal(empty.runHits,0);
+});
+test('distant shots and friendly projectiles are not reflected; enemy bodies and ground hazards remain dangerous',()=>{
+  const g=quiet();target(g,7,0);g.activateRice();const distant=bullet(g,5,0);distant.homing=0;distant.vx=8;g.tick(.05);assert.ok(distant.life>0);
+  const friend=bullet(g);friend.owner='player';friend.heroId='omsolo';friend.homing=0;g.tick(.05);assert.equal(friend.kind,'arrow');assert.ok(friend.life>0);
+  const body=target(g,0,0);body.attack=0;g.tick(.05);assert.equal(g.runHits,1);assert.equal(body.riceHeld,undefined);
+  const ground=quiet();target(ground,7,0);ground.activateRice();hazard(ground,0,0);step(ground,1);assert.equal(ground.runHits,1);assert.equal(ground.rice.active,true);
+});
+test('without an active reflection or during cooldown, incoming projectiles still damage Omsolo',()=>{
+  for(const cooldown of [false,true]){const g=quiet();target(g,7,0);if(cooldown){g.activateRice();g.cancelRice();}bullet(g,1,0);step(g,.1);assert.equal(g.runHits,1);assert.ok(g.player.hp<g.player.maxHp);}
 });
 test('a level-50 solo Omsolo can clear all six trial waves before learning rice',()=>{
   const g=new Adventure({act:23,seed:1,progression:profile(),party:['nyanluna','tsukineko'],hero:1});const seen=new Set();

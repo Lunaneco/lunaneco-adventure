@@ -14,7 +14,7 @@ export const RICE_QUEST=Object.freeze({
 export const riceQuestUnlocked=profile=>profile?.story?.omsoloUnlocked===true&&Number.isFinite(profile?.characters?.omsolo?.level)&&profile.characters.omsolo.level>=RICE_UNLOCK_LEVEL;
 export const hasRicePower=profile=>profile?.awakenings?.rice===true&&riceQuestUnlocked(profile);
 export const normalizeAwakenings=(raw,profile)=>({rice:raw?.rice===true&&riceQuestUnlocked(profile),nyanluna:raw?.nyanluna===true&&nyanQuestUnlocked(profile)});
-export const RICE_HELP='オムソロ操作中、通常の敵・敵弾・ダメージのある攻撃予告をドラッグして掴み、別の敵へぶつけよう。ボス本体は掴めないが、ボスの遠距離攻撃は掴めます。何もない地面はドラッグで移動。';
+export const RICE_HELP='オムソロ操作中に「ライス」ボタン（T）を押すと、5秒間、近づいた敵の遠距離攻撃を敵へ自動で跳ね返します。ボスの飛び道具も反射可能。効果終了後10秒で再使用。敵本体・近接攻撃・地面の攻撃予告は反射できません。ドラッグは移動専用です。';
 
 const scene=(area,title,next,lines)=>Object.freeze({act:RICE_QUEST_ID,area,kicker:'OMSOLO · SOLO AWAKENING',title,next,lines:lines.map(([who,text])=>({who,text,voiced:false}))});
 export const RICE_SCENES=Object.freeze({
@@ -43,6 +43,6 @@ export const RICE_SCENES=Object.freeze({
     ['omsolo','……止まった。力んだんじゃない。見て、呼吸して、そこへ手を伸ばしたんだ。'],
     ['narrator','懐の包みがほどけ、一粒の米が浮かぶ。何度も繰り返した呼吸が、今度は岩にも届いていた。'],
     ['omsolo','ユーダ師匠。やっと、最初の一粒です。ここからも修行は続けます。仲間を守れる俺になるために。'],
-    ['narrator','オムソロは「ライスの力」を習得した。通常の敵や敵の攻撃を掴み、別の敵へぶつけられる。ボス本体は掴めないが、その遠距離攻撃は掴める。ひとりの修行を終え、仲間の待つ道へ戻っていく。'],
+    ['narrator',`オムソロは「ライスの力」を習得した。${RICE_HELP} ひとりの修行を終え、仲間の待つ道へ戻っていく。`],
   ]),
 });

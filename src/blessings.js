@@ -69,7 +69,12 @@ export function skillUpgradeLabel(skill){const base=SKILLS.find(s=>s.id===skill.
 export const PERSONAL_SKILLS=Object.freeze(Object.fromEntries(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal','lumi'].map(id=>[id,SKILLS.filter(s=>s.requires?.length===1&&s.requires[0]===id)])));
 export function personalSkills(heroId){return Object.hasOwn(PERSONAL_SKILLS,heroId)?PERSONAL_SKILLS[heroId]:[];}
 export function defaultSkills(heroId){return personalSkills(heroId).filter(s=>!s.unlockNode).map(s=>s.id);}
+// Derive this permanent reward from the existing validated EX clear record.
+export const hasFreeSkillLoadout=profile=>profile?.story?.chapterSixCleared===true&&profile.story.extraClears?.[5]===true;
+export const loadoutSkillChoices=(profile,heroId)=>Object.hasOwn(PERSONAL_SKILLS,heroId)?hasFreeSkillLoadout(profile)?SKILLS:personalSkills(heroId):[];
 export function isSkillAvailable(profile,heroId,skillId){
+  if(!Object.hasOwn(PERSONAL_SKILLS,heroId))return false;
+  if(hasFreeSkillLoadout(profile))return SKILLS.some(s=>s.id===skillId);
   const skill=personalSkills(heroId).find(s=>s.id===skillId);if(!skill)return false;
   if(!skill.unlockNode)return true;
   const node=SKILL_TALENT_NODES.find(n=>n.id===skill.unlockNode),p=profile?.characters?.[heroId];
@@ -94,6 +99,7 @@ export function equipSkill(profile,heroId,slot,skillId){
 // Common and pair blessings are automatic. Personal candidates use a fixed loadout.
 export function skillsForParty(party,profile){
   const ids=new Set(party),equipped=new Set(party.flatMap(id=>equippedSkills(profile,id)));
+  if(hasFreeSkillLoadout(profile))return SKILLS.filter(skill=>equipped.has(skill.id)||skill.requires?.length!==1&&(skill.requires??[]).every(id=>ids.has(id)));
   return SKILLS.filter(skill=>(skill.requires??[]).every(id=>ids.has(id))&&(skill.requires?.length!==1||equipped.has(skill.id)));
 }
 export function blessingSource(skill,roster){
