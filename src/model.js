@@ -174,7 +174,8 @@ export class Adventure {
     Object.assign(this.partner,{x:this.player.x-1.7,z:this.player.z+1.5,attack:0,face:Math.PI});this.emit('guestJoin',{heroId:'hehereal'});return true;
   }
   meetLumi(){
-    if(this.actConfig.chapter!==6||this.guestHeroId||this.party.length!==1||this.party.includes('lumi')||this.act===28&&this.wave<3)return false;
+    // Absorbing a duo is not a solo deployment: no NPC may replace Omsolo.
+    if(this.actConfig.chapter!==6||this.guestHeroId||this.predation.used||this.party.length!==1||this.party.includes('lumi')||this.act===28&&this.wave<3)return false;
     this.guestHeroId='lumi';this.party=Object.freeze([...this.party,'lumi']);this.partyHeroes=this.party.map(id=>HEROES.findIndex(h=>h.id===id));this.skillPool=Object.freeze(skillsForParty(this.party,this.progression));this.refreshStats();
     Object.assign(this.partner,{x:this.player.x-1.7,z:this.player.z+1.5,attack:0,face:Math.PI});this.emit('guestJoin',{heroId:'lumi'});return true;
   }
