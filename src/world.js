@@ -131,7 +131,7 @@ export class World {
       if(e.type==='predationPulse'){this.ring(e.x,e.z,0xffafd4,e.radius,.3);this.burst(e.x,e.z,0xffd47f,28,4);}
       if(e.type==='predationPower'){this.burst(game.player.x,game.player.z,0xffdf83,12,2);this.numbers.push({x:game.player.x,y:game.layout.height+3.2,z:game.player.z,text:`攻撃↑ ${e.kills}`,crit:false,life:.8,max:.8});}
       if(e.type==='predationStart'||e.type==='predationEnd')this.burst(game.player.x,game.player.z,0xffafd4,65,4);
-      if(e.type==='nyanAwakeningStarted'||e.type==='nyanAwakeningEnded')this.burst(game.sourceFor('nyanluna').x,game.sourceFor('nyanluna').z,0xe7c9ff,35,3);
+      if(e.type==='nyanAwakeningStarted'||e.type==='nyanAwakeningEnded'){this.awakenedNyan.userData.naturalMotion?.reset();this.awakenedNyan.userData.attackTime=0;this.burst(game.sourceFor('nyanluna').x,game.sourceFor('nyanluna').z,0xe7c9ff,35,3);}
       if(e.type==='mountStart'||e.type==='mountEnd')this.burst(game.player.x,game.player.z,0xbceaff,35,3);
       if(e.type==='ultimate'){this.shake=this.settings.motion===false?0:(e.hero===0?.38:.22);const color=e.duet?0xe6b9ff:e.heroId==='shizuku'?0xf2a6c7:e.hero===0?0xe8c3ff:e.hero===2?0x9dffb8:0x95f2ff;this.burst(e.x,e.z,color,65,e.hero===0?7:3);this.ring(e.x,e.z,color,e.hero===0?3:1.8,.55);}
       if(e.type==='saberPulse'){
@@ -168,7 +168,7 @@ export class World {
     this.renderer.info.reset();this.terrain.update(game,this.time);if(game)this.surface=game.layout;this.time+=dt;const t=this.time;this.shake=Math.max(0,this.shake-dt);
     if(game){
       const p=game.player;this.heroes.forEach((h,i)=>{h.visible=game.isHeroAlive(i)&&!(i===0&&game.nyanAwakening.active);if(h.visible){setHeroWeapon(h,equippedWeapon(game.progression,game.heroId(i)));animateHero(h,{...(i===p.hero?p:game.partner),moving:game.phase==='playing'&&(i===p.hero?p:game.partner).moving,neko:i===7&&hasNekoLumi(game.party),riding:game.mount.active&&i===1,mounted:game.mount.active&&i===5,...(i===5&&game.ultimateEffects.some(e=>e.kind==='prismBeam')?{face:game.ultimateEffects.find(e=>e.kind==='prismBeam').angle}:{})},t,dt,i===p.hero||game.mount.active);const source=i===p.hero?p:game.partner;h.position.y=heightAt(game.layout,source.x,source.z);}});
-      this.awakenedNyan.visible=game.nyanAwakening.active&&game.isHeroAlive(0);if(this.awakenedNyan.visible){const source=p.hero===0?p:game.partner;animateHero(this.awakenedNyan,{...source,moving:game.phase==='playing'&&source.moving},t,dt,p.hero===0);this.awakenedNyan.position.y=heightAt(game.layout,source.x,source.z);}
+      this.awakenedNyan.visible=game.nyanAwakening.active&&game.isHeroAlive(0);if(this.awakenedNyan.visible){const source=p.hero===0?p:game.partner;animateHero(this.awakenedNyan,{...source,moving:game.phase==='playing'&&source.moving},t,game.phase==='playing'?dt:0,p.hero===0);this.awakenedNyan.position.y=heightAt(game.layout,source.x,source.z);}
       this.heheForm.visible=!!game.predation.active&&game.isHeroAlive(6);if(this.heheForm.visible){this.heroes[6].visible=false;updateHeheForm(this.heheForm,this.heroes[6],{...p,dancing:game.ultimateEffects.some(e=>e.kind==='predationDance')},t,dt,equippedWeapon(game.progression,'hehereal'));}
       if(game.mount.active){
         const dragon=this.heroes[5],rider=this.heroes[1];const facing=game.ultimateEffects.find(e=>e.kind==='prismBeam')?.angle??p.face;dragon.rotation.y=facing;rider.rotation.y=facing;dragon.updateMatrixWorld(true);

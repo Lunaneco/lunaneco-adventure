@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from '@playwright/test';
 import {mkdir,writeFile} from 'node:fs/promises';
-const url=process.env.LUNARIA_URL??'http://localhost:5187/',out='audit/nyanluna-awakening';
+const url=process.env.LUNARIA_URL??'http://localhost:5187/',out=process.env.NYAN_AUDIT_OUT??'audit/nyanluna-awakening-rig-20261003';
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({channel:'chrome',headless:true}),checks=[],errors=[];
 const raw={story:{version:2,actClears:Array(32).fill(true)},characters:Object.fromEntries(['nyanluna','tsukineko','omsolo','mochinyafe','shizuku','prim','hehereal','lumi'].map(id=>[id,{level:id==='nyanluna'?50:60,breaks:4}])),tutorial:{firstBattleCompleted:true},awakenings:{rice:true}};
@@ -33,8 +33,30 @@ try{
   const camera=new THREE.PerspectiveCamera(35,1000/900,.1,100),hero=w.awakenedNyan;scene.add(hero);hero.visible=true;hero.userData.ring.visible=false;window.__nyanQA={THREE,scene,camera,hero,w,animateHero};
  });
  for(const view of ['front','quarter','side','back','face','walk-left','walk-right','attack','dash']){
-  const row=await page.evaluate(view=>{const {THREE,hero:h,scene,camera,w,animateHero}=window.__nyanQA,moving=view.startsWith('walk')||view==='dash',face=view==='face',time=view==='walk-left'?Math.PI*.5/13:view==='walk-right'?Math.PI*1.5/13:.2;h.rotation.set(0,0,0);h.userData.movement=moving?1:0;h.userData.attackTime=view==='attack'?.17:0;animateHero(h,{x:0,z:0,face:0,moving,invincible:0,dash:view==='dash'?.2:0},time,0,true);h.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(h.userData.model,true),hand=h.userData.bones.get('hand.R').bone.getWorldPosition(new THREE.Vector3()),weapon=h.userData.weapon.getWorldPosition(new THREE.Vector3());camera.position.set(view==='quarter'?5:view==='side'?7:0,face?2.72:2.7,view==='back'?-7:view==='side'?0:face?2.8:7);camera.lookAt(0,face?2.72:1.6,0);h.userData.weapon.visible=!face;w.renderer.render(scene,camera);return {min:bounds.min.toArray(),size:bounds.getSize(new THREE.Vector3()).toArray(),socketDistance:weapon.distanceTo(hand),meshes:h.userData.metrics.meshes,triangles:h.userData.metrics.triangles,bones:h.userData.bones.size};},view);
-  assert.ok([...row.min,...row.size].every(Number.isFinite));assert.ok(row.min[1]>-.15);assert.ok(row.socketDistance<.12);assert.equal(row.triangles,223983);assert.equal(row.bones,39);await page.screenshot({path:`${out}/native-3d-${view}.png`});checks.push({view,...row});console.log('PASS Native awakening',view,JSON.stringify(row));
+  const row=await page.evaluate(view=>{const {THREE,hero:h,scene,camera,w,animateHero}=window.__nyanQA,moving=view.startsWith('walk')||view==='dash',face=view==='face';h.rotation.set(0,0,0);h.userData.naturalMotion.reset();h.userData.attackTime=0;const state={x:0,z:0,face:0,moving,invincible:0,dash:view==='dash'?.2:0};for(let i=0;i<(view==='walk-right'?42:24);i++)animateHero(h,state,i/60,1/60,true);h.userData.attackTime=view==='attack'?.17:0;animateHero(h,state,.7,0,true);h.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(h.userData.model,true),hand=h.userData.bones.get('hand.R').bone.getWorldPosition(new THREE.Vector3()),weapon=h.userData.weapon.getWorldPosition(new THREE.Vector3());camera.position.set(view==='quarter'?5:view==='side'?7:0,face?2.72:2.7,view==='back'?-7:view==='side'?0:face?2.8:7);camera.lookAt(0,face?2.72:1.6,0);h.userData.weapon.visible=!face;w.renderer.render(scene,camera);return {min:bounds.min.toArray(),size:bounds.getSize(new THREE.Vector3()).toArray(),socketDistance:weapon.distanceTo(hand),meshes:h.userData.metrics.meshes,triangles:h.userData.metrics.triangles,bones:h.userData.bones.size};},view);
+  assert.ok([...row.min,...row.size].every(Number.isFinite));assert.ok(row.min[1]>-.15);assert.ok(row.socketDistance<.12);assert.equal(row.triangles,222983);assert.equal(row.bones,49);await page.screenshot({path:`${out}/native-3d-${view}.png`});checks.push({view,...row});console.log('PASS Native awakening',view,JSON.stringify(row));
  }
+ const transitions=await page.evaluate(()=>{
+  const {THREE,hero:h,animateHero}=window.__nyanQA,d=h.userData;d.naturalMotion.reset();d.attackTime=0;h.rotation.y=0;
+  let maxSocketTranslation=0,maxSocketRotation=0,maxJointStep=0,minY=Infinity,maxY=-Infinity;
+  const previous=new Map(),offset=new THREE.Vector3(),relative=new THREE.Quaternion(),handPos=new THREE.Vector3(),handQ=new THREE.Quaternion(),weaponQ=new THREE.Quaternion();
+  for(let i=0;i<240;i++){
+   if(i===90)d.attackTime=.35;
+   animateHero(h,{x:0,z:0,face:i>140?Math.PI*.75:0,moving:i>=25&&i<175,invincible:0,dash:i>=120&&i<132?.2:0},i/60,1/60,true);h.updateMatrixWorld(true);
+   const hand=d.bones.get('hand.R').bone;hand.getWorldPosition(handPos);hand.getWorldQuaternion(handQ);d.weapon.getWorldQuaternion(weaponQ);
+   const now=d.weapon.getWorldPosition(new THREE.Vector3()).sub(handPos).applyQuaternion(handQ.clone().invert());
+   const rot=handQ.clone().invert().multiply(weaponQ).normalize();
+   if(i){maxSocketTranslation=Math.max(maxSocketTranslation,offset.distanceTo(now));maxSocketRotation=Math.max(maxSocketRotation,relative.angleTo(rot));}
+   offset.copy(now);relative.copy(rot);
+   for(const name of ['upper_arm.R','forearm.R','thigh.L','shin.L','hair.2.L']){const q=d.bones.get(name).bone.quaternion;if(previous.has(name))maxJointStep=Math.max(maxJointStep,previous.get(name).angleTo(q));previous.set(name,q.clone());}
+   const box=new THREE.Box3().setFromObject(d.model,true);minY=Math.min(minY,box.min.y);maxY=Math.max(maxY,box.max.y);
+   d.model.traverse(o=>{if(o.morphTargetInfluences&&o.morphTargetInfluences.some(v=>!Number.isFinite(v)||v<0||v>1))throw new Error('Invalid corrective blend');});
+  }
+  const frozen=[...d.bones.values()].map(b=>b.bone.quaternion.toArray());animateHero(h,{x:0,z:0,face:h.rotation.y,moving:false,invincible:0,dash:0},99,0,true);
+  const pauseStable=[...d.bones.values()].every((b,i)=>b.bone.quaternion.toArray().every((v,j)=>Math.abs(v-frozen[i][j])<1e-8));
+  return {maxSocketTranslation,maxSocketRotation,maxJointStep,minY,maxY,pauseStable};
+ });
+ console.log('NATURAL_TRANSITIONS',JSON.stringify(transitions));
+ assert.ok(transitions.maxSocketTranslation<1e-5);assert.ok(transitions.maxSocketRotation<1e-5);assert.ok(transitions.maxJointStep<.35);assert.ok(transitions.minY>.08);assert.ok(transitions.pauseStable);pass('240-frame idle/walk/cast/dash/turn/stop sequence: planted feet, smooth joints, rigid staff and frozen pause',transitions);
  assert.deepEqual(errors,[]);await writeFile(`${out}/browser-report.json`,JSON.stringify({url,checks,errors},null,2));
 }catch(e){await writeFile(`${out}/browser-report.json`,JSON.stringify({url,checks,errors,failure:e.stack},null,2));throw e;}finally{await browser.close();}

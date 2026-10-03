@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {VOICE_MANIFEST} from '../src/voice-manifest.js';
 import {maxedHeheProfile} from './chapter-six-extra-fixtures.js';
 
-const url=process.env.LUNARIA_URL??'http://localhost:5187/',out='audit/story-background-voice-20261003';
+const url=process.env.LUNARIA_URL??'http://localhost:5187/',out=process.env.VOICE_AUDIT_OUT??'audit/story-background-voice-20261003';
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({channel:'chrome',headless:true}),checks=[],errors=[];
 const context=await browser.newContext({viewport:{width:390,height:844},hasTouch:true,serviceWorkers:'block'});
@@ -34,8 +34,8 @@ try{
  assert.equal(decoded.length,27);for(const row of decoded){assert.equal(row.channels,1);assert.ok(Math.abs(row.duration-row.declared)<.015,row.id);assert.ok(row.peak<.81,row.id);}
  for(const row of decoded){const digest=createHash('sha256').update(await readFile('public/'+row.file)).digest('hex');assert.ok(row.file.endsWith('-'+digest.slice(0,12)+'.mp3'));assert.equal(row.file,VOICE_MANIFEST[row.id].file);}
  pass('All 27 revised battle clips download and decode through the actual voice player', {clips:decoded.length,seconds:decoded.reduce((n,v)=>n+v.duration,0)});
- const playback=await page.evaluate(async()=>{const t=window.__LUNARIA_TEST__,v=t.voice,result=[];await t.audio.ctx.resume();for(const id of ['nyanluna-attack-1','nyanluna-hurt-1','nyanluna-ultimate-1']){const played=await v.play(id,{interrupt:true}),item=v.manifest[id],expected=.5*10**(item.normalizationDb/20);await new Promise(resolve=>setTimeout(resolve,30));result.push({id,played,gain:v.clipGain.gain.value,expected,voiceVolume:v.gain.gain.value});v.stop();}v.configure(false);return {result,muted:!v.audible,current:v.current,lastError:v.lastError};});
+ const playback=await page.evaluate(async()=>{const t=window.__LUNARIA_TEST__,v=t.voice,result=[];await t.audio.ctx.resume();for(const id of ['nyanluna-attack-1','nyanluna-hurt-1','nyanluna-ultimate-1','nyanluna-switch-1','nyanluna-switch-2','nyanluna-heal-1','nyanluna-wave-1']){const played=await v.play(id,{interrupt:true}),item=v.manifest[id],expected=.5*10**(item.normalizationDb/20);await new Promise(resolve=>setTimeout(resolve,30));result.push({id,played,gain:v.clipGain.gain.value,expected,voiceVolume:v.gain.gain.value});v.stop();}v.configure(false);return {result,muted:!v.audible,current:v.current,lastError:v.lastError};});
  console.log('PLAYBACK',JSON.stringify(playback));
- for(const row of playback.result){assert.equal(row.played,true);assert.ok(Math.abs(row.gain-row.expected)<1e-6);assert.ok(Math.abs(row.voiceVolume-.85)<1e-6);}assert.equal(playback.muted,true);assert.equal(playback.current,null);assert.equal(playback.lastError,null);pass('Attack, hurt and ultimate play with calibrated gain; voice mute remains effective',playback);
+ for(const row of playback.result){assert.equal(row.played,true);assert.ok(Math.abs(row.gain-row.expected)<1e-6);assert.ok(Math.abs(row.voiceVolume-.85)<1e-6);}assert.equal(playback.muted,true);assert.equal(playback.current,null);assert.equal(playback.lastError,null);pass('Attack, hurt, ultimate and the four consistency retakes play with calibrated gain; voice mute remains effective',playback);
  assert.deepEqual(errors,[]);await writeFile(out+'/browser-report.json',JSON.stringify({url,checks,errors,decoded},null,2));
 }catch(e){await writeFile(out+'/browser-report.json',JSON.stringify({url,checks,errors,failure:e.stack},null,2));throw e;}finally{await browser.close();}

@@ -226,12 +226,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": -0.0106
   },
   "nyanluna-switch-1": {
-    "file": "assets/voices/nyanluna/nyanluna-switch-1-eb4588633600.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-switch-1-a1148ac9f617.mp3",
     "who": "nyanluna",
     "text": "わたしに任せて！",
-    "duration": 1.33,
+    "duration": 1.2,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.25
   },
   "omsolo-exit-1": {
     "file": "assets/voices/omsolo/omsolo-exit-1.mp3",
@@ -326,12 +326,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-heal-1": {
-    "file": "assets/voices/nyanluna/nyanluna-heal-1-3a6105da644d.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-heal-1-80c2dc74b775.mp3",
     "who": "nyanluna",
     "text": "ほっとした。もう大丈夫！",
-    "duration": 2.47,
+    "duration": 3.07,
     "kind": "battle",
-    "normalizationDb": 0.24
+    "normalizationDb": 0.27
   },
   "nyanluna-80e6eae7": {
     "file": "assets/voices/nyanluna/nyanluna-80e6eae7-08e56b1ba56c.mp3",
@@ -386,12 +386,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.42
   },
   "nyanluna-wave-1": {
-    "file": "assets/voices/nyanluna/nyanluna-wave-1-6ec1bfbb791b.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-wave-1-de352b62892b.mp3",
     "who": "nyanluna",
     "text": "次の魔物が来るよ。気をつけて！",
-    "duration": 2.39,
+    "duration": 2.61,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.25
   },
   "tsukineko-241cff32": {
     "file": "assets/voices/tsukineko/tsukineko-241cff32-63312e44afc0.mp3",
@@ -791,12 +791,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-switch-2": {
-    "file": "assets/voices/nyanluna/nyanluna-switch-2-150221e6bacf.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-switch-2-c0daeec2b83c.mp3",
     "who": "nyanluna",
     "text": "うん、交代だね！",
-    "duration": 1.83,
+    "duration": 2.09,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.25
   },
   "nyanluna-attack-2": {
     "file": "assets/voices/nyanluna/nyanluna-attack-2-6acf7b847987.mp3",

@@ -11,6 +11,7 @@ import { ATTACK_DURATION } from './model.js';
 import {createWeaponVariant} from './weapon-models.js';
 import {mochiSlimePose} from './mochi-motion.js';
 import {HERO_MODEL_NAMES, heroModelPath} from './hero-model-paths.js';
+import {createNyanlunaNaturalMotion} from './nyanluna-natural-motion.js';
 
 const files = HERO_MODEL_NAMES;
 const axisX = new THREE.Vector3(1, 0, 0);
@@ -162,6 +163,7 @@ function createHero(asset, hero, options={}) {
   root.add(ring);
   root.userData = { rig, model, slimeBody, bones, weapon, ring, hero, renewal, attackTime: 0,
     metrics, awakened:!!options.awakened, normalizationScale:scale, source: publicUrl(heroModelPath(root.name)), movement: 0 };
+  if(options.awakened)root.userData.naturalMotion=createNyanlunaNaturalMotion(model,asset.animations,bones);
   if(hero===7){root.userData.ears=createLumiEars();rig.add(root.userData.ears);}
   animateHero(root, { x: 0, z: 0, face: 0, moving: false, invincible: 0 }, 0, 0, hero === 0);
   return root;
@@ -181,6 +183,25 @@ function pose(data, name, x = 0, y = 0, z = 0) {
 
 export function animateHero(root, state, time, dt, active) {
   const d = root.userData;
+  if(d.naturalMotion){
+    root.position.set(state.x,0,state.z);
+    const turn=Math.atan2(Math.sin(state.face-root.rotation.y),Math.cos(state.face-root.rotation.y));
+    root.rotation.y+=turn*(1-Math.exp(-14*Math.max(0,dt)));
+    const ground=Math.hypot(state.x,state.z)<6.3?.105:.025;
+    d.rig.rotation.set(0,0,0);d.rig.position.set(0,ground,0);d.weapon.visible=true;
+    d.attackTime=Math.max(0,d.attackTime-dt);
+    d.movement=d.naturalMotion.update(state,dt,d.attackTime,ATTACK_DURATION).movement;
+    root.updateMatrixWorld(true);
+    const hand=d.bones.get('hand.R').bone;
+    hand.getWorldPosition(handPosition);d.rig.worldToLocal(handPosition);
+    hand.getWorldQuaternion(handRotation);d.rig.getWorldQuaternion(rigRotation).invert();handRotation.premultiply(rigRotation).normalize();
+    if(!d.awakenedGrip){const inverse=handRotation.clone().invert();d.awakenedGrip={rotation:inverse.clone().multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(.08,0,.13))),offset:new THREE.Vector3(0,-.03,.075).applyQuaternion(inverse)};}
+    gripOffset.copy(d.awakenedGrip.offset).applyQuaternion(handRotation);
+    d.weapon.position.copy(handPosition).add(gripOffset);d.weapon.quaternion.copy(handRotation).multiply(d.awakenedGrip.rotation);
+    d.ring.position.y=ground+.016;d.ring.material.opacity=active?.6:.22;d.ring.scale.setScalar(active?1:.8);
+    d.rig.visible=!(active&&state.invincible>.05&&state.invincible<.8&&Math.floor(time*22)%3===0);
+    return;
+  }
   if(d.hero===5){
     root.position.set(state.x,0,state.z);root.scale.setScalar(state.mounted?PRIM_MOUNT.scale:1);
     root.rotation.y+=Math.atan2(Math.sin(state.face-root.rotation.y),Math.cos(state.face-root.rotation.y))*Math.min(1,dt*14);
