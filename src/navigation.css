@@ -37,6 +37,11 @@
 .menu-light .menu-tabs button[aria-pressed=true]{color:#323a4b;background:none}
 .menu-light .menu-tabs button[aria-pressed=true]::after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:3px;background:#95805a}
 .menu-light .menu-tabs .icon{width:18px;height:18px}
+/* Chapter notes need paper-menu colours, not their night-screen text palette. */
+.menu-light :is(.chapter-six-brief,.chapter-seven-brief){
+ color:var(--ink);background:#f6f3ec;border:1px solid #cfc5b4;border-inline-start:3px solid #a18b63;
+ border-radius:8px;padding:14px 16px;margin:12px 0 20px;font-size:max(16px,var(--ui-min-font,0px));line-height:1.9;overflow-wrap:anywhere;
+}
 .journey-chapters{display:flex;gap:8px;margin:0 0 30px}
 .journey-chapters button{display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid transparent;background:#dddbd5;color:#626773;padding:11px 30px;border-radius:2px;font-size:max(13px,var(--ui-min-font,0px));font-weight:700;min-height:44px}
 .journey-chapters button[aria-pressed=true]{background:#3e4657;color:#ffffff;box-shadow:0 3px 8px #323d4620}
