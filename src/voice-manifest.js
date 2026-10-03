@@ -799,10 +799,10 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.25
   },
   "nyanluna-attack-2": {
-    "file": "assets/voices/nyanluna/nyanluna-attack-2-6acf7b847987.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-attack-2-e47fefd7a99b.mp3",
     "who": "nyanluna",
     "text": "光よ！",
-    "duration": 0.87,
+    "duration": 0.65,
     "kind": "battle",
     "normalizationDb": 0.25
   },
@@ -814,10 +814,10 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-support-1": {
-    "file": "assets/voices/nyanluna/nyanluna-support-1-1f282bc6cd9b.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-support-1-4901a11069c1.mp3",
     "who": "nyanluna",
     "text": "こっちから援護するよ！",
-    "duration": 1.46,
+    "duration": 1.45,
     "kind": "battle",
     "normalizationDb": 0.27
   },
@@ -829,12 +829,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "kind": "story"
   },
   "nyanluna-dash-2": {
-    "file": "assets/voices/nyanluna/nyanluna-dash-2-d15923b5dd90.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-dash-2-0f51f9e79c2d.mp3",
     "who": "nyanluna",
     "text": "よっと！",
-    "duration": 1.12,
+    "duration": 0.94,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.28
   },
   "tsukineko-defeat-1": {
     "file": "assets/voices/tsukineko/tsukineko-defeat-1-049fb796ed2e.mp3",
@@ -890,12 +890,12 @@ export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_
     "normalizationDb": 0.0
   },
   "nyanluna-exit-1": {
-    "file": "assets/voices/nyanluna/nyanluna-exit-1-e54ba692270b.mp3",
+    "file": "assets/voices/nyanluna/nyanluna-exit-1-0434b59aaa2e.mp3",
     "who": "nyanluna",
     "text": "月の門が開いたよ！",
-    "duration": 1.33,
+    "duration": 1.44,
     "kind": "battle",
-    "normalizationDb": 0.26
+    "normalizationDb": 0.24
   },
   "nyanluna-81da10c": {
     "file": "assets/voices/nyanluna/nyanluna-81da10c-f99784fd8171.mp3",
