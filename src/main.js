@@ -51,7 +51,8 @@ import {WeaponSummonPresentation} from './weapon-summon.js';
 import {WeaponSummonView} from './weapon-summon-view.js';
 import './weapon-summon.css';
 import './weapon-batch.css';
-import {talentView,materialsText} from './talent-ui.js';
+import {talentView,talentDetailView,materialsText} from './talent-ui.js';
+import {presentTalentUnlock} from './talent-presentation.js';
 import {materialArt} from './material-art.js';
 import {talentNode,nodeEffectText} from './talents.js';
 import {PROGRESSION_KEY,normalizeProgression,characterProgress,xpRequired,levelCap,LEVEL_RULES,grantLimitStone,unlockTalent} from './progression.js';
@@ -80,6 +81,7 @@ import './story-mobile.css';
 import './skill-choice.css';
 import './chapter-five.css';
 import './mobile-layout.css';
+import './talent-presentation.css';
 import {configureStandaloneViewport} from './viewport.js';
 import {hasPrimBond} from './prim-combat.js';
 import {extraCombatHint} from './extra-stages.js';
@@ -105,6 +107,7 @@ const heroLevel=id=>characterProgress(progression,id).level;
 let selectedAct=0;
 let equipmentHero=HEROES[0].id,equipmentCategory='weapons';
 let treeHero=HEROES[0].id,treeSelection='origin',blessingSlot=0;
+let talentDialogScroll=null;
 let partySkillHero=null,partySkillSlot=0;
 const savedParty=read(PARTY_KEY,{});let selectedParty=normalizeParty(savedParty.members,unlockedRoster());
 let selectedHero=Math.max(0,HEROES.findIndex(h=>h.id===(selectedParty.includes(savedParty.lead)?savedParty.lead:selectedParty[0]))),difficulty='normal',game=null,world=null,last=performance.now(),accumulator=0,activeDialog=null,returnFocus=null,resultSaved=false,toastTimer=0,bannerTimer=0,ultimateBannerTimer=0,renderFrames=0,storyEnabled=true,pendingStory=null;
@@ -188,6 +191,7 @@ $('#weapon-summon').addEventListener('pointercancel',()=>{summonPointer=null;});
 $('#weapon-summon').addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
 const dialogs={
   stage:()=>stageBriefingView(selectedAct,difficulty,progression),
+  talent:()=>`<header class="talent-sheet-header"><small>CONSTELLATION · 星の解放</small><button class="talent-sheet-close icon-button" data-close aria-label="説明を閉じてツリーに戻る">${icon('close')}</button></header>${talentDetailView(progression,treeHero,treeSelection,{dialog:true})}`,
   party:()=>partyView(selectedParty,selectedHero,HEROES,heroLevel,progression,$('#chapter-menu').classList.contains('hidden')?'タイトルへ戻る':'メニューへ戻る',null,{skillHero:partySkillHero,skillSlot:partySkillSlot}),
   guide:()=>`<div class="modal-heading"><span class="eyebrow">ADVENTURE GUIDE</span><h2>ふたりなら、もっと遠くへ。</h2><p>移動に集中。攻撃は、仲間にまかせよう。</p></div><div class="guide-grid"><article>${icon('compass')}<h3>撃って、かわして</h3><p><kbd>WASD</kbd> / <kbd>↑↓←→</kbd> または画面をドラッグして移動。近くの敵へ自動攻撃。<kbd>Space</kbd> で無敵時間のある回避。</p></article><article>${icon('swap')}<h3>ふたりの力を重ねる</h3><p>最初はにゃんるなだけで出発。第4幕の最後で親友のつきねこと再会・共闘し、クリアすると正式加入します。加入後は冒険画面の「パーティ」で1〜2体を選択。2体編成なら右下の「交代」で、表示された仲間の操作に切り替え。移動しながらでも押せます。<kbd>Q</kbd> または左上の顔でも交代。にゃんるなは遠距離魔法、つきねこは貫通する銃撃。第2章の最後ではオムソロを救出し、クリア後に近接の光剣使いとして加入します。第3章ではもちにゃふぇ、第4章ではHP吸収の鎌使い・雫、第5章では爪とブレスで戦うプリムが加入。第5章の各幕は初回クリアまでつきねこ一人で出撃し、クリアした幕は自由に編成できます。第6章「へへへランド」は推奨Lv.60。各幕の初回クリアまではオムソロ単独で出撃し、クリアした幕は自由編成。2人編成ではNPCのへへりあるは参加しません。おむすびを分けた後は、へへりあるが魔法の弓で援護し、最後の幕をクリアすると正式加入します。登場人物が増えても出撃は最大2人です。控えの仲間も援護します。HPはキャラ別。援護中の仲間は無敵。つきねこ＋プリムでは搭乗ボタン（PCはR）でプリムが大きくなり、12秒間二人ともメインとして攻撃・被弾します。移動はオムソロと同じ速さ。終了後20秒で再搭乗できます。通常の冒険では倒れると生存中の相方へ自動交代し、全員が倒れると終了します。第6章のNPCへへりあるは援護専用。操作役が倒れると終了します。クリア後に選んだ2人編成では、交代・自動交代を通常どおり使えます。戦闘不能からの復帰は次の冒険です。</p></article><article>${icon('spark')}<h3>経験値とクリスタル</h3><p>敵を倒したキャラに経験値100%、もう一人の出撃キャラに50%が入り、レベルと基礎能力が成長。援護の撃破も倒した本人に100%。端数の0.5も保存します。戦闘不能でも出撃中なら50%を獲得。未出撃のキャラとLv.80には入りません。落ちたクリスタルを集めると、出撃メンバーに応じた候補から3つの祝福を提示。共通・キャラ由来・2体の連携があり、効果は編成内で共有します。祝福は同じ幕の全6WAVEで維持されます。にゃんるなはスキルダメージ+50%・ゲージ獲得+50%。つきねこは基礎HP・攻撃力・防御力と通常射撃に優れます。</p></article><article>${icon('moon')}<h3>キャラ固有の必殺技</h3><p>攻撃した本人のゲージが増加し、100%で <kbd>E</kbd> または右下の必殺ボタン。にゃんるな「月華の聖域」は範囲攻撃・減速・HP回復。つきねこ「星銃・彗星連射」は貫通弾の8連射。オムソロ「翠光・守り手の円舞」は周囲への連続斬撃と回復・短い無敵。雫「紅月の鎌」は連続斬撃とHP吸収。にゃんるなと雫の二人が生存し、両ゲージ100%なら特殊連携「月雫・おかえりの約束」に変化します。へへりあるの「花弓・追いかける約束」は遠くの敵を追尾する魔法矢9連射。プリムの「プリズムブレス」は一直線の貫通攻撃。つきねことプリムの両ゲージが100%なら、二人の攻撃を重ねる「星虹・ふたりの帰り道」が発動します。専用イラストとボイスの演出後に発動します。演出中は画面をタップ（PCはEnter／Space）すると省略して即発動します。演出中は敵も味方も止まり、救出の制限時間も進みません。ゲージはキャラ別に保持し、援護でも蓄積。必殺技自体では増えません。</p></article></div><div class="guide-note">全6章・各章4幕・各幕6WAVE。地形はステージごとに変化。2フロアでは下階を制圧して青い階段から上階へ。分岐では左の緑の門が通常、右の赤い門が強ボスと追加素材。強ボスは同じ難易度の通常ボスに対して${ELITE_BOSS_LABEL}。地図を見て歩いて選ぼう。2WAVEごとに月の門が開きます。光る輪へ移動して次へ進もう。各幕の最後の門でクリア。ミッション報酬を受け取り、メニューから次の幕へ進みます。橙の照準線・突進の帯、紫や桃色の魔法陣から離れよう。<br>ゲームパッド：左スティック移動 / A回避 / B交代 / Y必殺 / Start一時停止。<br>祝福・クリスタルは新しい出撃でリセット。キャラ別のレベル・経験値・覚醒の輝石はこのブラウザに自動保存されます。成長ツリーは素材を使ってキャラごとに解放。「スキルの星」では新しい祝福候補を解放し、出撃前に3枠へセット。共通・二人の連携は枠を使わず自動で候補に入ります。星の芽は通常敵から50%で入手。月のしずくは月の門から1個ずつ、守護者の欠片はボスから入手。1段目はレア度1素材のみ。2段目には第2章・チャレンジモードで集めるレア度2素材も必要です。防御力はキャラ固有値＋レベル成長＋ツリー効果で被ダメージを軽減します。初期上限Lv.20。各章の第4幕クリアでもらえる覚醒の輝石と育成素材で、上限を10ずつ最大Lv.80まで解放できます。石は段階ごとに1・2・4・5・6・8個、Lv.40以降はレア度2素材も必要です。Lv.60の上限解放からは、第4〜6章で集めるレア度3素材も使います。成長ツリーの3段目はLv.60から解放されます。上限到達後の経験値も蓄積されます。<br>ステージミッションで育成素材を入手。ユニーク装備は全キャラ共通の各1枠。同じ装備は一人だけ使用でき、装備画面で仲間どうしの付け替えが可能です。チャレンジモードの時間・被弾条件を達成して入手します。専用武器は別枠の★1〜★4。各幕の全6WAVEクリアで毎回ガチャ券を1枚確定入手。ボスからも5%で追加の専用武器ガチャ券が落ち、メニュー「武器ガチャ」で1枚につき1回使えます。7人の専用武器から均等に抽選。★2が75%、★3が20%、★4が5%。★2〜★4は各キャラ・各レア度に性能の違う3種類。装備画面で自由に付け替えられます。同じ武器・同じレア度の重複だけを星の芽に変換。ガチャでは装備を変更しません。高難度の章ミッションでは追加の覚醒の輝石も入手できます。</div><button id="tutorial-replay" class="secondary">にゃんるなと操作を練習する</button><p class="tutorial-replay-note">にゃんるな1体で最初の戦闘から開始。育成・所持品は引き継ぎます。</p><button class="primary" data-close>準備はできた ${icon('arrow')}</button>`,
   settings:()=>`<div class="modal-heading"><span class="eyebrow">SETTINGS</span><h2>あなたの冒険に合わせて。</h2></div><div class="settings-list"><label><span>${icon('volume')}全体サウンド</span><input id="setting-sound" type="checkbox" ${settings.sound?'checked':''}></label><label><span>${icon('volume')}キャラクターボイス</span><input id="setting-voice" type="checkbox" ${settings.voice?'checked':''}></label><label class="voice-volume-setting"><span>ボイス音量 <output id="voice-volume-value">${Math.round(settings.voiceVolume*100)}%</output></span><input id="setting-voice-volume" aria-label="ボイス音量" type="range" min="0" max="100" value="${Math.round(settings.voiceVolume*100)}"></label><label><span>${icon('moon')}BGM</span><input id="setting-music" type="checkbox" ${settings.music?'checked':''}></label><label><span>${icon('spark')}画質</span><select id="setting-quality"><option value="high" ${settings.quality==='high'?'selected':''}>高画質</option><option value="low" ${settings.quality==='low'?'selected':''}>軽量</option></select></label><label><span>${icon('wind')}画面の揺れ・演出</span><input id="setting-motion" type="checkbox" ${settings.motion?'checked':''}></label></div><p class="subtle">動きが重い場合は「軽量」を選択してください。設定は自動保存されます。</p><button class="primary" data-close>閉じる ${icon('check')}</button>`,
@@ -221,9 +225,29 @@ function updatePartyLabels(){
 }
 function renderPartyDialog(){if(activeDialog!=='party')return;const scroll=$('#modal').scrollTop,expanded=$('.party-blessings')?.open;$('#modal-content').innerHTML=dialogs.party()+`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`;if(expanded)$('.party-blessings').open=true;$('#modal').scrollTop=scroll;if(!storageAvailable)$('.party-save-note').textContent='この環境では編成・スキル候補を保存できません。この画面では設定を維持します。';}
 function openDialog(type){
-  if(activeDialog||(type==='party'&&game))return;if(type==='party'||type==='stage')updatePartyLabels();audio.init();audio.play('click');returnFocus=document.activeElement;activeDialog=type;$('#modal-content').innerHTML=dialogs[type]()+(type==='stage'?'':`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`);if(type==='stage')$('#modal').setAttribute('aria-labelledby','stage-brief-title');else $('#modal').removeAttribute('aria-labelledby');$('#modal').showModal();if(type==='stage'){updateDifficultyLabels();$('#stage-brief-title').focus({preventScroll:true});}bindSettings();
+  if(activeDialog||(type==='party'&&game))return;
+  if(type==='party'||type==='stage')updatePartyLabels();
+  audio.init();audio.play('click');returnFocus=document.activeElement;activeDialog=type;
+  $('#modal').classList.toggle('talent-explanation',type==='talent');
+  if(type==='talent')talentDialogScroll=$('#chapter-menu').scrollTop;
+  $('#modal-content').innerHTML=dialogs[type]()+(['stage','talent'].includes(type)?'':`<button class="dialog-close icon-button" data-close aria-label="閉じる">${icon('close')}</button>`);
+  const title=type==='stage'?'stage-brief-title':type==='talent'?'talent-explanation-title':null;
+  if(title)$('#modal').setAttribute('aria-labelledby',title);else $('#modal').removeAttribute('aria-labelledby');
+  $('#modal').showModal();
+  if(type==='stage'){updateDifficultyLabels();$('#stage-brief-title').focus({preventScroll:true});}
+  if(type==='talent'){$('#modal').scrollTop=0;$('#talent-explanation-title').focus({preventScroll:true});$('#chapter-menu').scrollTop=talentDialogScroll;}
+  bindSettings();
 }
-function closeDialog(){if(['upgrade','result','story'].includes(activeDialog))return;if(activeDialog==='weapon-result'){closeWeaponSummon();return;}if(activeDialog==='pause'){audio.init();audio.setPaused(false);if(!ultimatePresentation.resume()){game?.resume();voice.resume();}}$('#modal').close();if(activeDialog==='stage')$('#modal-content').replaceChildren();$('#modal').removeAttribute('aria-labelledby');activeDialog=null;tutorialView.render(game);resetInput();returnFocus?.focus?.();}
+function closeDialog(){
+  if(['upgrade','result','story'].includes(activeDialog))return;
+  if(activeDialog==='weapon-result'){closeWeaponSummon();return;}
+  if(activeDialog==='pause'){audio.init();audio.setPaused(false);if(!ultimatePresentation.resume()){game?.resume();voice.resume();}}
+  const talent=activeDialog==='talent';
+  $('#modal').close();if(activeDialog==='stage'||talent)$('#modal-content').replaceChildren();
+  $('#modal').removeAttribute('aria-labelledby');$('#modal').classList.remove('talent-explanation');
+  activeDialog=null;tutorialView.render(game);resetInput();returnFocus?.focus?.(talent?{preventScroll:true}:undefined);
+  if(talent){$('#chapter-menu').scrollTop=talentDialogScroll;talentDialogScroll=null;}
+}
 function bindSettings(){
   ['sound','music','quality','motion','voice'].forEach(key=>{const el=$(`#setting-${key}`);if(!el)return;el.addEventListener('change',()=>{settings[key]=key==='quality'?el.value:el.checked;audio.setEnabled(settings.sound);audio.setMusic(settings.music);voice.configure(settings.voice,settings.voiceVolume);world.settings.motion=settings.motion;world.setQuality(settings.quality);document.body.classList.toggle('reduce-motion',!settings.motion);titleVideo.sync();save('lunaria-settings-v1',settings);});});
   $('#setting-voice-volume')?.addEventListener('input',e=>{settings.voiceVolume=Number(e.target.value)/100;voice.configure(settings.voice,settings.voiceVolume);$('#voice-volume-value').textContent=`${e.target.value}%`;save('lunaria-settings-v1',settings);});
@@ -297,18 +321,32 @@ function switchMenuTab(tab){
   if(!['adventure','growth','talent','missions','equipment','weapons'].includes(tab))return;$('#journey-page-title').textContent=({adventure:'ステージ選択',growth:'キャラ育成',talent:'成長ツリー',missions:'ミッション',equipment:'装備',weapons:'武器ガチャ'})[tab];if(tab==='talent')renderTalent();if(tab==='weapons')summonView.preload();if(['missions','equipment','weapons'].includes(tab))renderRewards();
   for(const key of ['adventure','growth','talent','missions','equipment','weapons']){const active=key===tab;$(`#${key}-panel`).classList.toggle('hidden',!active);$(`[data-menu-tab="${key}"]`).setAttribute('aria-pressed',String(active));}
 }
-function renderTalent(){if($('#tree-content'))$('#tree-content').innerHTML=talentView(progression,treeHero,treeSelection,blessingSlot);}
+function renderTalent({preserveView=false}={}){
+  const root=$('#tree-content');if(!root)return;
+  const top=$('#chapter-menu').scrollTop,openDetails=[...root.querySelectorAll('details')].map(el=>el.open),pickerLeft=root.querySelector('.tree-hero-picker')?.scrollLeft??0;
+  const visibleTier=preserveView?Number(root.querySelector('[data-tree-tier][aria-pressed="true"]')?.dataset.treeTier):undefined;
+  root.innerHTML=talentView(progression,treeHero,treeSelection,blessingSlot,{visibleTier});
+  if(preserveView){
+    root.querySelectorAll('details').forEach((el,i)=>el.open=openDetails[i]??false);
+    root.querySelector('.tree-hero-picker').scrollLeft=pickerLeft;$('#chapter-menu').scrollTop=top;
+  }
+}
 function chooseTreeHero(id){if(game||!isHeroUnlocked(progression,id))return;treeHero=id;blessingSlot=0;const tier=talentNode(treeSelection,treeHero)?.tier;treeSelection=tier===4?'demonGate':tier===3?'blessing1':tier===2?'ascension':'origin';renderTalent();$('#tree-feedback').textContent='';$(`[data-tree-hero="${id}"]`).focus({preventScroll:true});}
 function chooseTreeNode(id){
-  const node=talentNode(id,treeHero);if(game||!node)return;treeSelection=id;renderTalent();$(`[data-tree-node="${id}"]`).focus({preventScroll:true});announce(`${node.name}、${nodeEffectText(node)}。`);
-  if(innerWidth<=760)$('#talent-detail').scrollIntoView({block:'nearest',behavior:settings.motion?'smooth':'instant'});
+  const node=talentNode(id,treeHero);if(game||activeDialog||!node)return;
+  treeSelection=id;renderTalent({preserveView:true});$(`[data-tree-node="${id}"]`).focus({preventScroll:true});announce(`${node.name}、${nodeEffectText(node)}。`);
+  if(innerWidth<=760)openDialog('talent');
 }
 function applyTalent(heroId,nodeId){
   if(game||heroId!==treeHero||!isHeroUnlocked(progression,heroId)||!unlockTalent(progression,heroId,nodeId))return;
-  persistProgression();updateGrowthLabels();renderTalent();$(`[data-tree-node="${nodeId}"]`)?.classList.add('just-unlocked');$('#growth-cards').innerHTML=growthCards(progression);audio.play('upgrade');
+  const treeTop=talentDialogScroll??$('#chapter-menu').scrollTop;
+  if(activeDialog==='talent')closeDialog();
+  persistProgression();updateGrowthLabels();renderTalent({preserveView:true});$('#growth-cards').innerHTML=growthCards(progression);audio.play('upgrade');
   const node=talentNode(nodeId,heroId),hero=HEROES.find(h=>h.id===heroId);
+  presentTalentUnlock($('#tree-content'),node,{motion:settings.motion});
   $('#tree-feedback').textContent=`${hero.name}の「${node.name}」を解放。${nodeEffectText(node)}。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;
   $(`[data-tree-node="${nodeId}"]`).focus({preventScroll:true});announce(`${hero.name}の${node.name}を解放しました。`);
+  $('#chapter-menu').scrollTop=treeTop;
 }
 function recruitmentBanner(id){if(id==='lumi')return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait lumi"></span><div><small>FINGERTIP LIGHT · OUR WAY HOME</small><strong>るみが仲間になった！</strong><p>指先のレールガンで直線貫通攻撃。もちにゃふぇと組むとねこるみになり、通常攻撃・援護・必殺技が射程無限。8人の仲間から最大2人で出撃できます。</p></div></section>`;if(id==='hehereal')return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait hehereal" role="img" aria-label="へへりある"></span><div><small>SAKURA & RICE · OUR PROMISE</small><strong>へへりあるが仲間になった！</strong><p>桜の魔法弓で遠距離の敵を追尾。必殺技は追尾矢9連射。編成・育成・装備から、8人の仲間のうち最大2人で出撃できます。</p></div></section>`;if(id==='prim')return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait prim" role="img" aria-label="プリム"></span><div><small>OUR WAY HOME</small><strong>プリムが仲間になった！</strong><p>爪と一直線のプリズムブレスで戦う小竜。つきねこと組むとHP・攻撃+12%／ゲージ+20%。二人のゲージ100で連携技。搭乗ボタンで大きくなり、12秒間二人がメインで攻撃・被弾。移動はオムソロと同じ速さ。終了後20秒で再搭乗できます。</p></div></section>`;if(id==='shizuku')return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait shizuku" role="img" aria-label="雫"></span><div><small>ALWAYS BY YOUR SIDE</small><strong>雫が仲間になった！</strong><p>大鎌で近接攻撃、実ダメージの10%をHP吸収。にゃんるなと組むとHP・攻撃+12%／ゲージ+20%。二人のゲージ100で特殊連携「月雫・おかえりの約束」が発動。</p></div></section>`;if(id==='mochinyafe')return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait mochinyafe" role="img" aria-label="もちにゃふぇ"></span><div><small>NO LONGER ALONE</small><strong>もちにゃふぇが仲間になった！</strong><p>援護の「ふぇ〜」で雑魚を停止、ボスの攻撃・防御を低下。初期は最弱、Lv.50で最強へ育つ大器晩成型。パーティ編成から4人のうち最大2人を選べます。</p></div></section>`;const hero=HEROES.find(h=>h.id===id);return `<section class="recruitment-banner" aria-label="仲間加入"><span class="portrait ${id}" role="img" aria-label="${hero.name}"></span><div><small>${id==='omsolo'?'RESCUE COMPLETE':'REUNITED'}</small><strong>${id==='omsolo'?'オムソロが仲間になった！':'つきねこと、また一緒に！'}</strong><p>${id==='omsolo'?'緑の光刃で戦う近接の剣士。編成・祝福から仲間を入れ替えて、最大2人で出撃できます。':'大の仲良しの二人が再会。編成・育成・装備が解放されました。'}</p></div></section>`;}
 function goMenu(result){
@@ -376,7 +414,7 @@ document.addEventListener('click',event=>{
 
   if(target.dataset.openTree&&!game&&isHeroUnlocked(progression,target.dataset.openTree)){chooseTreeHero(target.dataset.openTree);if(target.dataset.treeTarget)treeSelection=target.dataset.treeTarget;switchMenuTab('talent');if(target.dataset.treeTarget)chooseTreeNode(treeSelection);else $('#talent-panel').scrollIntoView({block:'start'});}
   if(target.hasAttribute('data-open-skill-loadout')&&!game){closeDialog();if($('#chapter-menu').classList.contains('hidden'))goMenu();treeHero=HEROES[selectedHero].id;treeSelection='blessing1';blessingSlot=0;switchMenuTab('talent');$('#blessing-loadout').scrollIntoView({block:'start',behavior:'instant'});}
-  if(target.hasAttribute('data-edit-blessings')&&!game){$('#blessing-loadout')?.scrollIntoView({block:'start',behavior:'instant'});$(`[data-blessing-slot="${blessingSlot}"]`)?.focus({preventScroll:true});}
+  if(target.hasAttribute('data-edit-blessings')&&!game){if(activeDialog==='talent')closeDialog();$('#blessing-loadout')?.scrollIntoView({block:'start',behavior:'instant'});$(`[data-blessing-slot="${blessingSlot}"]`)?.focus({preventScroll:true});}
   if(target.hasAttribute('data-blessing-slot')&&!game){const slot=Number(target.dataset.blessingSlot);if(Number.isInteger(slot)&&slot>=0&&slot<3){blessingSlot=slot;renderTalent();$(`[data-blessing-slot="${slot}"]`).focus({preventScroll:true});}}
   if(target.dataset.equipBlessing&&!game&&target.dataset.blessingHero===treeHero&&equipSkill(progression,treeHero,blessingSlot,target.dataset.equipBlessing)){
     persistProgression();renderTalent();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.equipBlessing),message=`枠${blessingSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#tree-feedback').textContent=message;announce(message);$(`[data-blessing-slot="${blessingSlot}"]`).focus({preventScroll:true});
@@ -401,6 +439,13 @@ document.addEventListener('pointerdown',event=>{const button=event.target.closes
 // Suppress browser selection/image menus without cancelling taps or pointer movement.
 for(const type of ['selectstart','dragstart','contextmenu'])document.addEventListener(type,event=>event.preventDefault());
 $('#modal').addEventListener('cancel',e=>{e.preventDefault();closeDialog();});
+$('#modal').addEventListener('keydown',e=>{
+  if(activeDialog!=='talent'||e.key!=='Tab')return;
+  const buttons=[...$('#modal').querySelectorAll('button:not(:disabled)')],index=buttons.indexOf(document.activeElement);
+  if(index<0||(!e.shiftKey&&index===buttons.length-1)||(e.shiftKey&&index===0)){
+    e.preventDefault();(e.shiftKey?buttons.at(-1):buttons[0])?.focus();
+  }
+});
 window.addEventListener('keydown',e=>{
   if(e.code==='Escape'){e.preventDefault();if(activeDialog)closeDialog();else pause();return;}
   if(weaponSummon.active){if(!weaponSummon.finished&&['Space','Enter'].includes(e.code)&&!e.target.closest?.('button')){e.preventDefault();if(!e.repeat)weaponSummon.skip();}return;}

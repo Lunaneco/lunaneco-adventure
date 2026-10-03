@@ -1,0 +1,115 @@
+/* Keep the constellation's branch order at every width, including phones. */
+#talent-panel .tree-workbench .tree-tiers{grid-template-columns:repeat(4,minmax(0,1fr))}
+#talent-panel .tree-tiers button strong :is(.tree-tier-step,.tree-tier-name){display:inline;color:inherit;font:inherit}
+#talent-panel .tree-tiers .tree-tier-count b,#talent-panel .tree-tiers .tree-tier-count>span{display:inline;font:inherit;color:inherit}
+#talent-panel .constellation-sky .talent-node{touch-action:manipulation}
+/* Updated feedback/labels must not make the browser move its scroll anchor. */
+#chapter-menu:has(#talent-panel:not(.hidden)){overflow-anchor:none}
+
+/* A drawn connection, two fine rings and eight small star flecks. No screen flash. */
+#talent-panel .constellation-sky .talent-links path.just-lit{
+  stroke-dasharray:1;stroke-dashoffset:0;animation:constellation-connect 750ms cubic-bezier(.22,.65,.3,1) both;
+}
+#talent-panel .constellation-sky .talent-node.just-unlocked .node-star{
+  animation:constellation-star-bloom 1100ms cubic-bezier(.2,.7,.25,1) both;
+}
+.constellation-unlock-burst{position:absolute;inset:0;pointer-events:none;z-index:3}
+.constellation-unlock-burst::before,.constellation-unlock-burst::after{
+  content:"";position:absolute;inset:-12px;border:1px solid var(--tree-glow);border-radius:50%;
+  box-shadow:0 0 12px rgba(var(--tree-rgb),.18);opacity:0;animation:constellation-ring 1250ms ease-out both;
+}
+.constellation-unlock-burst::after{inset:-5px;border-color:#f6ddb2;animation-delay:160ms}
+.constellation-unlock-spark{
+  position:absolute;left:50%;top:50%;width:5px;height:5px;background:#fff2cf;
+  clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+  opacity:0;animation:constellation-spark 1100ms ease-out var(--spark-delay) both;
+}
+.constellation-unlock-notice{
+  --unlock-glow:#cfbaff;--unlock-rgb:207,186,255;
+  position:fixed;z-index:120;left:50%;bottom:max(24px,calc(env(safe-area-inset-bottom,0px) + 16px));
+  transform:translateX(-50%);display:flex;align-items:center;gap:15px;
+  width:max-content;max-width:min(460px,calc(100vw - 32px));padding:17px 23px;
+  border:1px solid rgba(var(--unlock-rgb),.5);border-radius:12px;
+  background:linear-gradient(125deg,#24314af5,#111c31fa);color:#f5efdf;
+  box-shadow:0 14px 35px #060d2850,inset 0 1px #f5e9cc15;
+  pointer-events:none;animation:constellation-notice 2600ms ease both;
+}
+.unlock-notice-icon{display:grid;place-items:center;flex:none;width:46px;height:46px;border:1px solid rgba(var(--unlock-rgb),.35);border-radius:50%;color:var(--unlock-glow);box-shadow:0 0 22px rgba(var(--unlock-rgb),.16)}
+.unlock-notice-icon>.icon{width:25px;height:25px}
+.constellation-unlock-notice>div{min-width:0}
+.constellation-unlock-notice small{display:block;color:var(--unlock-glow);font:10px/1.4 system-ui;letter-spacing:1.7px}
+.constellation-unlock-notice strong{display:block;margin-top:5px;font:600 18px/1.5 "Hiragino Mincho ProN","Yu Mincho",serif;overflow-wrap:anywhere}
+.constellation-unlock-notice p{margin:4px 0 0;font:13px/1.7 "Hiragino Sans",system-ui;color:#cad5e9;overflow-wrap:anywhere}
+.constellation-unlock-notice.is-still{animation:none}
+@keyframes constellation-connect{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes constellation-star-bloom{0%{transform:scale(.82);opacity:.6}42%{transform:scale(1.17);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes constellation-ring{0%{transform:scale(.55);opacity:0}20%{opacity:.8}100%{transform:scale(1.8);opacity:0}}
+@keyframes constellation-spark{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}25%{opacity:1}100%{transform:translate(calc(-50% + var(--spark-x)),calc(-50% + var(--spark-y))) scale(.6);opacity:0}}
+@keyframes constellation-notice{0%{transform:translate(-50%,12px);opacity:0}12%,82%{transform:translate(-50%,0);opacity:1}100%{transform:translate(-50%,-5px);opacity:0}}
+
+/* Phone explanations float above the tree; only this sheet scrolls. */
+#modal.talent-explanation{
+  position:fixed;inset:auto 0 max(10px,env(safe-area-inset-bottom,0px));margin:0 auto;
+  width:min(560px,calc(100vw - 20px));max-height:72dvh;
+  border-radius:20px;background:#f6f3ec;color:#414958;
+  box-shadow:0 18px 60px #080f3440;overscroll-behavior:contain;
+}
+#modal.talent-explanation::backdrop{background:#0d173840;backdrop-filter:none}
+body:has(#modal.talent-explanation[open]) #chapter-menu{overflow-y:hidden}
+#modal.talent-explanation #modal-content{padding:0}
+#modal.talent-explanation .talent-sheet-header{
+  position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:7px 14px 7px 22px;border-bottom:1px solid #d8d2c780;background:#f6f3ecf5;
+}
+#modal.talent-explanation .talent-sheet-header>small{font-size:11px;letter-spacing:1.2px}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-sheet-close{
+  width:44px;height:44px;flex:none;border:1px solid #cfc8bb;border-radius:50%;background:transparent;
+  touch-action:manipulation;
+}
+#modal.talent-explanation .talent-sheet-close .icon{width:20px;height:20px}
+#modal.talent-explanation .talent-detail{position:static;border:0;border-radius:0;background:transparent;padding:20px 22px 24px}
+#modal.talent-explanation .talent-detail-heading h3{font-size:21px;line-height:1.5;overflow-wrap:anywhere}
+#modal.talent-explanation .talent-detail-icon{border-color:#d9cda7}
+#modal.talent-explanation .talent-effect{font-size:15px;line-height:1.8;margin-top:18px}
+#modal.talent-explanation .talent-permanent{margin-bottom:17px}
+#modal.talent-explanation .talent-preview{border-color:#d8d2c780;margin-bottom:18px}
+#modal.talent-explanation .talent-preview dt{color:#4d5b70}
+#modal.talent-explanation .talent-preview dd{color:#414958}
+#modal.talent-explanation .talent-cost li{gap:9px}
+#modal.talent-explanation .talent-cost li>span{min-width:0}
+#modal.talent-explanation .talent-cost li>b{flex:none}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation :is(.talent-preview b,.talent-requirements .ready){color:#326546}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-cost .shortage b{color:#a44840}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-owned-note{color:#6d4d89}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-unlock{
+  min-height:48px;background:#444d60;color:#fff;border-color:#444d60;border-radius:26px;touch-action:manipulation;
+}
+body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-unlock:disabled{background:#e5e0d6;border-color:#d0c8ba;color:#697181}
+#modal.talent-explanation .talent-spend-note{line-height:1.8;margin-top:14px}
+
+@media(max-width:760px){
+  #talent-panel .tree-workbench{grid-template-columns:minmax(0,1fr)}
+  #talent-panel .tree-workbench .tree-tiers{margin-inline:10px;gap:3px;padding:4px}
+  #talent-panel .tree-workbench .tree-tiers button{min-height:116px;padding:9px 3px;display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+  #talent-panel .tree-tiers button strong{margin:0;font-size:14px!important;line-height:1.5;overflow-wrap:anywhere}
+  #talent-panel .tree-tiers button strong .tree-tier-step{display:none}
+  #talent-panel .tree-workbench .tree-tiers button .tree-tier-level{font-size:clamp(10px,2.7vw,12px);white-space:nowrap;letter-spacing:0}
+  #talent-panel .tree-workbench .tree-tiers button .tree-tier-count{font-size:12px;line-height:1.5}
+  #talent-panel .tree-tiers .tree-tier-count>span{display:block}
+  #talent-panel .constellation-sky .talent-map{height:640px;margin-inline:8px}
+  #talent-panel .constellation-sky .talent-map .talent-node{width:clamp(76px,calc(32% - 8px),116px);min-height:108px}
+  #talent-panel .constellation-sky .talent-map .talent-node.tree-anchor{width:min(72%,280px)}
+  #talent-panel .constellation-sky .talent-node>strong{font-size:14px;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+  #talent-panel .constellation-sky .talent-node>small{font-size:12px;line-height:1.6}
+  #talent-panel .constellation-sky .skill-talent-map{height:510px}
+  #talent-panel .constellation-sky .skill-talent-map .talent-node{width:min(80%,280px)}
+  #talent-panel .tree-workbench>.talent-detail{display:none}
+  .constellation-unlock-notice{padding:14px 17px;gap:12px}
+  .constellation-unlock-notice strong{font-size:17px}
+}
+@media(prefers-reduced-motion:reduce){
+  #talent-panel .constellation-sky .talent-links path.just-lit,#talent-panel .constellation-sky .talent-node.just-unlocked .node-star,
+  .constellation-unlock-burst::before,.constellation-unlock-burst::after,.constellation-unlock-spark,.constellation-unlock-notice{animation:none}
+}
+.reduce-motion #talent-panel .constellation-sky .talent-links path.just-lit,.reduce-motion #talent-panel .constellation-sky .talent-node.just-unlocked .node-star,
+.reduce-motion .constellation-unlock-burst::before,.reduce-motion .constellation-unlock-burst::after,.reduce-motion .constellation-unlock-spark,.reduce-motion .constellation-unlock-notice{animation:none}
