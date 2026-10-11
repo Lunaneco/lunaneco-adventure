@@ -11,7 +11,10 @@ export const FIELD_CAMERA = Object.freeze({
 const focalPixels = FIELD_CAMERA.referenceHeight / (2 * Math.tan(FIELD_CAMERA.referenceFov * Math.PI / 360));
 
 export function resizeFieldCamera(camera, width, height, tutorialActive = false) {
-  const w = Math.max(1, width), h = Math.max(1, height);
+  // Mobile rotation/background transitions may briefly report 0/1px. Keep
+  // the last valid projection instead of committing an extreme, transient FOV.
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width < 2 || height < 2) return false;
+  const w = width, h = height;
   camera.aspect = w / h;
   camera.fov = 2 * Math.atan(h / (2 * focalPixels)) * 180 / Math.PI;
   // This shifts the framing below the lesson card without changing its scale.
@@ -19,4 +22,5 @@ export function resizeFieldCamera(camera, width, height, tutorialActive = false)
   if (lessonOffset) camera.setViewOffset(w, h, 0, -lessonOffset, w, h);
   else camera.clearViewOffset();
   camera.updateProjectionMatrix();
+  return true;
 }

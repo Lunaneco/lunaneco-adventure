@@ -1,0 +1,65 @@
+#chapter-menu #gallery-panel{color:#2c3444}
+#chapter-menu #gallery-panel .gallery-mast{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;margin:8px 0 26px;padding-bottom:22px;border-bottom:1px solid #d9d0c0}
+#chapter-menu #gallery-panel .gallery-mast .eyebrow{color:#8a7044;letter-spacing:.42em}
+#chapter-menu #gallery-panel .gallery-mast h2{margin:10px 0 12px;font-family:"Didot","Bodoni MT","Hiragino Mincho ProN","Yu Mincho",serif;font-size:clamp(34px,4vw,52px);font-weight:500;letter-spacing:.12em;line-height:1.15;color:#241f1a}
+#chapter-menu #gallery-panel .gallery-mast p{max-width:460px;margin:0;color:#5c6574;font-size:max(13px,var(--ui-min-font,0px));line-height:1.9;letter-spacing:.04em}
+#chapter-menu #gallery-panel .gallery-medallion{flex:none;width:108px;height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #c6ae78;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fffaf1,#f3ead8);box-shadow:inset 0 0 0 6px #f7f1e6,0 10px 24px #8d7a5520}
+#chapter-menu #gallery-panel .gallery-medallion b{font:500 36px/1 Georgia,"Hiragino Mincho ProN",serif;color:#2a241c}
+#chapter-menu #gallery-panel .gallery-medallion span{color:#7d6a48;font-size:max(12px,var(--ui-min-font,0px));letter-spacing:.08em}
+#chapter-menu #gallery-panel .gallery-medallion small{margin-top:4px;color:#8d7b5c;letter-spacing:.28em;font-size:max(10px,var(--ui-min-font,0px))}
+#chapter-menu #gallery-panel .gallery-cast{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 16px;scrollbar-width:thin}
+#chapter-menu #gallery-panel .gallery-cast-card{flex:0 0 auto;display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 16px 8px 8px;border:1px solid #ddd4c4;border-radius:999px;background:#f7f4ee;color:#3c4556;box-shadow:0 4px 12px #4c46380c}
+#chapter-menu #gallery-panel .gallery-cast-card .portrait{width:46px;height:46px}
+#chapter-menu #gallery-panel .gallery-cast-card strong{display:block;font-size:14px;letter-spacing:.04em}
+#chapter-menu #gallery-panel .gallery-cast-card small{color:#6d6252;font-size:max(11px,var(--ui-min-font,0px))}
+#chapter-menu #gallery-panel .gallery-cast-card[aria-pressed=true]{background:#2f3544;border-color:#2f3544;color:#f8f1e4}
+#chapter-menu #gallery-panel .gallery-cast-card[aria-pressed=true] small{color:#e4d3ae}
+#chapter-menu #gallery-panel .gallery-wall-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:8px 0 18px}
+#chapter-menu #gallery-panel .gallery-wall-head h3{margin:0;font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:28px;font-weight:500;letter-spacing:.12em;color:#241f1a}
+#chapter-menu #gallery-panel .gallery-wall-head p{margin:6px 0 0;color:#6a6256;letter-spacing:.08em}
+#chapter-menu #gallery-panel .gallery-wall-head>span{color:#7a6a50;font-size:max(12px,var(--ui-min-font,0px));letter-spacing:.06em;text-align:right}
+#chapter-menu #gallery-panel .gallery-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:22px}
+#chapter-menu #gallery-panel .gallery-frame{display:flex;flex-direction:column;padding:12px 12px 14px;border:1px solid #e4d7b8;border-radius:4px;background:linear-gradient(#fffdf8,#f4efe4);color:#3a342c;box-shadow:0 10px 24px #5c514014,inset 0 0 0 1px #fff;text-align:left;transition:transform .2s ease,box-shadow .2s ease}
+#chapter-menu #gallery-panel .gallery-frame.is-open:hover{transform:translateY(-4px);box-shadow:0 16px 30px #5c514020,inset 0 0 0 1px #fff}
+#chapter-menu #gallery-panel .gallery-mat{position:relative;display:grid;place-items:center;aspect-ratio:3/4;overflow:hidden;border-radius:2px;background:
+  linear-gradient(180deg,#fbf8f2,#efe7d8),
+  repeating-linear-gradient(135deg,#e7dcc8 0 1px,#0000 1px 8px);box-shadow:inset 0 0 0 1px #e7dcc4}
+#chapter-menu #gallery-panel .gallery-mat img{width:100%;height:100%;object-fit:contain}
+#chapter-menu #gallery-panel .gallery-seal{display:flex;flex-direction:column;align-items:center;gap:8px;color:#8d7d64}
+#chapter-menu #gallery-panel .gallery-seal .icon{width:28px;height:28px}
+#chapter-menu #gallery-panel .gallery-seal b{font-weight:600;letter-spacing:.14em;font-size:max(12px,var(--ui-min-font,0px))}
+#chapter-menu #gallery-panel .gallery-plaque{display:flex;align-items:baseline;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #e6dcc8}
+#chapter-menu #gallery-panel .gallery-plaque small{color:#9a845c;letter-spacing:.16em;font-size:max(10px,var(--ui-min-font,0px));white-space:nowrap}
+#chapter-menu #gallery-panel .gallery-plaque b{font-family:Georgia,"Hiragino Mincho ProN",serif;font-size:18px;font-weight:500;color:#2c261f}
+#chapter-menu #gallery-panel .gallery-plaque em{margin-left:auto;font-style:normal;color:#6e6254;font-size:max(11px,var(--ui-min-font,0px));letter-spacing:.04em;white-space:nowrap}
+#chapter-menu #gallery-panel .gallery-same{display:block;margin-top:6px;text-align:right;color:#8a7044;letter-spacing:.14em;font-size:max(11px,var(--ui-min-font,0px))}
+#chapter-menu #gallery-panel .gallery-frame.is-sealed{cursor:default}
+#chapter-menu #gallery-panel .gallery-frame.is-open{border-top:3px solid var(--hero,#c6ae78)}
+#gallery-panel #gallery-viewer{width:min(1080px,calc(100vw - 28px));max-height:calc(100dvh - 28px);margin:auto;padding:22px 22px 18px;border:1px solid #e6d3a4;border-radius:18px;background:radial-gradient(ellipse at 50% 0%,#3c3428,transparent 58%),#14110e;color:#f6efe2;box-shadow:0 30px 90px #000c}
+#gallery-panel #gallery-viewer::backdrop{background:#0c0b09cc;backdrop-filter:blur(8px)}
+#gallery-panel #gallery-viewer .gallery-viewer-close{position:absolute;top:14px;right:14px;width:42px;height:42px;border:1px solid #e6d3a488;border-radius:50%;background:#ffffff14;color:#f6efe2}
+#gallery-panel #gallery-viewer .gallery-viewer-stage{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:14px;align-items:center;min-height:0}
+#gallery-panel #gallery-viewer figure{display:flex;flex-direction:column;align-items:center;margin:0;min-width:0}
+#gallery-panel #gallery-viewer img{display:block;width:auto;max-width:100%;height:auto;max-height:min(72dvh,760px);object-fit:contain;background:#0e0c0a;border-radius:8px;box-shadow:0 0 0 1px #e6d3a455}
+#gallery-panel #gallery-viewer figcaption{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-top:14px}
+#gallery-panel #gallery-viewer figcaption small{letter-spacing:.28em;color:#e6d3a4;font-size:max(10px,var(--ui-min-font,0px))}
+#gallery-panel #gallery-viewer figcaption strong{font-family:"Hiragino Mincho ProN","Yu Mincho",serif;font-size:22px;font-weight:500;letter-spacing:.16em;color:#f8f1e6}
+#gallery-panel #gallery-viewer figcaption span{margin-left:auto;color:#d9cbb3;letter-spacing:.08em}
+#gallery-panel #gallery-viewer .gallery-viewer-step{width:48px;height:48px;border:1px solid #e6d3a466;border-radius:50%;background:#ffffff10;color:#f6efe2}
+#gallery-panel #gallery-viewer .gallery-viewer-step.is-prev{transform:scaleX(-1)}
+#gallery-panel #gallery-viewer .gallery-viewer-step:disabled{opacity:.28}
+@media(max-width:760px){
+  #chapter-menu #gallery-panel .gallery-mast{align-items:flex-start;gap:16px;margin-bottom:18px}
+  #chapter-menu #gallery-panel .gallery-mast h2{font-size:32px;letter-spacing:.06em}
+  #chapter-menu #gallery-panel .gallery-medallion{width:84px;height:84px}
+  #chapter-menu #gallery-panel .gallery-medallion b{font-size:28px}
+  #chapter-menu #gallery-panel .gallery-wall{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #chapter-menu #gallery-panel .gallery-wall-head{align-items:flex-start}
+  #chapter-menu #gallery-panel .gallery-wall-head h3{font-size:22px}
+  #chapter-menu #gallery-panel .gallery-plaque{flex-wrap:wrap}
+  #chapter-menu #gallery-panel .gallery-plaque em{margin-left:auto}
+  #gallery-panel #gallery-viewer{width:calc(100vw - 16px);padding:54px 12px 14px;border-radius:12px}
+  #gallery-panel #gallery-viewer .gallery-viewer-stage{grid-template-columns:40px minmax(0,1fr) 40px;gap:6px}
+  #gallery-panel #gallery-viewer figcaption span{margin-left:0}
+}
+@media(prefers-reduced-motion:reduce){#chapter-menu #gallery-panel .gallery-frame{transition:none}}

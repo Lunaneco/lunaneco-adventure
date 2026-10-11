@@ -55,3 +55,16 @@ test('moving to a raised floor retains actor scale and zero-sized transient layo
   }
   resizeFieldCamera(ground,0,0);assert.ok(ground.projectionMatrix.elements.every(Number.isFinite));
 });
+
+test('invalid transient sizes preserve the last valid framing until a real resize',()=>{
+  const c=cameraAt();assert.equal(resizeFieldCamera(c,390,844,true),true);
+  const before={fov:c.fov,aspect:c.aspect,view:{...c.view},projection:c.projectionMatrix.elements.slice()};
+  for(const [w,h] of [[0,844],[390,0],[1,1],[-1,844],[NaN,844],[390,Infinity],[undefined,844]]){
+    assert.equal(resizeFieldCamera(c,w,h,false),false);
+    assert.equal(c.fov,before.fov);assert.equal(c.aspect,before.aspect);
+    assert.deepEqual(c.view,before.view);assert.deepEqual(c.projectionMatrix.elements,before.projection);
+  }
+  assert.equal(resizeFieldCamera(c,844,390,false),true);assert.equal(c.view.enabled,false);
+  const reference=cameraAt();resizeFieldCamera(reference,390,844);
+  extent(c,[0,0,0],[0,2.8,0],844,390).forEach((v,i)=>close(v,extent(reference,[0,0,0],[0,2.8,0],390,844)[i]));
+});

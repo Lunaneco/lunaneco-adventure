@@ -1,0 +1,12 @@
+/* pan-y excludes browser pinch/double-tap zoom without disabling explanation
+   scrolling in pause, blessing and story dialogs (including the top layer). */
+body.playing,
+body.playing #modal,
+body.playing #story-dialog,
+body.playing #battle-tutorial{touch-action:pan-y}
+/* Movement + a second finger on any battle button remain game pointer input. */
+body.playing #scene,
+body.playing #hud,
+body.playing #hud *,
+body.playing #ultimate-cutin,
+body.playing #ultimate-cutin *{touch-action:none}
