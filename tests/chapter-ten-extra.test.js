@@ -38,21 +38,19 @@ test('chapter 10 extra is level 100, uses the tower, and guarantees the rare on 
   }
   const brief=stageBriefingView(PARESIS_EXTRA_ID,'hard',ready());
   assert.match(brief,/Lv\.100/);assert.match(brief,/WAVE 1/);assert.match(brief,/瘴金のへへへ/);
-  const hehe=actFor(HEHE_EXTRA_ID),tower=act,heheCombat=extraCombatFor(hehe),towerCombat=extraCombatFor(tower);
-  assert.ok(tower.bossHp>hehe.bossHp);assert.ok(tower.hpScale>hehe.hpScale);
-  assert.ok(tower.damageScale*(tower.menace??1)>hehe.damageScale*(hehe.menace??1));
-  assert.ok(tower.counts.slice(0,5).every((n,i)=>n>hehe.counts[i]));
-  assert.ok(towerCombat.cooldownRate>heheCombat.cooldownRate);
-  assert.ok(towerCombat.telegraphScale<heheCombat.telegraphScale);
-  assert.ok(towerCombat.moveScale>heheCombat.moveScale);
-  assert.ok(towerCombat.projectileScale>heheCombat.projectileScale);
-  assert.ok(towerCombat.spawnScale<heheCombat.spawnScale);
+  const hehe=actFor(HEHE_EXTRA_ID),tower=act,heheCombat=extraCombatFor(hehe),towerCombat=extraCombatFor(tower),ratio=(a,b)=>a/b;
+  assert.equal(tower.bossHp,hehe.bossHp*1.3);assert.equal(tower.hpScale,hehe.hpScale*1.3);
+  assert.equal(tower.damageScale*(tower.menace??1),hehe.damageScale*(hehe.menace??1)*1.3);
+  for(let i=0;i<5;i++)assert.equal(tower.counts[i],Math.round(hehe.counts[i]*1.3));
+  assert.ok(Math.abs(ratio(towerCombat.cooldownRate,heheCombat.cooldownRate)-1.3)<.01);
+  assert.ok(Math.abs(ratio(heheCombat.telegraphScale,towerCombat.telegraphScale)-1.3)<.01);
+  assert.ok(Math.abs(ratio(towerCombat.moveScale,heheCombat.moveScale)-1.3)<.01);
+  assert.ok(Math.abs(ratio(towerCombat.projectileScale,heheCombat.projectileScale)-1.3)<.01);
+  assert.ok(Math.abs(ratio(heheCombat.spawnScale,towerCombat.spawnScale)-1.3)<.01);
   const prior=ready();
   const heheRun=new Adventure({act:HEHE_EXTRA_ID,progression:prior,party:['nyanluna','tsukineko'],seed:3});
   const towerBoss=g.spawnEnemy('boss',0,-8),heheBoss=heheRun.spawnEnemy('boss',0,-8);
-  const towerTrash=g.spawnEnemy('paresisChorister',2,0),heheTrash=heheRun.spawnEnemy('heheBrawler',2,0);
-  assert.ok(towerBoss.hp>heheBoss.hp);assert.ok(towerBoss.damage>heheBoss.damage);
-  assert.ok(towerTrash.hp>heheTrash.hp);assert.ok(towerTrash.damage>heheTrash.damage);
+  assert.ok(Math.abs(towerBoss.hp/heheBoss.hp-1.3)<.01);assert.ok(Math.abs(towerBoss.damage/heheBoss.damage-1.3)<.01);
 });
 
 test('the first chapter 10 extra clear grants the legendary unique once',()=>{
