@@ -1,10 +1,11 @@
 import {ENEMY_TYPES} from './enemies.js';
 import {MATERIALS,talentNode,isTalentUnlocked,normalizeTalentTree,talentBonuses} from './talents.js';
 import {LEVEL_RULES,LEVEL_AWAKENING_COSTS} from './level-rules.js';
-import {normalizeEquipment,equipmentBonuses} from './equipment.js';
+import {normalizeEquipment,equipmentBonuses,BANQUET_UNIQUE} from './equipment.js';
 import {normalizeWeapons,weaponAttackBonus,weaponDefenseBonus} from './weapons.js';
 import {normalizeMissions,STAGE_MISSIONS} from './missions.js';
 import {normalizeStory} from './acts.js';
+import {EXTRA_ACTS} from './extra-stages.js';
 import {normalizeSkillLoadouts} from './blessings.js';
 import {normalizeAwakenings} from './rice-awakening.js';
 export {LEVEL_RULES} from './level-rules.js';
@@ -21,6 +22,8 @@ export function normalizeProgression(raw,roster=[],legacyRecord={}){
   // These trials previously paid only materials. Valid claimed trials also earn
   // their newly added relic, without paying the material reward a second time.
   const recovered=STAGE_MISSIONS.filter(m=>m.act>=8&&m.equipment&&result.missions.claimed.includes(m.id)).map(m=>m.equipment);
+  const heheExtra=EXTRA_ACTS.find(act=>act.endgame);
+  if(heheExtra&&result.story.extraClears[heheExtra.chapter])recovered.push(BANQUET_UNIQUE.id);
   if(recovered.length)result.equipment=normalizeEquipment({...result.equipment,owned:[...result.equipment.owned,...recovered]});
   const source=raw?.characters&&typeof raw.characters==='object'&&!Array.isArray(raw.characters)?raw.characters:{};
   result.tutorial={firstBattleCompleted:raw?.tutorial?.firstBattleCompleted===true};

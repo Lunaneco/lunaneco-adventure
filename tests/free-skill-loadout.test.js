@@ -12,6 +12,18 @@ const profile=(cleared=true,story={})=>normalizeProgression({story:{version:2,ac
 const choose=(g,id)=>{g.phase='upgrade';g.pendingBlessings=1;g.offers=[SKILLS.find(s=>s.id===id)];return g.chooseSkill(id);};
 const gate=(g,area)=>{g.phase='playing';g.wave=area*2+2;g.area=area;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);return g.crossExit();};
 
+test('an existing Hehe extra clear receives the banquet ring once when the save loads',()=>{
+ const raw={story:{version:2,actClears:Array.from({length:50},(_,i)=>i<=27),extraClears:[false,false,false,false,false,true]},equipment:{owned:['meadow-charm'],loadout:{nyanluna:'meadow-charm'}}};
+ const loaded=normalizeProgression(raw,HEROES);
+ assert.equal(loaded.equipment.owned.filter(id=>id==='banquet-gold-ring').length,1);
+ assert.equal(loaded.equipment.loadout.nyanluna,'meadow-charm');
+ assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(loaded)),HEROES).equipment,loaded.equipment);
+ const uncleared=normalizeProgression({story:{version:2,actClears:Array.from({length:50},(_,i)=>i<=27)}},HEROES);
+ assert.equal(uncleared.equipment.owned.includes('banquet-gold-ring'),false);
+ const forged=normalizeProgression({story:{version:2,actClears:Array(20).fill(true),extraClears:[false,false,false,false,false,true]}},HEROES);
+ assert.equal(forged.story.extraClears[5],false);
+ assert.equal(forged.equipment.owned.includes('banquet-gold-ring'),false);
+});
 test('a cleared finale unlocks free skills; an old banquet clear and forged flags do not',()=>{
  const p=profile();assert.equal(p.story.finaleCleared,true);assert.equal(hasFreeSkillLoadout(p),true);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
  assert.equal(hasFreeSkillLoadout(profile(false)),false);
