@@ -35,20 +35,20 @@ test('free solo and duo lineups never receive a story NPC or a level floor in He
   const g=game({party,hero:HEROES.findIndex(h=>h.id===party[0])});assert.deepEqual(g.party,party);g.wave=2;g.startWave();assert.deepEqual(g.party,party);assert.equal(g.guestHeroId,null);
  }
 });
-test('WAVE 3 schedules exactly one golden Hehe without a chance roll, in every new run',()=>{
- assert.equal(goldenHeheWave(act,()=>{throw Error('must not roll');}),3);
+test('WAVE 1 schedules exactly one golden Hehe without a chance roll, in every new run',()=>{
+ assert.equal(goldenHeheWave(act,()=>{throw Error('must not roll');}),1);
  for(const seed of [0,1,7,60,99,1000]){
-  const g=game({seed});assert.equal(g.goldenHeheWave,3);assert.equal(g.spawnGoldenHehe(),null);g.wave=2;g.startWave();for(let i=0;i<3;i++)g.spawn();
+  const g=game({seed});assert.equal(g.goldenHeheWave,1);assert.equal(g.wave,1);g.spawn();g.spawn();assert.equal(g.enemies.some(e=>e.type===GOLDEN_HEHE.type),false);g.spawn();
   const rares=g.enemies.filter(e=>e.type===GOLDEN_HEHE.type);assert.equal(rares.length,1);assert.equal(g.waveSpawned,3);assert.equal(g.spawnGoldenHehe(),null);
-  assert.equal(rares[0].maxHp,GOLDEN_HEHE.hp*1.28*1.3);g.hit(rares[0],1e9,0,0);assert.equal(g.goldenHeheKills,1);assert.equal(g.earnedMaterials.bloodCrystal,40);assert.equal(g.earnedMaterials.demonHeart,20);assert.equal(g.earnedWeaponTickets,10);
-  g.wave=4;g.startWave();assert.equal(g.spawnGoldenHehe(),null);g.wave=3;assert.equal(g.spawnGoldenHehe(),null);
+  assert.equal(rares[0].maxHp,GOLDEN_HEHE.hp*1.3);g.hit(rares[0],1e9,0,0);assert.equal(g.goldenHeheKills,1);assert.equal(g.earnedMaterials.bloodCrystal,40);assert.equal(g.earnedMaterials.demonHeart,20);assert.equal(g.earnedWeaponTickets,10);
+  g.wave=4;g.startWave();assert.equal(g.spawnGoldenHehe(),null);g.wave=1;assert.equal(g.spawnGoldenHehe(),null);
  }
- const g=game();g.wave=3;const e=g.spawnGoldenHehe();g.time=e.expiresAt+.01;assert.ok(g.expireGoldenSlime(e));assert.equal(g.spawnGoldenHehe(),null);assert.equal(g.goldenHeheKills,0);
+ const g=game();const e=g.spawnGoldenHehe();g.time=e.expiresAt+.01;assert.ok(g.expireGoldenSlime(e));assert.equal(g.spawnGoldenHehe(),null);assert.equal(g.goldenHeheKills,0);
 });
 test('EX unlock/card/briefing describe Lv.80, free parties, dodge pressure and the guaranteed rare wave',()=>{
  const locked=normalizeProgression({},HEROES);assert.match(stageSelectionView(0,locked),/第2章クリアで解放/);assert.match(extraStageSelector(0,20,locked),/第2章・第4幕/);
  assert.match(stageSelectionView(5,maxedHeheProfile(27)),/data-act="33"[^>]*disabled/);assert.match(stageSelectionView(5,maxedHeheProfile(27)),/第6章クリアで解放/);
- const p=maxedHeheProfile(),brief=stageBriefingView(33,'normal',p);for(const text of ['フルカンスト','Lv.80','NPCなし','WAVE 3','1体確定'])assert.ok(brief.includes(text),text);
+ const p=maxedHeheProfile(),brief=stageBriefingView(33,'normal',p);for(const text of ['フルカンスト','Lv.80','NPCなし','WAVE 1','1体確定'])assert.ok(brief.includes(text),text);
  assert.doesNotMatch(brief,/オムソロ操作固定|初回クリアまでのソロ|各幕で一度だけ20%|data-difficulty=/);
  assert.match(extraStageSelector(5,33,p),/Lv.80/);assert.match(extraStageSelector(5,33,maxedHeheProfile(27)),/第6章・第4幕/);assert.match(extraDifficultyView(act),/Lv.80/);assert.match(extraCombatHint(act),/260体/);
 });
