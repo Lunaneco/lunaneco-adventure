@@ -9,6 +9,8 @@ export const STORY_CAST=Object.freeze({
   primDuet:Object.freeze({name:'つきねこ ＆ プリム',role:'同じ光を見ていた二人',image:publicUrl('assets/ultimates/tsukineko-prim-duet-v1.webp'),alt:'大きくなったプリムにつきねこが乗り、星銃とブレスを合わせる',color:'#bceaff'}),
   shizuku:Object.freeze({name:'雫',role:'不器用な、紅月の守り手',image:publicUrl('assets/story/shizuku-reference-v1.webp'),alt:'雫 — 黒銀の大鎌、黒いレースのドレスと赤い瞳の少女',color:'#e7a3c2'}),
   shizukuDuet:Object.freeze({name:'にゃんるな ＆ 雫',role:'大の仲良し',image:publicUrl('assets/ultimates/nyanluna-shizuku-duet-v1.webp'),alt:'月光と鎌を重ねる親友',color:'#e6b9ff'}),
+  kephia:Object.freeze({name:'ケフィア',role:'塔を笑い声で塗った、道化の魔導師',image:publicUrl('assets/story/kephia-story-v1.webp'),alt:'紫と金の菱形模様の道化服、鈴のついた二股帽子、白い半仮面と灯りの杖。大きく口を開けて笑うケフィア',color:'#e7a0ff'}),
+  kephiaFinal:Object.freeze({name:'ケフィア・終幕',role:'舞台そのものになった道化',image:publicUrl('assets/story/kephia-final-story-v1.webp'),alt:'裂けた緞帳と割れた仮面の柱から上半身を生やし、六本の腕を広げ、灯りの冠の下で高笑いするケフィア',color:'#ff8adf'}),
   demonking:Object.freeze({name:'悪魔大王',role:'国を守ろうとして暴走した王',image:publicUrl('assets/story/demon-king.png'),alt:'暴走の紅霧に包まれた悪魔大王',color:'#ffa3af'}),
   demonking_calm:Object.freeze({name:'悪魔大王',role:'穏やかな心を取り戻した王',image:publicUrl('assets/story/demon-king-calm.png'),alt:'優しい目で微笑む、正気を取り戻した悪魔大王',color:'#ffd5b0'}),
   mochinyafe:Object.freeze({name:'もちにゃふぇ',role:'声を届ける、最後の一匹',image:publicUrl('assets/story/mochinyafe.png'),alt:'丸くてもちもちした桃色の猫。小さな前足と茶色の瞳を持つ、もちにゃふぇ',color:'#ffc3dc'}),

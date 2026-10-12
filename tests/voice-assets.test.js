@@ -14,6 +14,7 @@ import {SEVENTH_CHAPTER_SCENES} from '../src/chapter-seven.js';
 import {LUMI_NEKO_ULTIMATE_LINE} from '../src/voice-catalog.js';
 import {SIXTH_CHAPTER_SCENES} from '../src/chapter-six.js';
 import {FIFTH_CHAPTER_SCENES} from '../src/chapter-five-story.js';
+import {DARK_PARESIS_SCENES,KEPHIA_BATTLE_LINES} from '../src/dark-paresis.js';
 
 test('all sixteen raging dragon lines use distinct monster roars, while purified Prim and the duet keep their accepted calls',()=>{
  const lines=FIFTH_CHAPTER_SCENES.flatMap(act=>Object.values(act).flatMap(scene=>scene.lines)).filter(line=>line.who==='prim');
@@ -31,18 +32,18 @@ test('all sixteen raging dragon lines use distinct monster roars, while purified
 });
 
 test('all remaining battle clips have measured levels and the unwanted grunt is not shipped',()=>{
- const battle=Object.values(VOICE_MANIFEST).filter(v=>v.kind==='battle');assert.equal(battle.length,186);
+ const battle=Object.values(VOICE_MANIFEST).filter(v=>v.kind==='battle');assert.equal(battle.length,191);
  for(const item of battle){assert.ok(Number.isFinite(item.normalizationDb),item.file);assert.ok(item.normalizationDb>-12&&item.normalizationDb<6,item.file);assert.ok(voicePlaybackGain(item)>0&&voicePlaybackGain(item)<1,item.file);}
  assert.ok(!Object.values(VOICE_MANIFEST).some(v=>v.file.endsWith('tsukineko-hurt-1-a7437c6a58d1.mp3')));
  assert.equal(VOICE_MANIFEST['tsukineko-hurt-1'].text,'いたっ！');assert.equal(VOICE_MANIFEST['tsukineko-hurt-2'],undefined);
 });
 
 test('only selected story lines, tutorials and character actions ship voice assets',async()=>{
- const story=[...ACT_SCENES,...SIXTH_CHAPTER_SCENES,...SEVENTH_CHAPTER_SCENES].flatMap(s=>Object.values(s).flatMap(scene=>scene.lines));
- assert.equal(story.length,382);assert.equal(story.filter(line=>line.voiced).length,201);
+ const story=[...ACT_SCENES,...SIXTH_CHAPTER_SCENES,...SEVENTH_CHAPTER_SCENES,...DARK_PARESIS_SCENES].flatMap(s=>Object.values(s).flatMap(scene=>scene.lines));
+ assert.equal(story.length,564);assert.equal(story.filter(line=>line.voiced).length,383);
  for(const line of story.filter(line=>!line.voiced))assert.equal(VOICE_MANIFEST[dialogueVoiceId(line.who,line.text)],undefined,`Unselected story voice: ${line.text}`);
  const lines=[...story.filter(line=>line.voiced),...TUTORIAL_STEPS.map(s=>({who:'nyanluna',text:s.text}))].map(line=>({...line,id:dialogueVoiceId(line.who,line.text)}));
- lines.push(LUMI_NEKO_ULTIMATE_LINE,...Object.values(HEHE_FORM_LINES),PRIM_DUET_VOICE,DUET_VOICE,...Object.values(BATTLE_VOICES).flatMap(events=>Object.values(events).flat()));
+ lines.push(...KEPHIA_BATTLE_LINES.form,KEPHIA_BATTLE_LINES.enrage,LUMI_NEKO_ULTIMATE_LINE,...Object.values(HEHE_FORM_LINES),PRIM_DUET_VOICE,DUET_VOICE,...Object.values(BATTLE_VOICES).flatMap(events=>Object.values(events).flat()));
  const ids=new Set();
  for(const line of lines){
   ids.add(line.id);const item=VOICE_MANIFEST[line.id];assert.ok(item,`Missing voice: ${line.id} ${line.text}`);assert.equal(item.text,line.text);assert.equal(item.who,line.who);assert.ok(item.duration>0&&item.duration<60);
@@ -57,7 +58,7 @@ test('only selected story lines, tutorials and character actions ship voice asse
 test('voice distribution includes only approved MP3 clips and no private voice references',async()=>{
  const base=new URL('../public/assets/voices/',import.meta.url),expected=new Set(Object.values(VOICE_MANIFEST).map(v=>v.file));let count=0;
  for(const dir of await readdir(base,{withFileTypes:true})){
-  assert.ok(dir.isDirectory());assert.ok(['nyanluna','tsukineko','omsolo','omsolo_hurt','komusubi','guardian','narrator','mochinyafe','shizuku','demonking','demonking_calm','prim','hehereal','lumi'].includes(dir.name));
+  assert.ok(dir.isDirectory());assert.ok(['nyanluna','tsukineko','omsolo','omsolo_hurt','komusubi','guardian','narrator','mochinyafe','shizuku','demonking','demonking_calm','prim','hehereal','lumi','kephia'].includes(dir.name));
   for(const name of await readdir(new URL(dir.name+'/',base))){assert.ok(expected.has(`assets/voices/${dir.name}/${name}`),`Unexpected file: ${name}`);count++;}
  }
  assert.equal(count,expected.size);

@@ -33,7 +33,7 @@ test('every chapter-seven dialogue uses the character-free village background, n
 });
 
 test('chapter seven preserves all previous IDs and saves, unlocks sequentially, and recruits only at the last gate',()=>{
- const p=profile(28);assert.equal(p.story.actClears.length,32);assert.deepEqual(p.story.actClears.slice(28),[false,false,false,false]);assert.equal(nextStoryAct(27),28);assert.ok(isActUnlocked(p,28));assert.ok(!isHeroUnlocked(p,'lumi'));assert.equal(CHAPTERS[6].start,28);assert.equal(ACTS.length,28);
+ const p=profile(28);assert.equal(p.story.actClears.length,50);assert.deepEqual(p.story.actClears.slice(28,32),[false,false,false,false]);assert.equal(nextStoryAct(27),28);assert.ok(isActUnlocked(p,28));assert.ok(!isHeroUnlocked(p,'lumi'));assert.equal(CHAPTERS[6].start,28);assert.equal(ACTS.length,44);
  for(const id of [20,21,22,23,24,25,26,27])assert.equal(actFor(id).id,id);
  const forged=normalizeProgression({story:{version:2,actClears:[],lumiUnlocked:true,chapterSevenCleared:true}},HEROES);assert.ok(!isHeroUnlocked(forged,'lumi'));
  for(const id of LUMI_ACT_IDS){const g=quiet({act:id,progression:profile(id)});assert.equal(g.player.hero,3);assert.equal(actFor(id).recommendedLevel,60);assert.ok(ANTI_KEMO_BOSSES[g.actConfig.bossId]);g.hit(g.spawnEnemy('boss',0,-5),1e9,0,0);assert.ok(!isHeroUnlocked(g.progression,'lumi'));finish(g);assert.equal(g.recruitedHeroId,id===31?'lumi':null);assert.equal(isHeroUnlocked(g.progression,'lumi'),id===31);assert.equal(completeAct(g.progression,id),false);assert.deepEqual(normalizeProgression(g.progression,HEROES),g.progression);}

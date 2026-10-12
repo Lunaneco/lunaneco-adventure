@@ -1,5 +1,5 @@
 /* Keep the constellation's branch order at every width, including phones. */
-#talent-panel .tree-workbench .tree-tiers{grid-template-columns:repeat(4,minmax(0,1fr))}
+#talent-panel .tree-workbench .tree-tiers{grid-template-columns:repeat(5,minmax(0,1fr))}
 #talent-panel .tree-tiers button strong :is(.tree-tier-step,.tree-tier-name){display:inline;color:inherit;font:inherit}
 #talent-panel .tree-tiers .tree-tier-count b,#talent-panel .tree-tiers .tree-tier-count>span{display:inline;font:inherit;color:inherit}
 #talent-panel .constellation-sky .talent-node{touch-action:manipulation}
@@ -89,7 +89,7 @@ body:has(#chapter-menu:not(.hidden)) #modal.talent-explanation .talent-unlock:di
 
 @media(max-width:760px){
   #talent-panel .tree-workbench{grid-template-columns:minmax(0,1fr)}
-  #talent-panel .tree-workbench .tree-tiers{margin-inline:10px;gap:3px;padding:4px}
+  #talent-panel .tree-workbench .tree-tiers{margin-inline:10px;gap:3px;padding:4px;grid-template-columns:repeat(3,minmax(0,1fr))}
   #talent-panel .tree-workbench .tree-tiers button{min-height:116px;padding:9px 3px;display:flex;flex-direction:column;justify-content:space-between;gap:5px}
   #talent-panel .tree-tiers button strong{margin:0;font-size:14px!important;line-height:1.5;overflow-wrap:anywhere}
   #talent-panel .tree-tiers button strong .tree-tier-step{display:none}

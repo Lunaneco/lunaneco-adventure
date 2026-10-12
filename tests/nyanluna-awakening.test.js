@@ -25,7 +25,7 @@ test('Nyanluna trial unlocks at exactly Lv.50, independently of story chapter cl
  const p=profile(49);assert.equal(isActUnlocked(p,32),false);assert.equal(new Adventure({act:32,progression:p}).act,0);awardCharacterXp(p,'nyanluna',xpRequired(49));assert.equal(p.characters.nyanluna.level,50);assert.equal(isActUnlocked(p,32),true);
  for(const level of [50,60,80])assert.equal(isActUnlocked(profile(level),32),true);
  for(const level of [49,'50',NaN,Infinity,null])assert.equal(nyanQuestUnlocked({characters:{nyanluna:{level}}}),false);
- assert.equal(NYAN_QUEST_ID,32);assert.equal(PLAYABLE_ACTS.at(-1),NYAN_QUEST);assert.equal(ACTS.length,28);assert.equal(profile().story.actClears.length,32);assert.equal(actLabel(32),'にゃんるな・ソロ覚醒');
+ assert.equal(NYAN_QUEST_ID,32);assert.equal(PLAYABLE_ACTS.at(-1),NYAN_QUEST);assert.equal(ACTS.length,44);assert.equal(profile().story.actClears.length,50);assert.equal(actLabel(32),'にゃんるな・ソロ覚醒');
 });
 test('unlearned and malformed old saves keep awakening locked; rice flag is independent',()=>{
  assert.equal(hasNyanAwakening(profile()),false);assert.equal(hasNyanAwakening(profile(49,true)),false);

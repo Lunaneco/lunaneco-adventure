@@ -23,7 +23,7 @@ test('large rarity 1 reserves cannot replace rarity 2 or partially pay for an ad
 });
 test('legacy saves retain fully upgraded trees and old inventory without recharging or inventing rare items',()=>{
   const raw={story,characters:{nyanluna:{level:50,breaks:3,xp:0,tree:TALENT_NODES.filter(n=>n.level<=50).map(n=>n.id)}},inventory:{starBud:84,moonDew:9,wardenCore:7,limitStone:2}},p=normalizeProgression(raw,HEROES);
-  assert.deepEqual(p.characters.nyanluna,raw.characters.nyanluna);assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,...raw.inventory,moonPrism:0,astralCore:0,weaponTicket:0});const before=structuredClone(p);assert.equal(unlockTalent(p,'nyanluna','ascension'),false);assert.deepEqual(p,before);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
+  assert.deepEqual(p.characters.nyanluna,raw.characters.nyanluna);assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,...raw.inventory,moonPrism:0,astralCore:0,weaponTicket:0,miasmaShard:0,paresisCore:0});const before=structuredClone(p);assert.equal(unlockTalent(p,'nyanluna','ascension'),false);assert.deepEqual(p,before);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
 });
 test('chapter 1 normal bosses and gates grant only rarity 1; XP and crystals stay separate',()=>{
   const g=game();kill(g);gate(g,0);assert.equal(g.progression.inventory.starBud,3);assert.equal(g.progression.inventory.wardenCore,1);assert.equal(g.progression.inventory.moonDew,1);assert.equal(g.earnedMaterials.moonPrism,0);assert.equal(g.earnedMaterials.astralCore,0);assert.equal(g.earnedXp.nyanluna,60);assert.equal(g.totalCrystals,0);

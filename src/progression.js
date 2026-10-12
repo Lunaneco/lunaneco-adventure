@@ -61,7 +61,7 @@ export function breakthroughStatus(profile,id){
   const character=characterProgress(profile,id);if(!character)return {canBreak:false};
   const cap=levelCap(character),maxed=cap>=LEVEL_RULES.maxLevel,costs=LEVEL_AWAKENING_COSTS[character.breaks]??{};
   const missing=Object.entries(costs).filter(([id,cost])=>integer(profile.inventory[id])<cost).map(([id,needed])=>({id,needed,owned:integer(profile.inventory[id])}));
-  const chapterMet=character.breaks<3||profile.story?.chapterThreeCleared===true;
+  const chapterMet=character.breaks>=6?profile.story?.chapterSevenCleared===true:character.breaks<3||profile.story?.chapterThreeCleared===true;
   return {chapterMet,cap,nextCap:Math.min(LEVEL_RULES.maxLevel,cap+LEVEL_RULES.capStep),cost:costs.limitStone??0,costs,missing,maxed,canBreak:chapterMet&&!maxed&&character.level>=cap&&!missing.length};
 }
 export function breakthrough(profile,id){
@@ -78,7 +78,7 @@ export function talentStatus(profile,heroId,nodeId){
   const node=talentNode(nodeId,heroId),character=characterProgress(profile,heroId);if(!node||!character)return {canUnlock:false};
   const owned=isTalentUnlocked(character,nodeId),parents=node.parents.filter(id=>!isTalentUnlocked(character,id));
   const missing=Object.entries(node.cost).filter(([id,cost])=>integer(profile.inventory[id])<cost).map(([id,cost])=>({id,needed:cost,owned:integer(profile.inventory[id])}));
-  const chapterMet=(node.tier!==4&&!(node.kind==='limit'&&node.stage>=4))||profile.story?.chapterThreeCleared===true;
+  const chapterMet=node.tier===5||(node.kind==='limit'&&node.stage>=7)?profile.story?.chapterSevenCleared===true:(node.tier===4||(node.kind==='limit'&&node.stage>=4)?profile.story?.chapterThreeCleared===true:true);
   return {chapterMet,node,owned,parents,missing,levelMet:character.level>=node.level,canUnlock:chapterMet&&!owned&&character.level>=node.level&&!parents.length&&!missing.length&&(node.kind!=='limit'||character.breaks+1===node.stage)};
 }
 export function unlockTalent(profile,heroId,nodeId){

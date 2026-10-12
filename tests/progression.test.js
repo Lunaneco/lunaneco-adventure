@@ -60,17 +60,19 @@ test('level caps require the current cap and an item; XP waits and unlocks after
  awardCharacterXp(p,'nyanluna',9999);assert.equal(p.characters.nyanluna.level,20);assert.ok(p.characters.nyanluna.xp>0);const xp=p.characters.nyanluna.xp;
  assert.equal(breakthrough(p,'nyanluna'),true);assert.equal(p.inventory.limitStone,0);assert.equal(levelCap(p.characters.nyanluna),30);assert.ok(p.characters.nyanluna.level>20);assert.ok(p.characters.nyanluna.xp<xp);assert.equal(breakthrough(p,'nyanluna'),false);assert.equal(p.characters.tsukineko.breaks,0);
 });
-test('cap unlocks never exceed 80 or consume items once fully unlocked',()=>{
+test('cap unlocks reach 100 only after chapter seven and stop consuming items at the final cap',()=>{
  const p=fresh();p.story.chapterThreeCleared=true;for(const cost of LEVEL_AWAKENING_COSTS)for(const [id,n] of Object.entries(cost))p.inventory[id]+=n;grantLimitStone(p,1);awardCharacterXp(p,'tsukineko',999999);
  for(const cap of [30,40,50,60,70,80]){assert.equal(breakthrough(p,'tsukineko'),true);assert.equal(levelCap(p.characters.tsukineko),cap);}
- assert.equal(p.characters.tsukineko.level,80);assert.equal(p.characters.tsukineko.xp,0);assert.equal(breakthrough(p,'tsukineko'),false);assert.equal(p.inventory.limitStone,1);assert.equal(awardCharacterXp(p,'tsukineko',100).amount,0);
+ assert.equal(breakthrough(p,'tsukineko'),false);p.story.chapterSevenCleared=true;
+ for(const cap of [90,100]){assert.equal(breakthrough(p,'tsukineko'),true);assert.equal(levelCap(p.characters.tsukineko),cap);}
+ assert.equal(p.characters.tsukineko.level,100);assert.equal(p.characters.tsukineko.xp,0);assert.equal(breakthrough(p,'tsukineko'),false);assert.equal(p.inventory.limitStone,1);assert.equal(awardCharacterXp(p,'tsukineko',100).amount,0);
 });
 test('unaffordable or invalid breakthroughs never spend an item',()=>{
  const p=fresh();p.characters.nyanluna.level=20;assert.equal(breakthrough(p,'nyanluna'),false);assert.equal(breakthrough(p,'__proto__'),false);assert.equal(p.inventory.limitStone,0);
 });
 test('saved progression survives normalization, keeps future character IDs and validates corrupt values',()=>{
  const raw=JSON.parse('{"characters":{"future_hero":{"level":7,"xp":9,"breaks":1},"nyanluna":{"level":-8,"xp":"999","breaks":-1},"tsukineko":{"level":999,"xp":-1,"breaks":99},"__proto__":{"level":42}},"inventory":{"limitStone":-9}}');
- const p=normalizeProgression(raw,HEROES);assert.deepEqual(p.characters.future_hero,{level:7,xp:9,breaks:1,tree:[]});assert.deepEqual(p.characters.nyanluna,{level:1,xp:0,breaks:0,tree:[]});assert.equal(p.characters.tsukineko.level,80);assert.equal(p.inventory.limitStone,0);assert.equal(Object.hasOwn(p.characters,'__proto__'),false);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);assert.deepEqual(normalizeProgression(null,HEROES),fresh());
+ const p=normalizeProgression(raw,HEROES);assert.deepEqual(p.characters.future_hero,{level:7,xp:9,breaks:1,tree:[]});assert.deepEqual(p.characters.nyanluna,{level:1,xp:0,breaks:0,tree:[]});assert.equal(p.characters.tsukineko.level,100);assert.equal(p.inventory.limitStone,0);assert.equal(Object.hasOwn(p.characters,'__proto__'),false);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);assert.deepEqual(normalizeProgression(null,HEROES),fresh());
 });
 test('each level consumes the defined XP once with no rounding or reload loss',()=>{
  const p=fresh();awardCharacterXp(p,'nyanluna',xpRequired(1)+xpRequired(2)+5);assert.deepEqual(p.characters.nyanluna,{level:3,xp:5,breaks:0,tree:[]});assert.deepEqual(normalizeProgression(p,HEROES),p);assert.equal(LEVEL_RULES.initialCap,20);

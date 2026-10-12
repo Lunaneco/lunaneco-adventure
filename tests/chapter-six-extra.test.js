@@ -22,7 +22,7 @@ const gate=(g,area)=>{g.phase='playing';g.wave=area*2+2;g.area=area;g.exitOpen=t
 test('Hehe EX has a new stable ID, requires chapter-six final clear, and does not require chapter seven',()=>{
  assert.equal(HEHE_EXTRA_ID,33);assert.equal(new Set(PLAYABLE_ACTS.map(a=>a.id)).size,PLAYABLE_ACTS.length);assert.equal(act.chapter,5);assert.equal(act.recommendedLevel,80);
  assert.equal(isActUnlocked(maxedHeheProfile(27),33),false);assert.equal(isActUnlocked(maxedHeheProfile(28),33),true);assert.equal(new Adventure({act:33,progression:maxedHeheProfile(27)}).act,0);
- assert.equal(game({progression:maxedHeheProfile(28),difficulty:'normal'}).difficulty,'hard');assert.equal(ACTS.length,28);assert.equal(missionsForAct(33).length,0);
+ assert.equal(game({progression:maxedHeheProfile(28),difficulty:'normal'}).difficulty,'hard');assert.equal(ACTS.length,44);assert.equal(missionsForAct(33).length,0);
 });
 test('new chapter-indexed EX saves preserve old clears and skip non-story ID gaps',()=>{
  const raw={version:2,actClears:Array(28).fill(true),extraClears:[true,false,true,false,false,true]};

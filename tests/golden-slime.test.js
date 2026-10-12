@@ -81,7 +81,7 @@ test('kill just before expiry grants all five material stacks, ten tickets, one 
 });
 test('undeployed heroes get no XP and a fallen partner gets half, while caps and full wallets stay valid',()=>{
  const g=quiet();g.healthFor(3).hp=0;const e=g.spawnGoldenSlime();g.hit(e,1e9,0,0);assert.equal(g.earnedXp.mochinyafe,750);assert.equal(g.healthFor(3).hp,0);assert.equal(g.earnedXp.nyanluna,1500);
- const full=quiet();full.progression.characters.nyanluna.level=80;full.progression.characters.nyanluna.breaks=6;for(const id of Object.keys(full.progression.inventory))full.progression.inventory[id]=99999999;
+ const full=quiet();full.progression.characters.nyanluna.level=100;full.progression.characters.nyanluna.breaks=8;for(const id of Object.keys(full.progression.inventory))full.progression.inventory[id]=99999999;
  full.hit(full.spawnGoldenSlime(),1e9,0,0);assert.equal(full.earnedXp.nyanluna,0);assert.equal(full.earnedRareStones,0);assert.equal(full.earnedWeaponTickets,0);assert.ok(Object.values(full.progression.inventory).every(n=>n===99999999));
 });
 test('additional encounters and new runs pay the full bounty for every kill, with no one-time claim',()=>{

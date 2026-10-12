@@ -7,6 +7,8 @@ import {buildMochiEnemy,MOCHI_ENEMIES,MOCHI_BOSSES} from './chapter-three-enemie
 import {buildChapterTwoBoss} from './chapter-two-bosses.js';
 import {buildCountryEnemy} from './chapter-two-enemies.js';
 import {CHAPTER_TWO_ENEMIES,ENEMY_TYPES} from './enemies.js';
+import {PARESIS_ENEMIES,buildParesisEnemy} from './chapter-dark-paresis-enemies.js';
+import {DARK_PARESIS_BOSSES} from './dark-paresis.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import {mochiSlimePose} from './mochi-motion.js';
 const materials=new Map();
@@ -23,7 +25,8 @@ export function bakeGroup(group){
 }
 export function createEnemy(type,bossId='eclipse'){
   const root=new THREE.Group(),body=new THREE.Group();root.add(body);let wings=[],rotors=[],focus=null;
-  if(ANTI_KEMO_ENEMIES[type]||type==='boss'&&ANTI_KEMO_BOSSES[bossId]){({focus,wings,rotors}=buildAntiKemoEnemy(type,bossId,root,body,{part,ball,tube}));}
+  if(PARESIS_ENEMIES[type]||type==='boss'&&DARK_PARESIS_BOSSES[bossId]){({focus,wings,rotors}=buildParesisEnemy(type,bossId,root,body,{part,tube}));}
+  else if(ANTI_KEMO_ENEMIES[type]||type==='boss'&&ANTI_KEMO_BOSSES[bossId]){({focus,wings,rotors}=buildAntiKemoEnemy(type,bossId,root,body,{part,ball,tube}));}
   else if(HEHE_ENEMIES[type]||type===GOLDEN_HEHE.type||type==='boss'&&HEHE_BOSSES[bossId]){({focus,wings,rotors}=buildHeheEnemy(type,bossId,root,body,{part,ball,tube}));
   }else if(PRISM_ENEMIES[type]||type==='boss'&&PRISM_BOSSES[bossId]){({focus,wings,rotors}=buildPrismEnemy(type,bossId,root,body,{part,ball,tube,bakeGroup}));
   }else if(DEMON_ENEMIES[type]||type==='boss'&&DEMON_BOSSES[bossId]){({focus,wings,rotors}=buildDemonEnemy(type,bossId,root,body,{part,ball,tube}));

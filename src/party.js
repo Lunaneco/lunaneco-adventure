@@ -1,3 +1,4 @@
+import {kephiaPairForPhase} from './dark-paresis.js';
 import {actFor,isActCleared} from './acts.js';
 
 export const PARTY_LIMIT=2;
@@ -26,6 +27,11 @@ export function requiredPartyMember(profile,act){
 
 // Preserve the selected lead when a first-clear story member needs the other slot.
 export function partyForAct(raw,roster,profile,act,lead){
+  const phase=actFor(act)?.kephiaPhase;
+  if(Number.isInteger(phase)){
+    const pair=kephiaPairForPhase(profile?.story?.kephiaPairs,phase).filter(id=>roster.some(hero=>hero.id===id));
+    if(pair.length===2)return pair;
+  }
   const solo=soloHeroForAct(profile,act);
   if(solo&&roster.some(h=>h.id===solo))return [solo];
   if(requiresSoloTsukineko(profile,act)&&roster.some(h=>h.id==='tsukineko'))return ['tsukineko'];

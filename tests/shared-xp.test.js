@@ -22,7 +22,7 @@ test('half XP survives save/reload, exact level boundaries, banking at level cap
  assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
 });
 test('fallen deployed partner receives 50% and can level up without reviving; max-level killer does not change the split',()=>{
- const g=game();g.healthFor(3).hp=0;g.progressFor(3).xp=xpRequired(1)-1;Object.assign(g.progressFor(0),{level:80,breaks:6});kill(g,'nyanluna');assert.equal(g.earnedXp.nyanluna,0);assert.equal(g.earnedXp.mochinyafe,1.5);assert.equal(g.progressFor(3).level,2);assert.equal(g.progressFor(3).xp,.5);assert.equal(g.healthFor(3).hp,0);
+ const g=game();g.healthFor(3).hp=0;g.progressFor(3).xp=xpRequired(1)-1;Object.assign(g.progressFor(0),{level:100,breaks:8});kill(g,'nyanluna');assert.equal(g.earnedXp.nyanluna,0);assert.equal(g.earnedXp.mochinyafe,1.5);assert.equal(g.progressFor(3).level,2);assert.equal(g.progressFor(3).xp,.5);assert.equal(g.healthFor(3).hp,0);
 });
 test('solo kills award 100% only; an undeployed damage owner cannot create XP for anyone',()=>{
  const g=game(['mochinyafe']);kill(g,'mochinyafe');assert.deepEqual(g.earnedXp,{nyanluna:0,tsukineko:0,omsolo:0,mochinyafe:3,shizuku:0,prim:0,hehereal:0,lumi:0});const before=structuredClone(g.earnedXp);kill(g,'nyanluna');assert.deepEqual(g.earnedXp,before);

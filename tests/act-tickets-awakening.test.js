@@ -35,7 +35,8 @@ test('awakening costs escalate, agree with the tree and do not require chapter-t
 });
 test('every stone and material is required atomically for each character and cap, including the direct API',()=>{
   for(const hero of HEROES)for(const [stage,cost] of LEVEL_AWAKENING_COSTS.entries()){
-    const make=()=>normalizeProgression({story,characters:{[hero.id]:{level:20+stage*10,breaks:stage,xp:400}},inventory:cost},HEROES),node=`limit${30+stage*10}`;
+    const late={version:2,actClears:Array.from({length:50},(_,i)=>i<=31)};
+    const make=()=>normalizeProgression({story:stage>=6?late:story,characters:{[hero.id]:{level:20+stage*10,breaks:stage,xp:400}},inventory:cost},HEROES),node=`limit${30+stage*10}`;
     for(const id of Object.keys(cost)){
       const p=make();p.inventory[id]--;const before=structuredClone(p);
       assert.equal(breakthroughStatus(p,hero.id).canBreak,false);assert.deepEqual(breakthroughStatus(p,hero.id).missing,[{id,needed:cost[id],owned:cost[id]-1}]);

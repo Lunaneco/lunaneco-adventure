@@ -23,7 +23,7 @@ function finalGate(g){g.area=2;g.wave=6;g.pendingBlessings=0;g.exitOpen=true;g.e
 test('chapter six preserves old quest IDs and saves; four acts recommend level 60, not a level gate',()=>{
  const old=profile();assert.equal(CHAPTERS[5].title,'へへへランド');assert.equal(nextAct(old),24);assert.equal(nextStoryAct(19),24);
  for(const id of HEHE_ACT_IDS){const a=actFor(id);assert.equal(a.chapter,5);assert.equal(a.recommendedLevel,60);assert.equal(a.soloHero,'omsolo');assert.ok(HEHE_BOSSES[a.bossId]);assert.equal(storyScenesFor(id),SIXTH_CHAPTER_SCENES[id-24]);}
- assert.deepEqual([20,21,22,23].map(id=>actFor(id).id),[20,21,22,23]);assert.equal(old.story.actClears.length,32);assert.deepEqual(old.story.actClears.slice(24,28),[false,false,false,false]);
+ assert.deepEqual([20,21,22,23].map(id=>actFor(id).id),[20,21,22,23]);assert.equal(old.story.actClears.length,50);assert.deepEqual(old.story.actClears.slice(24,28),[false,false,false,false]);
  assert.equal(isActUnlocked(profile(19),24),false);old.characters.omsolo.level=20;assert.equal(isActUnlocked(old,24),true);assert.equal(isActUnlocked(old,25),false);assert.equal(isHeroUnlocked(old,'hehereal'),false);
  old.characters.omsolo.level=60;assert.deepEqual(normalizeProgression(old,HEROES),old);assert.equal(completeAct(old,27),false);assert.equal(old.story.chapterSixCleared,false);
 });

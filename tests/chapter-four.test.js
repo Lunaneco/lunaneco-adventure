@@ -49,13 +49,17 @@ test('fourth chapter follows the old save, is playable at 50, and recruits Shizu
  assert.ok(old.story.chapterFourCleared&&old.story.demonKingCalm&&isHeroUnlocked(old,'shizuku'));assert.equal(completeAct(old,15),false);
  const forged=normalizeProgression({story:{version:2,actClears:Array(12).fill(true),shizukuUnlocked:true,demonKingCalm:true}},HEROES);assert.equal(isHeroUnlocked(forged,'shizuku'),false);assert.equal(forged.story.demonKingCalm,false);
 });
-test('Lv.50 to 60 already requires rarity 3; no earlier limit step consumes it; cap ends at 80',()=>{
- for(const cost of LEVEL_AWAKENING_COSTS.slice(0,3))assert.ok(Object.keys(cost).every(id=>MATERIALS[id]?.rarity!==3));
- for(const cost of LEVEL_AWAKENING_COSTS.slice(3))assert.ok(cost.bloodCrystal>0&&cost.demonHeart>0);
+test('Lv.50 to 60 already requires rarity 3; no earlier limit step consumes it; chapter seven opens the cap to 100',()=>{
+ for(const cost of LEVEL_AWAKENING_COSTS.slice(0,3))assert.ok(Object.keys(cost).every(id=>MATERIALS[id]?.rarity!==3&&MATERIALS[id]?.rarity!==4));
+ for(const cost of LEVEL_AWAKENING_COSTS.slice(3,6))assert.ok(cost.bloodCrystal>0&&cost.demonHeart>0);
+ for(const cost of LEVEL_AWAKENING_COSTS.slice(6))assert.ok(cost.miasmaShard>0&&cost.paresisCore>0&&!cost.bloodCrystal);
  const p=profile(12,50);awardCharacterXp(p,'nyanluna',1e6);Object.assign(p.inventory,LEVEL_AWAKENING_COSTS[3],{bloodCrystal:0,demonHeart:0});const before=structuredClone(p);
  assert.equal(breakthroughStatus(p,'nyanluna').canBreak,false);assert.equal(breakthrough(p,'nyanluna'),false);assert.deepEqual(p,before);
  for(let i=3;i<6;i++){Object.assign(p.inventory,LEVEL_AWAKENING_COSTS[i]);assert.ok(breakthrough(p,'nyanluna'));assert.equal(levelCap(p.characters.nyanluna),30+i*10);}
- assert.equal(p.characters.nyanluna.level,80);assert.equal(p.characters.nyanluna.xp,0);assert.equal(breakthrough(p,'nyanluna'),false);
+ assert.equal(p.characters.nyanluna.level,80);assert.equal(breakthrough(p,'nyanluna'),false);
+ p.story.chapterSevenCleared=true;
+ for(let i=6;i<8;i++){Object.assign(p.inventory,LEVEL_AWAKENING_COSTS[i]);assert.ok(breakthrough(p,'nyanluna'));assert.equal(levelCap(p.characters.nyanluna),30+i*10);}
+ assert.equal(p.characters.nyanluna.level,100);assert.equal(p.characters.nyanluna.xp,0);assert.equal(breakthrough(p,'nyanluna'),false);
  const locked=profile(11,50);Object.assign(locked.inventory,LEVEL_AWAKENING_COSTS[3]);assert.equal(breakthroughStatus(locked,'nyanluna').chapterMet,false);
 });
 test('rarity 3 drops start in chapter four, persist through defeat, and fund the third ability tier',()=>{

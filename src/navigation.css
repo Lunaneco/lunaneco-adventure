@@ -226,3 +226,19 @@ body:has(#chapter-menu:not(.hidden)) #modal:not(:has(.stage-briefing)) :is(.part
 .menu-light #weapons-panel .weapon-odds th{font-weight:700;background:#e4e9f0}
 .menu-light :is(.run-ticket-reward,.signature-bonus){color:#24364b!important}
 .menu-light #missions-panel .mission-stage>header{background:linear-gradient(0deg,#12253fee,#12253fa6),var(--reward-scene) center 45%/cover}
+.kephia-board{display:grid;gap:14px;margin:8px 0 28px;padding:16px;background:#f7f3ea;border:1px solid #d9d0c0;border-radius:8px}
+.kephia-board h3{margin:0 0 6px;font-size:18px}
+.kephia-board header p,.kephia-pair span{color:#4d5b6e}
+.kephia-pair{display:grid;gap:8px}
+.kephia-pair strong{letter-spacing:.08em}
+.kephia-pair div{display:flex;flex-wrap:wrap;gap:6px}
+.kephia-pair button{min-height:40px;padding:6px 10px;border:1px solid #c9c1af;background:#fff;border-radius:6px}
+.kephia-pair button[aria-pressed=true]{background:#24364b;color:#f6f1e6;border-color:#24364b}
+.ending-roll{max-width:920px}
+.ending-solo,.ending-gather{display:grid;justify-items:center;gap:12px;text-align:center;padding:12px}
+.ending-solo img{width:min(280px,70vw);height:auto;border-radius:8px}
+.ending-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+.ending-grid figure{margin:0}
+.ending-grid img{width:100%;height:auto;border-radius:6px}
+.ending-grid figcaption{display:grid;gap:2px;margin-top:6px}
+@media(max-width:640px){.ending-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

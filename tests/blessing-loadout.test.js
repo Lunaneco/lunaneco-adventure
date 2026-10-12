@@ -39,7 +39,7 @@ test('all twelve skills unlock per hero at increasing levels and rarity costs, w
  for(const h of HEROES){
   const p=profile({characters:{[h.id]:{level:35,breaks:2,tree:[...first,'ascension']}}}),stats=characterStats(h,p.characters[h.id]),other=structuredClone(p.characters[HEROES.find(o=>o.id!==h.id).id]);
   for(const node of SKILL_TALENT_NODES){assert.equal(unlockTalent(p,h.id,node.id),true);const paid=structuredClone(p);assert.equal(unlockTalent(p,h.id,node.id),false);assert.deepEqual(p,paid);assert.ok(talentNode(node.id,h.id).skill.requires.includes(h.id));}
-  assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,starBud:710,moonDew:89,wardenCore:8,moonPrism:88,astralCore:6,weaponTicket:0,limitStone:0});assert.deepEqual(characterStats(h,p.characters[h.id]),stats);assert.deepEqual(equippedSkills(p,h.id),defaultSkills(h.id));assert.deepEqual(p.characters[HEROES.find(o=>o.id!==h.id).id],other);
+  assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,starBud:710,moonDew:89,wardenCore:8,moonPrism:88,astralCore:6,weaponTicket:0,limitStone:0,miasmaShard:0,paresisCore:0});assert.deepEqual(characterStats(h,p.characters[h.id]),stats);assert.deepEqual(equippedSkills(p,h.id),defaultSkills(h.id));assert.deepEqual(p.characters[HEROES.find(o=>o.id!==h.id).id],other);
  }
  for(const [level,node,prior] of [[4,'blessing1',['origin']],[14,'blessing2',['origin','blessing1']],[34,'blessing3',tree.slice(0,-1)]]){
   const p=profile({characters:{nyanluna:{level,breaks:2,tree:prior}}}),before=structuredClone(p);assert.equal(unlockTalent(p,'nyanluna',node),false);assert.deepEqual(p,before);

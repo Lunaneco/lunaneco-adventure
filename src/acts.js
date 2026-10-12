@@ -1,4 +1,5 @@
 import {FIELD_THEMES} from './field-themes.js';
+import {DARK_CHAPTERS,DARK_PARESIS_ACTS,STORY_ACT_SLOTS,normalizeKephiaPairs} from './dark-paresis.js';
 import {SEVENTH_CHAPTER_ACTS} from './chapter-seven.js';
 import {SIXTH_CHAPTER_ACTS} from './chapter-six.js';
 import {NYAN_QUEST,nyanQuestUnlocked,hasNyanAwakening} from './nyanluna-awakening.js';
@@ -36,8 +37,9 @@ export const CHAPTERS=Object.freeze([
  {id:4,title:'プリズムの国',summary:'青い結晶とオーロラの異世界。つきねことプリムだけの全4幕。適正Lv.60・第4章と同等の難易度。各幕の初回はつきねこ単独。',start:16,end:19},
  {id:5,title:'へへへランド',summary:'全4幕・各幕の初回はオムソロのソロクエスト、クリア後は自由編成。空腹のへへりあるに顔のおむすびを分け、魔法の弓と共闘。推奨Lv.60。各幕20%で黄金のへへへが出現。',start:24,end:27},
  {id:6,title:'ねこみみの村と、指先の光',summary:'ケモみみを毛嫌うアンチケモみみ集団に荒らされた村。各幕の初回はもちにゃふぇ単独、るみとの共闘で村を守る。推奨Lv.60。第4幕クリアでるみ加入。クリア後は自由編成。',start:28,end:31},
+ ...DARK_CHAPTERS,
 ]);
-export const ACTS=Object.freeze([...acts.map(a=>Object.freeze({...a,recommendedLevel:a.id>=12?60:a.id>=8?40:a.id>=4?30:null,chapter:Math.floor(a.id/4),number:a.id%4+1,recruit:a.id===19?'prim':a.id===3?'tsukineko':a.id===7?'omsolo':a.id===11?'mochinyafe':a.id===15?'shizuku':null})),...SIXTH_CHAPTER_ACTS,...SEVENTH_CHAPTER_ACTS]);
+export const ACTS=Object.freeze([...acts.map(a=>Object.freeze({...a,recommendedLevel:a.id>=12?60:a.id>=8?40:a.id>=4?30:null,chapter:Math.floor(a.id/4),number:a.id%4+1,recruit:a.id===19?'prim':a.id===3?'tsukineko':a.id===7?'omsolo':a.id===11?'mochinyafe':a.id===15?'shizuku':null})),...SIXTH_CHAPTER_ACTS,...SEVENTH_CHAPTER_ACTS,...DARK_PARESIS_ACTS]);
 export const PLAYABLE_ACTS=Object.freeze([...ACTS.slice(0,20),...EXTRA_ACTS.slice(0,3),RICE_QUEST,...ACTS.slice(20),...EXTRA_ACTS.slice(3),NYAN_QUEST]);
 const ACT_BY_ID=new Map(PLAYABLE_ACTS.map(act=>[act.id,act]));
 export const actFor=act=>ACT_BY_ID.get(act);
@@ -47,11 +49,11 @@ export const isActCleared=(profile,act)=>actFor(act)?.awakening?(actFor(act).awa
 export const clearTicketReward=(profile,act)=>actFor(act)?.extra?(isActCleared(profile,act)?EXTRA_REPEAT_TICKETS:EXTRA_FIRST_TICKETS):1;
 export function normalizeStory(raw,legacy={}){
  const oldClear=raw?.chapterOneCleared===true||legacy?.chapterOneCleared===true;
- const actClears=Array(32).fill(false);let previous=true;
+ const actClears=Array(STORY_ACT_SLOTS).fill(false);let previous=true;
  for(const act of ACTS){actClears[act.id]=previous&&(raw?.version===2?raw?.actClears?.[act.id]===true:act.id===0&&oldClear);previous=actClears[act.id];}
  const extraClears=Array(Math.max(...EXTRA_ACTS.map(a=>a.chapter))+1).fill(false);
  for(const extra of EXTRA_ACTS)extraClears[extra.chapter]=ACTS.filter(a=>a.id<=extra.unlockAfterAct).every(a=>actClears[a.id])&&raw?.extraClears?.[extra.chapter]===true;
- return {version:2,actClears,extraClears,chapterOneCleared:actClears.slice(0,4).every(Boolean),chapterTwoCleared:actClears.slice(4,8).every(Boolean),tsukinekoUnlocked:raw?.version===2?raw.tsukinekoUnlocked===true||actClears[3]:oldClear,omsoloUnlocked:actClears[7],chapterThreeCleared:actClears.slice(8,12).every(Boolean),mochinyafeUnlocked:actClears[11],chapterFourCleared:actClears.slice(12,16).every(Boolean),shizukuUnlocked:actClears[15],chapterFiveCleared:actClears.slice(16,20).every(Boolean),primUnlocked:actClears[19],chapterSixCleared:actClears.slice(24,28).every(Boolean),heherealUnlocked:actClears[27],chapterSevenCleared:actClears.slice(28,32).every(Boolean),lumiUnlocked:actClears[31],demonKingCalm:actClears[15]};
+ return {version:2,actClears,extraClears,chapterOneCleared:actClears.slice(0,4).every(Boolean),chapterTwoCleared:actClears.slice(4,8).every(Boolean),tsukinekoUnlocked:raw?.version===2?raw.tsukinekoUnlocked===true||actClears[3]:oldClear,omsoloUnlocked:actClears[7],chapterThreeCleared:actClears.slice(8,12).every(Boolean),mochinyafeUnlocked:actClears[11],chapterFourCleared:actClears.slice(12,16).every(Boolean),shizukuUnlocked:actClears[15],chapterFiveCleared:actClears.slice(16,20).every(Boolean),primUnlocked:actClears[19],chapterSixCleared:actClears.slice(24,28).every(Boolean),heherealUnlocked:actClears[27],chapterSevenCleared:actClears.slice(28,32).every(Boolean),lumiUnlocked:actClears[31],chapterEightCleared:actClears.slice(34,38).every(Boolean),chapterNineCleared:actClears.slice(38,42).every(Boolean),chapterTenCleared:actClears.slice(42,46).every(Boolean),finaleCleared:actClears.slice(46,50).every(Boolean),kephiaPairs:normalizeKephiaPairs(raw?.kephiaPairs),demonKingCalm:actClears[15]};
 }
 export const isActUnlocked=(profile,act)=>Number.isInteger(act)&&ACT_BY_ID.has(act)&&(actFor(act).awakening?(actFor(act).awakening==='nyanluna'?nyanQuestUnlocked(profile):riceQuestUnlocked(profile)):actFor(act).extra?ACTS.filter(a=>a.id<=actFor(act).unlockAfterAct).every(a=>profile?.story?.actClears?.[a.id]===true):act===0||profile?.story?.actClears?.[ACTS[ACTS.findIndex(a=>a.id===act)-1]?.id]===true);
 export const nextAct=profile=>ACTS.find(a=>!profile.story.actClears[a.id])?.id??ACTS.at(-1).id;
@@ -66,6 +68,10 @@ export function completeAct(profile,act){
  profile.story.chapterFiveCleared=profile.story.actClears.slice(16,20).length===4&&profile.story.actClears.slice(16,20).every(Boolean);
  profile.story.chapterSixCleared=profile.story.actClears.slice(24,28).length===4&&profile.story.actClears.slice(24,28).every(Boolean);
  profile.story.chapterSevenCleared=profile.story.actClears.slice(28,32).length===4&&profile.story.actClears.slice(28,32).every(Boolean);
+ profile.story.chapterEightCleared=profile.story.actClears.slice(34,38).length===4&&profile.story.actClears.slice(34,38).every(Boolean);
+ profile.story.chapterNineCleared=profile.story.actClears.slice(38,42).length===4&&profile.story.actClears.slice(38,42).every(Boolean);
+ profile.story.chapterTenCleared=profile.story.actClears.slice(42,46).length===4&&profile.story.actClears.slice(42,46).every(Boolean);
+ profile.story.finaleCleared=profile.story.actClears.slice(46,50).length===4&&profile.story.actClears.slice(46,50).every(Boolean);
  if(hero==='lumi')profile.story.lumiUnlocked=profile.story.chapterSevenCleared;
  else if(hero==='hehereal')profile.story.heherealUnlocked=profile.story.chapterSixCleared;
  else if(hero)profile.story[`${hero}Unlocked`]=true;

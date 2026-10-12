@@ -29,7 +29,7 @@ test('eight advanced nodes cost 2760 buds, 216 rare dew and 66 rare cores per he
   for(const hero of HEROES){
     const p=profile(hero.id),otherId=HEROES.find(h=>h.id!==hero.id).id,other=structuredClone(p.characters[otherId]);
     for(const node of SECOND_TIER_NODES){assert.equal(unlockTalent(p,hero.id,node.id),true);const paid=structuredClone(p);assert.equal(unlockTalent(p,hero.id,node.id),false);assert.deepEqual(p,paid);}
-    assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,starBud:7240,moonDew:1000,wardenCore:100,moonPrism:784,astralCore:34,limitStone:3,weaponTicket:0});assert.deepEqual(p.characters[otherId],other);assert.equal(p.characters[hero.id].tree.length,16);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
+    assert.deepEqual(p.inventory,{bloodCrystal:0,demonHeart:0,starBud:7240,moonDew:1000,wardenCore:100,moonPrism:784,astralCore:34,limitStone:3,weaponTicket:0,miasmaShard:0,paresisCore:0});assert.deepEqual(p.characters[otherId],other);assert.equal(p.characters[hero.id].tree.length,16);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
   }
 });
 test('level 35/40/50 gates and the final three branches stay mandatory even with abundant materials',()=>{

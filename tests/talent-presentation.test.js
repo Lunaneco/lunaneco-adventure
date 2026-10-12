@@ -6,10 +6,10 @@ import {talentView,talentDetailView} from '../src/talent-ui.js';
 import {talentNode} from '../src/talents.js';
 import {talentUnlockCopy,presentTalentUnlock} from '../src/talent-presentation.js';
 
-test('responsive tier labels preserve all four ordered tiers and their accessible full names',()=>{
+test('responsive tier labels preserve all five ordered tiers and their accessible full names',()=>{
   const profile=normalizeProgression({},HEROES),before=structuredClone(profile);
   const html=talentView(profile,'nyanluna');
-  assert.deepEqual([...html.matchAll(/data-tree-tier="(\d)"/g)].map(m=>m[1]),['1','2','4','3']);
+  assert.deepEqual([...html.matchAll(/data-tree-tier="(\d)"/g)].map(m=>m[1]),['1','2','4','5','3']);
   assert.match(html,/aria-label="1段目 · 基礎の星、Lv.1–15、0 \/ 8 解放"/);
   assert.match(html,/class="tree-tier-step">1段目 · <\/span><span class="tree-tier-name">基礎の星/);
   assert.match(html,/aria-label="スキルの星、Lv.5–35、0 \/ 3 解放"/);

@@ -32,6 +32,13 @@ export function startPredation(game){
  game.emit('predationStart',{hero:6,heroId:'hehereal'});
  return true;
 }
+// The finale hands the stage to a new pair mid-run; the absorbed pair leaves with its transformation.
+export function resetPredation(game){
+ const wasActive=!!game.predation?.active;
+ game.predation={active:false,used:false,baseAttack:0,attackBonus:0,danceKills:0};
+ if(wasActive)game.emit('predationEnd',{hero:6,heroId:'hehereal'});
+ return wasActive;
+}
 // There is intentionally no manual release or timer. A whole act is one battle.
 export function finishPredation(game){
  if(!game.predation?.active||!['victory','defeat'].includes(game.phase))return false;

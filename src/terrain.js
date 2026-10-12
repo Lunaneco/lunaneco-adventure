@@ -57,7 +57,36 @@ export const NYAN_FIELD_LAYOUTS=Object.freeze([garden,hall,eclipse].map((room,ar
 export const HEHE_FIELD_LAYOUTS=Object.freeze(Array.from({length:4},(_,act)=>[single(variant([garden,cross,hall,petal][act],`hehe-${act}-entry`,['へへへランドの門前','花弓の商店街','分けあう食堂街','いただきますの街路'][act]),'オムソロ単独操作 · 推奨Lv.60'),floors(variant(courtyard,`hehe-${act}-lower`,'花弓の階段・下層'),variant(roof,`hehe-${act}-upper`,'花弓の階段・上層')),single(variant(eclipse,`hehe-${act}-arena`,['門番の広場','射撃隊の見張り台','鉄腕の街角','へへへランドの王宮前'][act]),'へへりあると共闘 · 黄金のへへへは各幕20%')].map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom({...room,hehe:true,country:'town',district:area,surface:'stone'},5,act,area,field.kind,index))}))));
 export const LUMI_FIELD_LAYOUTS=Object.freeze(Array.from({length:4},(_,act)=>[single(variant([garden,cross,hall,petal][act],`lumi-${act}-entry`,['壊れた村の門','封鎖された市場','包囲された住居跡','帰り道の参道'][act]),'初回はもちにゃふぇ操作 · 推奨Lv.60'),floors(variant(courtyard,`lumi-${act}-lower`,'村の階段・下層'),variant(roof,`lumi-${act}-upper`,'村の階段・上層')),single(variant(eclipse,`lumi-${act}-arena`,['門封じの広場','封鎖射撃の見張り台','避難所の中庭','みんなの村の広場'][act]),'アンチケモみみ集団を退ける')].map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom({...room,kemoVillage:true,country:'village',district:area,surface:'stone'},6,act,area,field.kind,index))}))));
 export const HEHE_EXTRA_FIELD_LAYOUTS=Object.freeze([single(variant(petal,'extra-hehe-street','極宴の包囲街道'),'フルカンスト向け・回避優先'),floors(variant(courtyard,'extra-hehe-lower','黄金の回避回廊・下層'),variant(roof,'extra-hehe-upper','黄金の回避回廊・上層')),single(variant(eclipse,'extra-hehe-throne','へへへ・極宴の王座'),'三連扇矢の切れ目と足元の印から回避')].map((field,area)=>({...field,rooms:field.rooms.map((room,index)=>chapterRoom({...room,hehe:true,country:'town',district:area,surface:'stone'},5,3,area,field.kind,index))})));
-export const fieldFor=(act,area)=>act===HEHE_EXTRA_ID?(HEHE_EXTRA_FIELD_LAYOUTS[area]??HEHE_EXTRA_FIELD_LAYOUTS[0]):act===NYAN_QUEST_ID?(NYAN_FIELD_LAYOUTS[area]??NYAN_FIELD_LAYOUTS[0]):act>=28&&act<=31?(LUMI_FIELD_LAYOUTS[act-28][area]??LUMI_FIELD_LAYOUTS[act-28][0]):act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
+const TOWER_NAMES=[
+ ['瘴気に覆われた月の外廊','残響の螺旋','月光の殻'],
+ ['止まった針の外廊','星灯の螺旋','刻印の舞台'],
+ ['黒い露の用水廊','穂守りの螺旋','灯台の殻'],
+ ['鈴の外廊','谷鈴の螺旋','小さな灯の舞台'],
+ ['門影の外廊','濁空の螺旋','鎌の舞台'],
+ ['青晶の外廊','切れた虹の螺旋','翼の舞台'],
+ ['冷めた食卓の外廊','花灯の螺旋','いただきますの舞台'],
+ ['村門の外廊','指先の螺旋','光の舞台'],
+ ['塔門の回廊','瘴灯の螺旋','門番の舞台'],
+ ['光の跡の回廊','笑い声の螺旋','鐘楼の舞台'],
+ ['闇灯の身廊','分かれの螺旋','濃霧の舞台'],
+ ['白い殻の回廊','濁光の螺旋','扉の舞台'],
+ ['開幕の舞台','開幕の舞台','開幕の舞台'],
+ ['幕間の舞台','幕間の舞台','幕間の舞台'],
+ ['暗転の舞台','暗転の舞台','暗転の舞台'],
+ ['終幕の舞台','終幕の舞台','終幕の舞台'],
+];
+const paresisRoom=(base,id,name,extra)=>({...variant(base,id,name,'eclipse',{paresis:true,surface:'stone',...extra})});
+function paresisField(act){
+ const names=TOWER_NAMES[act],finale=act>=12,note=finale?'ケフィアとのボス戦。雑魚は現れない':'ダークパレシスの階';
+ return [0,1,2].map(area=>{
+  const field=finale||area!==1
+   ? single(paresisRoom(area===2||finale?eclipse:garden,`paresis-${act}-a${area}`,names[finale?0:area],finale?{shape:2}:{}),note)
+   : floors(paresisRoom(courtyard,`paresis-${act}-lower`,`${names[1]}・下層`,{}),paresisRoom(roof,`paresis-${act}-upper`,`${names[1]}・上層`,{shape:0,height:4.5}));
+  return {...field,rooms:field.rooms.map((room,index)=>chapterRoom(room,7,act,area,field.kind,index))};
+ });
+}
+export const PARESIS_FIELD_LAYOUTS=Object.freeze(Array.from({length:16},(_,act)=>paresisField(act)));
+export const fieldFor=(act,area)=>act===HEHE_EXTRA_ID?(HEHE_EXTRA_FIELD_LAYOUTS[area]??HEHE_EXTRA_FIELD_LAYOUTS[0]):act===NYAN_QUEST_ID?(NYAN_FIELD_LAYOUTS[area]??NYAN_FIELD_LAYOUTS[0]):act>=34&&act<=49?(PARESIS_FIELD_LAYOUTS[act-34][area]??PARESIS_FIELD_LAYOUTS[act-34][0]):act>=28&&act<=31?(LUMI_FIELD_LAYOUTS[act-28][area]??LUMI_FIELD_LAYOUTS[act-28][0]):act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
 export function layoutFor(act,area,wave,route='safe'){
  const f=fieldFor(act,area);return f.rooms[f.kind==='floors'?(wave%2===0?1:0):f.kind==='branch'&&wave%2===0?(route==='elite'?2:1):0];
 }

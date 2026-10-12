@@ -1,3 +1,4 @@
+import {DARK_PARESIS_SCENES,isParesisAct} from './dark-paresis.js';
 import {SEVENTH_CHAPTER_SCENES,isLumiAct} from './chapter-seven.js';
 import {publicUrl} from './public-url.js';
 import {SIXTH_CHAPTER_SCENES,isHeheAct} from './chapter-six.js';
@@ -112,7 +113,7 @@ export const ACT_SCENES=[{
  ],true),
 },...SECOND_CHAPTER_SCENES,...THIRD_CHAPTER_SCENES,...FOURTH_CHAPTER_SCENES,...FIFTH_CHAPTER_SCENES];
 export const SCENES=ACT_SCENES[0];
-export const storyScenesFor=act=>act===NYAN_QUEST_ID?NYAN_AWAKENING_SCENES:isLumiAct(act)?SEVENTH_CHAPTER_SCENES[act-28]:isHeheAct(act)?SIXTH_CHAPTER_SCENES[act-24]:act===RICE_QUEST_ID?RICE_SCENES:ACT_SCENES[act];
+export const storyScenesFor=act=>act===NYAN_QUEST_ID?NYAN_AWAKENING_SCENES:isParesisAct(act)?DARK_PARESIS_SCENES[act-34]:isLumiAct(act)?SEVENTH_CHAPTER_SCENES[act-28]:isHeheAct(act)?SIXTH_CHAPTER_SCENES[act-24]:act===RICE_QUEST_ID?RICE_SCENES:ACT_SCENES[act];
 export class ChapterStory{
   constructor(){
     preloadStoryCast();

@@ -1,3 +1,4 @@
+import {DARK_PARESIS_VOICE_MANIFEST} from './dark-paresis-voice-manifest.js';
 import {CHAPTER_SEVEN_VOICE_MANIFEST} from './chapter-seven-voice-manifest.js';
 import {HEHE_FORM_VOICE_MANIFEST} from './hehe-form-voice-manifest.js';
 import {CHAPTER_SIX_VOICE_MANIFEST} from './chapter-six-voice-manifest.js';
@@ -14,7 +15,7 @@ import {MOCHI_VOICE_MANIFEST} from './mochi-voice-manifest.js';
 // 2026-10-01: Nyanluna battle clips denoised; faded boundaries and content-addressed URLs.
 // 2026-10-03: All 27 Nyanluna battle clips re-cleaned from original takes: declick, denoise, calibrated gain.
 // v2.2.2: All 27 Nyanluna battle clips freshly synthesized with Irodori-TTS v4.1-Small and the saved speaker reference.
-export const VOICE_MANIFEST={...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_MANIFEST,...CHAPTER_SIX_VOICE_MANIFEST,...CHAPTER_FIVE_VOICE_MANIFEST,...CHAPTER_FOUR_VOICE_MANIFEST,...MOCHI_VOICE_MANIFEST,
+export const VOICE_MANIFEST={...DARK_PARESIS_VOICE_MANIFEST,...CHAPTER_SEVEN_VOICE_MANIFEST,...HEHE_FORM_VOICE_MANIFEST,...CHAPTER_SIX_VOICE_MANIFEST,...CHAPTER_FIVE_VOICE_MANIFEST,...CHAPTER_FOUR_VOICE_MANIFEST,...MOCHI_VOICE_MANIFEST,
   "nyanluna-a4069723": {
     "file": "assets/voices/nyanluna/nyanluna-a4069723-47459080630d.mp3",
     "who": "nyanluna",

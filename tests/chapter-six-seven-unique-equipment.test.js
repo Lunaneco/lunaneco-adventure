@@ -12,7 +12,7 @@ const profile=()=>normalizeProgression({story:{version:2,actClears:Array(32).fil
 const gate=g=>{g.area=2;g.wave=6;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);assert.ok(g.crossExit());};
 
 test('chapters six and seven each have four distinct generated unique items, preserving mission IDs and rewards',()=>{
- assert.equal(CHAPTER_UNIQUE_EQUIPMENT.length,8);assert.equal(UNIQUE_EQUIPMENT.length,30);assert.equal(STAGE_MISSIONS.length,381);
+ assert.equal(CHAPTER_UNIQUE_EQUIPMENT.length,8);assert.equal(UNIQUE_EQUIPMENT.length,30);assert.equal(STAGE_MISSIONS.length,605);
  assert.deepEqual(CHAPTER_UNIQUE_EQUIPMENT.map(r=>r.act),[24,25,26,27,28,29,30,31]);assert.equal(new Set(CHAPTER_UNIQUE_EQUIPMENT.map(r=>equipmentImage(r.id))).size,8);
  for(const relic of CHAPTER_UNIQUE_EQUIPMENT){
   const mission=STAGE_MISSIONS.find(m=>m.equipment===relic.id);assert.equal(mission.id,`act${relic.act+1}-relic`);assert.equal(mission.area,2);assert.equal(mission.trial.seconds,420+(relic.act%4)*20);assert.equal(mission.trial.hits,1);assert.equal(mission.trial.chapter,true);assert.deepEqual(mission.rewards,{bloodCrystal:6,demonHeart:2});

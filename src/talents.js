@@ -1,3 +1,4 @@
+import {DARK_HEHE_MATERIALS} from './dark-paresis.js';
 import {GOLDEN_HEHE} from './chapter-six-enemies.js';
 import {actFor} from './acts.js';
 import {ENEMY_TYPES} from './enemies.js';
@@ -14,18 +15,22 @@ export const MATERIALS=Object.freeze({
   wardenCore:{rarity:1,name:'守護者の欠片',icon:'star',source:'ボス撃破',note:'各幕のボスを倒すと1個。1段目の最後の星とLv.30へのレベル覚醒に使用。'},
   moonPrism:{rarity:2,name:'月虹の結晶',icon:'moon',source:'第2章・チャレンジの門',note:'第2章、または全章のチャレンジモードで、月の門から1個ずつ、全3個。毎回入手でき、第2章の突破ミッションでも獲得。2段目とLv.40・50へのレベル覚醒に使用。'},
   astralCore:{rarity:2,name:'深星の宝珠',icon:'star',source:'第2章・高難度のボス',note:'第2章またはチャレンジモードのボス、全章の分岐の強ボスから毎回1個。第2章の最終エリア突破ミッションでも1個。2段目とLv.40・50へのレベル覚醒に使用。'},
+  miasmaShard:{rarity:4,name:'瘴灯の欠片',icon:'crystal',source:'第8章以降の敵・月の門',note:'第8章からの通常敵の素材抽選に当選すると1個、各月の門から3個。4段目の成長ツリーとLv.90・100への覚醒に使用。'},
+  paresisCore:{rarity:4,name:'パレシスの核',icon:'star',source:'第8章以降のボス',note:'第8章以降のボスから毎回2個、強ボスから3個。4段目の成長ツリーとLv.90・100への覚醒に使用。'},
 });
-export const TREE_RESOURCES=Object.freeze({...MATERIALS,limitStone:{name:'覚醒の輝石',icon:'crystal',source:'章クリア・高難度試練・レア討伐',note:'各章の第4幕クリアで毎回1個。第3章の金色のスライム討伐1体につき1個。各章の時間制限・ノーダメージ試練でも各1個。レベルの道で素材と一緒に使用。必要数は1・2・4・5・6・8個へ増加し、上限を10ずつ解放。'}});
+export const TREE_RESOURCES=Object.freeze({...MATERIALS,limitStone:{name:'覚醒の輝石',icon:'crystal',source:'章クリア・高難度試練・レア討伐',note:'各章の第4幕クリアで毎回1個。第3章の金色のスライム討伐1体につき1個。各章の時間制限・ノーダメージ試練でも各1個。レベルの道で素材と一緒に使用。必要数は1・2・4・5・6・8・10・12個へ増加し、上限を10ずつ、最大Lv.100まで解放。'}});
 export const MATERIAL_DROPS=Object.freeze({...Object.fromEntries(Object.entries(ENEMY_TYPES).map(([id,s])=>[id,{starBud:s.buds}])),boss:{starBud:3,wardenCore:1}});
 // Higher-rarity rewards supplement normal drops; replaying an eligible stage earns them again.
 export const MATERIAL_DROP_CHANCE=.5;
 export function enemyMaterials(enemy,act,difficulty,random=Math.random){
+  if(enemy.rareTier==='paresis')return {...DARK_HEHE_MATERIALS};
   if(enemy.type===GOLDEN_HEHE.type)return {...GOLDEN_HEHE.materials};
   if(enemy.type===GOLDEN_SLIME.type)return {...GOLDEN_SLIME.materials};
   if(enemy.type!=='boss'&&random()>=MATERIAL_DROP_CHANCE)return {};
-  return {...MATERIAL_DROPS[enemy.type],...(actFor(act)?.chapter>=3?(enemy.type==='boss'?{demonHeart:enemy.elite?3:2}:{bloodCrystal:1}):{}),...(enemy.type==='boss'&&(act>=4||difficulty==='hard'||enemy.elite)?{astralCore:1}:{})};
+  const chapter=actFor(act)?.chapter??0;
+  return {...MATERIAL_DROPS[enemy.type],...(chapter>=3?(enemy.type==='boss'?{demonHeart:enemy.elite?3:2}:{bloodCrystal:1}):{}),...(enemy.type==='boss'&&(act>=4||difficulty==='hard'||enemy.elite)?{astralCore:1}:{}),...(chapter>=7?(enemy.type==='boss'?{paresisCore:enemy.elite?3:2}:{miasmaShard:1}):{})};
 }
-export function gateMaterials(area,act,difficulty){return {moonDew:1,...(actFor(act)?.chapter>=3?{bloodCrystal:3}:{}),...(act>=4||difficulty==='hard'?{moonPrism:1}:{})};}
+export function gateMaterials(area,act,difficulty){return {moonDew:1,...(actFor(act)?.chapter>=3?{bloodCrystal:3}:{}),...(act>=4||difficulty==='hard'?{moonPrism:1}:{}),...(actFor(act)?.chapter>=7?{miasmaShard:3}:{})};}
 export function resourceLabel(id){const m=TREE_RESOURCES[id];return `${m.rarity?`★${m.rarity} `:''}${m.name}`;}
 export function tierMaterialCost(nodes){const total={};for(const node of nodes)for(const [id,n] of Object.entries(node.cost))total[id]=(total[id]??0)+n;return total;}
 // Ordered by prerequisites; both the graph and saved-data validation use this order.
@@ -60,10 +65,21 @@ export const THIRD_TIER_NODES=Object.freeze([
  {id:'demonMercy',tier:4,name:'奥義の慈心',branch:'生命',icon:'heart',level:70,parents:['life4'],cost:{starBud:650,bloodCrystal:24,demonHeart:6},bonus:{hp:80,ultimateImmunity:.5},x:82,y:62},
  {id:'demonAwakening',tier:4,name:'紅月の大覚醒',branch:'最終奥義',icon:'star',level:80,parents:['demonPower','demonCharge','demonMercy'],cost:{starBud:1200,bloodCrystal:48,demonHeart:16},bonus:{hp:100,attack:.20,defense:20,ultimateDamage:.3},x:50,y:85},
 ]);
-export const TALENT_NODES=Object.freeze([...FIRST_TIER_NODES,...SECOND_TIER_NODES,...THIRD_TIER_NODES,...SKILL_TALENT_NODES]);
+export const MIASMA_TIER_NODES=Object.freeze([
+ {id:'miasmaGate',tier:5,name:'瘴灯の扉',branch:'第4段階',icon:'moon',level:80,parents:['demonAwakening'],cost:{starBud:800,miasmaShard:16,paresisCore:4},bonus:{hp:90,attack:.14,defense:16},x:50,y:12},
+ {id:'attack5',tier:5,name:'攻撃の星 V',branch:'攻撃',icon:'sword',level:85,parents:['miasmaGate'],cost:{starBud:900,miasmaShard:24,paresisCore:6},bonus:{attack:.28},x:18,y:37},
+ {id:'guard5',tier:5,name:'守護の星 V',branch:'守護',icon:'shield',level:85,parents:['miasmaGate'],cost:{starBud:900,miasmaShard:24,paresisCore:6},bonus:{defense:36},x:50,y:37},
+ {id:'life5',tier:5,name:'生命の星 V',branch:'生命',icon:'heart',level:85,parents:['miasmaGate'],cost:{starBud:900,miasmaShard:24,paresisCore:6},bonus:{hp:180},x:82,y:37},
+ {id:'miasmaPower',tier:5,name:'奥義の瘴灯',branch:'必殺技',icon:'spark',level:90,parents:['attack5'],cost:{starBud:1100,miasmaShard:32,paresisCore:8},bonus:{ultimateDamage:.4},x:18,y:62},
+ {id:'miasmaCharge',tier:5,name:'奥義の共塔',branch:'必殺技',icon:'link',level:90,parents:['guard5'],cost:{starBud:1100,miasmaShard:32,paresisCore:8},bonus:{ultimateCharge:.35},x:50,y:62},
+ {id:'miasmaBond',tier:5,name:'奥義の還路',branch:'生命',icon:'heart',level:90,parents:['life5'],cost:{starBud:1100,miasmaShard:32,paresisCore:8},bonus:{hp:100,ultimateImmunity:.6},x:82,y:62},
+ {id:'paresisAwakening',tier:5,name:'パレシスの大覚醒',branch:'最終奥義',icon:'star',level:100,parents:['miasmaPower','miasmaCharge','miasmaBond'],cost:{starBud:1600,miasmaShard:64,paresisCore:20},bonus:{hp:140,attack:.24,defense:24,ultimateDamage:.35},x:50,y:85},
+]);
+export const TALENT_NODES=Object.freeze([...FIRST_TIER_NODES,...SECOND_TIER_NODES,...THIRD_TIER_NODES,...MIASMA_TIER_NODES,...SKILL_TALENT_NODES]);
 export const LIMIT_BREAK_NODES=Object.freeze(Array.from({length:(LEVEL_RULES.maxLevel-LEVEL_RULES.initialCap)/LEVEL_RULES.capStep},(_,i)=>{
   const level=LEVEL_RULES.initialCap+i*LEVEL_RULES.capStep,cap=level+LEVEL_RULES.capStep;
-  return {id:`limit${cap}`,kind:'limit',stage:i+1,name:`レベル覚醒 ${['I','II','III','IV','V','VI'][i]??i+1}`,branch:'レベルの道',icon:'crystal',level,cap,parents:i?[`limit${level}`]:[],cost:LEVEL_AWAKENING_COSTS[i],bonus:{},x:8+i*16.8,y:40};
+  const steps=(LEVEL_RULES.maxLevel-LEVEL_RULES.initialCap)/LEVEL_RULES.capStep;
+  return {id:`limit${cap}`,kind:'limit',stage:i+1,name:`レベル覚醒 ${['I','II','III','IV','V','VI','VII','VIII'][i]??i+1}`,branch:'レベルの道',icon:'crystal',level,cap,parents:i?[`limit${level}`]:[],cost:LEVEL_AWAKENING_COSTS[i],bonus:{},x:6+i*(88/Math.max(1,steps-1)),y:40};
 }));
 export const GROWTH_NODES=Object.freeze([...TALENT_NODES,...LIMIT_BREAK_NODES]);
 export function isTalentUnlocked(character,id){const limit=LIMIT_BREAK_NODES.find(node=>node.id===id);return limit?character.breaks>=limit.stage:(character.tree??[]).includes(id);}

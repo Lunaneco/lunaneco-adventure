@@ -5,8 +5,8 @@ import {normalizeProgression,talentStatus,unlockTalent,previewLimitBreak,levelCa
 import {LIMIT_BREAK_NODES,GROWTH_NODES,isTalentUnlocked,growthCount,nextLimitNode} from '../src/talents.js';
 const saved=(characters={},stones=3)=>normalizeProgression({characters,inventory:{limitStone:stones,starBud:1000,moonDew:100,wardenCore:20,moonPrism:100,astralCore:30}},HEROES);
 
-test('the tree exposes exactly six cap steps from the shared level rules',()=>{
- assert.equal(GROWTH_NODES.length,33);assert.deepEqual(LIMIT_BREAK_NODES.map(n=>[n.level,n.cap,n.cost.limitStone]),[[20,30,1],[30,40,2],[40,50,4],[50,60,5],[60,70,6],[70,80,8]]);
+test('the tree exposes exactly eight cap steps from the shared level rules',()=>{
+ assert.equal(GROWTH_NODES.length,43);assert.deepEqual(LIMIT_BREAK_NODES.map(n=>[n.level,n.cap,n.cost.limitStone]),[[20,30,1],[30,40,2],[40,50,4],[50,60,5],[60,70,6],[70,80,8],[80,90,10],[90,100,12]]);
  assert.equal(LIMIT_BREAK_NODES.at(-1).cap,LEVEL_RULES.maxLevel);
 });
 test('old breakthrough progress lights the correct tree nodes without requiring ability stars',()=>{

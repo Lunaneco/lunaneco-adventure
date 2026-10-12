@@ -42,5 +42,5 @@ test('Nyanluna uses 27 fresh content-addressed battle takes, not the v2.2.1 clea
   assert.ok(clip.duration>=.35&&clip.duration<10,id);
   assert.ok(Number.isFinite(clip.normalizationDb),id);
  }
- assert.equal(Object.values(VOICE_MANIFEST).filter(v=>v.who==='nyanluna'&&v.kind!=='battle').length,35);
+ assert.equal(Object.values(VOICE_MANIFEST).filter(v=>v.who==='nyanluna'&&v.kind!=='battle').length,45);
 });
