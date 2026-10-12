@@ -199,5 +199,5 @@ test('clearing the final kephia form records all four finale acts',()=>{
 test('the ending roll names every hero and scrolls their closing line',()=>{
   const html=endingRollMarkup(id=>({image:`/portraits/${id}.png`,alt:id}));
   for(const hero of ENDING_CREDITS){assert.match(html,new RegExp(hero.name));assert.match(html,new RegExp(hero.line));assert.match(html,new RegExp(hero.handle));}
-  assert.match(html,/ending-roll-track/);assert.match(html,/ここまで遊んでくれて、ありがとう/);
+  assert.match(html,/ending-roll-track/);assert.match(html,/最後まで遊んでくださり、心よりありがとうございます/);assert.match(html,/by\.Lunaneco/);assert.doesNotMatch(html,/ここまで遊んでくれて|闇を分けて/);
 });

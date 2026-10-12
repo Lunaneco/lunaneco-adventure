@@ -18,7 +18,7 @@ export const ENDING_CREDITS=Object.freeze([
 ]);
 export function endingRollMarkup(imageFor){
   const cast=ENDING_CREDITS.map(hero=>{const speaker=imageFor(hero.id);return `<article class="ending-credit"><img src="${speaker.image}" alt="${speaker.alt}"><div><strong>${hero.name}</strong><small>${hero.handle}</small><p>${hero.line}</p></div></article>`;}).join('');
-  return `<section class="ending-roll-screen" aria-label="エンドロール"><div class="ending-roll-viewport"><div class="ending-roll-track"><header><p class="eyebrow">LUNANECO ADVENTURE</p><h2>ルナネコの不思議な冒険</h2><p>終章</p></header>${cast}<p class="ending-thanks">闇を分けて、また同じ場所で。</p><p class="ending-thanks">ここまで遊んでくれて、ありがとう。</p></div></div><button id="ending-close" class="primary">メニューへ</button></section>`;
+  return `<section class="ending-roll-screen" aria-label="エンドロール"><div class="ending-roll-viewport"><div class="ending-roll-track"><header><p class="eyebrow">LUNANECO ADVENTURE</p><h2>ルナネコの不思議な冒険</h2><p>終章</p></header>${cast}<p class="ending-thanks">最後まで遊んでくださり、心よりありがとうございます。</p><p class="ending-thanks">by.Lunaneco</p></div></div><button id="ending-close" class="primary">メニューへ</button></section>`;
 }
 export const KEPHIA_HERO_NAMES=Object.freeze(Object.fromEntries(ENDING_CREDITS.map(hero=>[hero.id,hero.name])));
 export const KEPHIA_PHASE_LABELS=Object.freeze(['1段階','2段階','3段階','最終形態']);
