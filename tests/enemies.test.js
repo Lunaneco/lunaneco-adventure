@@ -74,7 +74,7 @@ test('all enemy model silhouettes have valid finite geometry within mobile rende
  for(const [type,bossId] of shapes){
   const model=createEnemy(type,bossId),bounds=new Box3().setFromObject(model);let triangles=0,meshes=0;
   model.traverse(o=>{if(o.isMesh){meshes++;triangles+=(o.geometry.index?.count??o.geometry.attributes.position.count)/3;for(const n of o.geometry.attributes.position.array)assert.ok(Number.isFinite(n));}});
-  assert.ok(triangles<16000&&meshes<30,`${type}/${bossId}: ${triangles} triangles, ${meshes} draws`);assert.ok(bounds.max.y>1&&bounds.max.y<(bossId==='colossus'||bossId?.startsWith('prism')||bossId?.startsWith('hehe')||bossId?.startsWith('anti')?7:5)&&bounds.max.x-bounds.min.x<(bossId?.startsWith('prism')?11:7));
+  assert.ok(triangles<16000&&meshes<30,`${type}/${bossId}: ${triangles} triangles, ${meshes} draws`);const finaleTower=bossId==='kephia4';assert.ok(bounds.max.y>1&&bounds.max.y<(bossId==='colossus'||bossId?.startsWith('prism')||bossId?.startsWith('hehe')||bossId?.startsWith('anti')||finaleTower?7:5)&&bounds.max.x-bounds.min.x<(bossId?.startsWith('prism')||finaleTower?11:7),bossId);
   animateEnemy(model,{x:0,z:0,face:0,type,bossId,id:1,speed:1,hit:0,cast:{kind:'chant'}},1);assert.ok(model.children.length);
   if(type==='boss')bossBounds.push([bounds.max.x-bounds.min.x,bounds.max.y,bounds.max.z-bounds.min.z].map(n=>n.toFixed(2)).join(','));
  }

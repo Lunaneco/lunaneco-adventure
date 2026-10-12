@@ -1,4 +1,4 @@
-import {paresisEnemyAttack,paresisBossAttack} from './chapter-dark-paresis-combat.js';
+import {paresisEnemyAttack,paresisBossAttack,kephiaBossAttack,kephiaBand,KEPHIA_BAND_LABEL,kephiaFormIndex} from './chapter-dark-paresis-combat.js';
 import {PARESIS_ENEMIES} from './chapter-dark-paresis-enemies.js';
 import {ANTI_KEMO_ENEMIES,antiKemoEnemyAttack,antiKemoBossAttack} from './chapter-seven-enemies.js';
 import {GOLDEN_HEHE,HEHE_ENEMIES} from './chapter-six-enemies.js';
@@ -6,7 +6,8 @@ import {heheEnemyAttack,heheBossAttack} from './chapter-six-combat.js';
 import {PRISM_ENEMIES} from './chapter-five-enemies.js';
 import {prismBossAttack,prismEnemyAttack,prismFollowup} from './chapter-five-combat.js';
 import {demonEnemyAttack,demonBossAttack,demonFollowup} from './chapter-four-combat.js';
-import {BOSSES,ELITE_BOSS_MULTIPLIER} from './enemies.js';
+import {BOSSES,ELITE_BOSS_MULTIPLIER,ENEMY_TYPES} from './enemies.js';
+import {projectInside} from './terrain.js';
 import {GOLDEN_SLIME,fleeGoldenSlime} from './golden-slime.js';
 import {extraCombatFor} from './extra-stages.js';
 import {storyBossAttack} from './boss-patterns.js';
@@ -74,8 +75,22 @@ function finishCast(g,e,c){
   if(c.waves>1)e.salvo={kind:'bossVolley',timer:c.interval,round:1,pattern:c};
  }
 }
+function summonKephiaAdds(g,e,types){
+ const cap=3,living=g.enemies.filter(enemy=>enemy.hp>0&&enemy.type!=='boss').length;
+ let made=0;
+ for(const type of types){
+  if(living+made>=cap||!ENEMY_TYPES[type])break;
+  const angle=g.rng()*Math.PI*2,point=projectInside(g.walkLayout,e.x+Math.sin(angle)*(5+g.rng()*2),e.z+Math.cos(angle)*(5+g.rng()*2),1);
+  const add=g.spawnEnemy(type,point.x,point.z),spec=ENEMY_TYPES[type],hard=g.difficulty==='hard'?1.3:1,form=kephiaFormIndex(e.bossId);
+  add.hp=add.maxHp=Math.round(spec.hp*(1+form*.12)*hard);add.damage=Math.round(spec.damage*(1+form*.08)*hard);add.summoned=true;made++;
+ }
+ if(made)g.emit('bossPhase',{label:'ケフィアが客を呼んだ。倒すとクリスタルが落ちる。'});
+ return made;
+}
 function bossAttack(g,e){
- const spec=BOSSES[e.bossId],p=g.player,angle=Math.atan2(p.x-e.x,p.z-e.z),action=e.action++%3,color=spec.color;
+ const spec=BOSSES[e.bossId],p=g.player,angle=Math.atan2(p.x-e.x,p.z-e.z);
+ if(g.actConfig?.kephiaRush&&String(e.bossId??'').startsWith('kephia')){kephiaBossAttack(g,e,{angle,line,circle,ring,charge,lockCast,volley,summon:types=>summonKephiaAdds(g,e,types)});return;}
+ const action=e.action++%3,color=spec.color;
  const empowered=Boolean(g.actConfig?.extra||e.hp<=e.maxHp*.5);
  e.special=g.actConfig?.chapter>=3?(empowered?1.4:1.95):g.actConfig?.chapter===2?(empowered?1.65:2.35):g.actConfig?.chapter===1?(empowered?2.5:3.35):(empowered?3:4.1);
  g.emit('bossAttack',{kind:['rune','stars','charge'][action],label:g.actConfig?.apex?['夢蝕の包囲陣','三重王冠の星弾','王座砕きの交差突進'][action]:spec.attacks[g.actConfig?.chapter===4?(e.action-1)%2:action],bossId:e.bossId});
@@ -92,7 +107,8 @@ export function tickEnemyBehavior(g,e,dt,slow=1){
  if(e.prismFollowup)e.prismFollowup.due-=dt;
  if(e.type===GOLDEN_SLIME.type||e.type===GOLDEN_HEHE.type){fleeGoldenSlime(g,e,dt,slow);return;}
  const p=g.player,dx=p.x-e.x,dz=p.z-e.z,d=Math.hypot(dx,dz)||.01,angle=Math.atan2(dx,dz),route=g.steerEnemy(e);
- if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;g.emit('bossPhase',{label:g.actConfig?.chapter>=7?(g.actConfig.kephiaRush?'笑い声が重なる — 輪と弾幕と突進が間を置かなくなる':'瘴気の暴走 — 輪と灯りの弾が厚くなる'):g.actConfig?.chapter===6?'集団の猛攻 — 連射と突撃に注意':g.actConfig?.chapter===5?'へへへの猛攻 — 扇矢と連撃が増加':g.actConfig?.chapter===4?'虹光の暴走 — 五方向弾・三連撃、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
+ if(e.type==='boss'&&g.actConfig?.kephiaRush){const band=kephiaBand(e.hp/e.maxHp);if(e.kephiaBand&&e.kephiaBand!==band)g.emit('bossPhase',{label:KEPHIA_BAND_LABEL[kephiaFormIndex(e.bossId)][band]});e.kephiaBand=band;}
+ if(e.type==='boss'&&!e.enraged&&e.hp<=e.maxHp*.5){e.enraged=true;if(!g.actConfig?.kephiaRush)g.emit('bossPhase',{label:g.actConfig?.chapter>=7?'瘴気の暴走 — 輪と灯りの弾が厚くなる':g.actConfig?.chapter===6?'集団の猛攻 — 連射と突撃に注意':g.actConfig?.chapter===5?'へへへの猛攻 — 扇矢と連撃が増加':g.actConfig?.chapter===4?'虹光の暴走 — 五方向弾・三連撃、ブレスの溜めが短縮':g.actConfig?.chapter>=3?'紅霧の暴走 — 追尾弾と連撃が増加':g.actConfig?.chapter===2?'闇の猛攻 — 連撃と弾幕が激しくなる':g.actConfig?.chapter===1?'猛攻開始 — 攻撃の間隔が短くなる':'力の解放 — 連撃が増加、予告を見て回避しよう'});}
  if(e.type==='boss'&&g.actConfig?.apex&&!e.apexAwakened&&e.hp<=e.maxHp*.5){e.apexAwakened=true;g.emit('bossPhase',{label:'夢蝕覚醒 — 包囲魔法と星弾が増加'});}
  if(e.rush){const rush=e.rush;e.face=rush.angle;move(e,Math.sin(rush.angle),Math.cos(rush.angle),rush.speed*slow,Math.min(dt,rush.remaining));rush.remaining-=dt;if(rush.remaining<=0){e.rush=null;e.recovery=.8;}return;}
  if(e.cast){e.cast.remaining-=dt;if(e.cast.remaining<=0){const cast=e.cast;e.cast=null;finishCast(g,e,cast);}return;}

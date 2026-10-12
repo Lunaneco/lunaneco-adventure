@@ -3,12 +3,15 @@ import {publicUrl} from './public-url.js';
 export const MUSIC_TRACKS=Object.freeze({
   field:Object.freeze({file:'assets/music/field-0ed3141cd81c.mp3',volume:.2101}),
   boss:Object.freeze({file:'assets/music/boss-34cad050b0be.mp3',volume:.2564}),
+  kephia:Object.freeze({file:'assets/music/kephia-f906314b572c.mp3',volume:.24}),
+  kephiaFinale:Object.freeze({file:'assets/music/kephiaFinale-2fb753124b71.mp3',volume:.2}),
 });
 
 export function musicScene(game){
   if(!game)return 'menu';
   if(['victory','defeat'].includes(game.phase))return 'field';
-  return game.enemies.some(enemy=>enemy.type==='boss'&&enemy.hp>0)?'boss':'field';
+  if(game.actConfig?.kephiaRush&&game.phase==='playing'){const scene=(game.kephiaForm??0)>=2?'kephiaFinale':'kephia';if(MUSIC_TRACKS[scene])return scene;}
+  return game.enemies?.some(enemy=>enemy.type==='boss'&&enemy.hp>0)?'boss':'field';
 }
 
 // One streaming element avoids decoding two long stereo tracks into mobile memory.

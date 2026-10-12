@@ -17,6 +17,9 @@ test('boss music follows living bosses on both routes; defeated bosses and the m
  assert.equal(musicScene(null),'menu');
  for(const elite of [false,true]){const boss={type:'boss',hp:100,elite},g={phase:'playing',enemies:[boss]};assert.equal(musicScene(g),'boss');g.phase='ultimateIntro';assert.equal(musicScene(g),'boss');boss.hp=0;assert.equal(musicScene(g),'field');boss.hp=100;g.phase='defeat';assert.equal(musicScene(g),'field');}
  assert.equal(musicScene({phase:'playing',enemies:[{type:'mage',hp:100}]}),'field');
+ const finale={phase:'playing',actConfig:{kephiaRush:true},enemies:[{type:'boss',hp:1}]};
+ assert.equal(musicScene({...finale,kephiaForm:0}),'kephia');assert.equal(musicScene({...finale,kephiaForm:1}),'kephia');
+ assert.equal(musicScene({...finale,kephiaForm:2,enemies:[]}),'kephiaFinale');assert.equal(musicScene({...finale,kephiaForm:3,phase:'victory'}),'field');
 });
 test('long tracks stream and loop at their original speed without per-frame restart',async()=>{
  const {player,media}=harness();player.update({scene:'field'});await flush();media.currentTime=42;
