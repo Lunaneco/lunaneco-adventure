@@ -223,6 +223,7 @@ export class Adventure {
       const knewRice=hasRicePower(this.progression),knewNyan=hasNyanAwakening(this.progression),knewFreeSkills=hasFreeSkillLoadout(this.progression);
       if(finaleClear)for(const id of [46,47,48])this.progression.story.actClears[id]=true;
       if(completeAct(this.progression,this.act)){this.recruitedHeroId=this.actConfig.recruit;this.emit('recruited',{heroId:this.recruitedHeroId});}
+      if(this.actConfig.towerExtra){const relicId='eight-light-crown';if(!this.progression.equipment.owned.includes(relicId)){this.progression.equipment.owned.push(relicId);this.earnedUnique=relicId;this.emit('uniqueReward',{id:relicId});}}
       if(!knewRice&&hasRicePower(this.progression)){this.riceNewlyLearned=true;this.emit('riceAwakened');}
       if(!knewNyan&&hasNyanAwakening(this.progression)){this.nyanAwakeningNewlyLearned=true;this.emit('nyanAwakeningLearned');}
       if(!knewFreeSkills&&hasFreeSkillLoadout(this.progression))this.emit('freeSkillsUnlocked');
@@ -260,7 +261,7 @@ export class Adventure {
   spawnEnemy(type,x,z,{elite=false}={}){
     const boss=type==='boss',rare=type===GOLDEN_SLIME.type||type===GOLDEN_HEHE.type,rng=type===GOLDEN_HEHE.type?this.heheRng:rare?this.rareRng:this.rng;const hard=this.difficulty==='hard'?1.3:1,power=boss&&elite?ELITE_BOSS_MULTIPLIER:1;
     const spec=boss?BOSSES[this.actConfig.bossId]:ENEMY_TYPES[type];if(!spec)throw new Error(`Unknown enemy: ${type}`);
-    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra||this.actConfig.awakening?rare&&this.actConfig.endgame?1:this.actConfig.hpScale:1+(this.actConfig.chapter>=3?this.actConfig.number-1:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
+    const extra=this.actConfig.extra,hp=(boss?this.actConfig.bossHp:spec.hp)*(boss?1:(1+(this.wave-1)*.14)*(extra||this.actConfig.awakening?rare&&(this.actConfig.endgame||this.actConfig.towerExtra)?1:this.actConfig.hpScale:1+(this.actConfig.chapter>=3?this.actConfig.number-1:this.actConfig.chapter===2?this.act-8:this.act)*.08))*hard*power;
     const e={id:this.ids++,type,bossId:boss?this.actConfig.bossId:null,name:(boss?this.actConfig.boss:spec.name)+(elite?'・深淵':''),elite,x,z,hp,maxHp:hp,speed:spec.speed*(extra?extraCombatFor(this.actConfig).moveScale:1),damage:(boss?(this.actConfig.chapter>=9?128:this.actConfig.chapter>=7?110:this.actConfig.chapter>=3?92:this.actConfig.chapter===2?62:this.actConfig.chapter===1?45:22):spec.damage)*hard*power*(extra?this.actConfig.damageScale:1),radius:spec.radius*(elite?1.12:1),hit:0,attack:1+rng(),age:0,knockX:0,knockZ:0,face:0,action:0,special:this.actConfig.chapter>=2?(boss?2.4:1.1+rng()*.7):boss?3:1.4+rng(),cast:null,rush:null,recovery:0,enraged:!!extra&&boss,navTimer:0};
     if(rare){e.rare=true;e.expiresAt=this.time+spec.lifetime;}
     if(this.actConfig.awakening)e.damage*=this.actConfig.damageScale;

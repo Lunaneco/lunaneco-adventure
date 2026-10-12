@@ -1,4 +1,4 @@
-import {HEHE_EXTRA_ID} from './extra-stages.js';
+import {HEHE_EXTRA_ID,PARESIS_EXTRA_ID} from './extra-stages.js';
 import {chapterRoom} from './chapter-terrain.js';
 import {NYAN_QUEST_ID} from './nyanluna-awakening.js';
 import {RICE_QUEST_ID} from './rice-awakening.js';
@@ -86,7 +86,15 @@ function paresisField(act){
  });
 }
 export const PARESIS_FIELD_LAYOUTS=Object.freeze(Array.from({length:16},(_,act)=>paresisField(act)));
-export const fieldFor=(act,area)=>act===HEHE_EXTRA_ID?(HEHE_EXTRA_FIELD_LAYOUTS[area]??HEHE_EXTRA_FIELD_LAYOUTS[0]):act===NYAN_QUEST_ID?(NYAN_FIELD_LAYOUTS[area]??NYAN_FIELD_LAYOUTS[0]):act>=34&&act<=49?(PARESIS_FIELD_LAYOUTS[act-34][area]??PARESIS_FIELD_LAYOUTS[act-34][0]):act>=28&&act<=31?(LUMI_FIELD_LAYOUTS[act-28][area]??LUMI_FIELD_LAYOUTS[act-28][0]):act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
+const PARESIS_EXTRA_NAMES=['核の前廊','核の螺旋','核の舞台'];
+export const PARESIS_EXTRA_FIELD_LAYOUTS=Object.freeze([0,1,2].map(area=>{
+ const note='第10章エクストラ。WAVE 1に瘴金のへへへが1体確定';
+ const field=area!==1
+  ? single(paresisRoom(area===2?eclipse:garden,`paresis-extra-a${area}`,PARESIS_EXTRA_NAMES[area],area===2?{shape:2}:{}),note)
+  : floors(paresisRoom(courtyard,'paresis-extra-lower',`${PARESIS_EXTRA_NAMES[1]}・下層`,{}),paresisRoom(roof,'paresis-extra-upper',`${PARESIS_EXTRA_NAMES[1]}・上層`,{shape:0,height:4.5}));
+ return {...field,rooms:field.rooms.map((room,index)=>chapterRoom(room,7,16,area,field.kind,index))};
+}));
+export const fieldFor=(act,area)=>act===PARESIS_EXTRA_ID?(PARESIS_EXTRA_FIELD_LAYOUTS[area]??PARESIS_EXTRA_FIELD_LAYOUTS[0]):act===HEHE_EXTRA_ID?(HEHE_EXTRA_FIELD_LAYOUTS[area]??HEHE_EXTRA_FIELD_LAYOUTS[0]):act===NYAN_QUEST_ID?(NYAN_FIELD_LAYOUTS[area]??NYAN_FIELD_LAYOUTS[0]):act>=34&&act<=49?(PARESIS_FIELD_LAYOUTS[act-34][area]??PARESIS_FIELD_LAYOUTS[act-34][0]):act>=28&&act<=31?(LUMI_FIELD_LAYOUTS[act-28][area]??LUMI_FIELD_LAYOUTS[act-28][0]):act>=24&&act<=27?(HEHE_FIELD_LAYOUTS[act-24][area]??HEHE_FIELD_LAYOUTS[act-24][0]):act===RICE_QUEST_ID?(RICE_FIELD_LAYOUTS[area]??RICE_FIELD_LAYOUTS[0]):FIELD_LAYOUTS[act]?.[area]??EXTRA_FIELD_LAYOUTS[act-FIELD_LAYOUTS.length]?.[area]??FIELD_LAYOUTS[0][0];
 export function layoutFor(act,area,wave,route='safe'){
  const f=fieldFor(act,area);return f.rooms[f.kind==='floors'?(wave%2===0?1:0):f.kind==='branch'&&wave%2===0?(route==='elite'?2:1):0];
 }

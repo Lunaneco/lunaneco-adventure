@@ -234,6 +234,7 @@ body:has(#chapter-menu:not(.hidden)) #modal:not(:has(.stage-briefing)) :is(.part
 .kephia-pair div{display:flex;flex-wrap:wrap;gap:6px}
 .kephia-pair button{min-height:40px;padding:6px 10px;border:1px solid #c9c1af;background:#fff;border-radius:6px}
 .kephia-pair button[aria-pressed=true]{background:#24364b;color:#f6f1e6;border-color:#24364b}
+body:has(#chapter-menu:not(.hidden)) #modal .kephia-pair button[aria-pressed=true]{background:#24364b;color:#f6f1e6;border-color:#24364b}
 .ending-roll{max-width:920px}
 .ending-solo,.ending-gather{display:grid;justify-items:center;gap:12px;text-align:center;padding:12px}
 .ending-solo img{width:min(280px,70vw);height:auto;border-radius:8px}

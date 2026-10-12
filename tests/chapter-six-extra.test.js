@@ -26,9 +26,9 @@ test('Hehe EX has a new stable ID, requires chapter-six final clear, and does no
 });
 test('new chapter-indexed EX saves preserve old clears and skip non-story ID gaps',()=>{
  const raw={version:2,actClears:Array(28).fill(true),extraClears:[true,false,true,false,false,true]};
- const story=normalizeStory(raw);assert.deepEqual(story.extraClears,[true,false,true,false,false,true]);
- raw.actClears[27]=false;assert.deepEqual(normalizeStory(raw).extraClears,[true,false,true,false,false,false]);
- assert.deepEqual(normalizeStory({version:2,actClears:Array(12).fill(true),extraClears:[true,false]}).extraClears,[true,false,false,false,false,false]);
+ const story=normalizeStory(raw);assert.deepEqual(story.extraClears,[true,false,true,false,false,true,false,false,false,false]);
+ raw.actClears[27]=false;assert.deepEqual(normalizeStory(raw).extraClears,[true,false,true,false,false,false,false,false,false,false]);
+ assert.deepEqual(normalizeStory({version:2,actClears:Array(12).fill(true),extraClears:[true,false]}).extraClears,[true,false,false,false,false,false,false,false,false,false]);
 });
 test('free solo and duo lineups never receive a story NPC or a level floor in Hehe EX',()=>{
  for(const party of [['nyanluna'],['hehereal'],['omsolo','hehereal'],['mochinyafe','lumi']]){

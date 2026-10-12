@@ -33,7 +33,8 @@ export const DARK_HEHE_NAME='瘴金のへへへ';
 export const DARK_HEHE_LIFETIME=20;
 export const DARK_HEHE_MATERIALS=Object.freeze({starBud:300,moonDew:60,wardenCore:30,moonPrism:45,astralCore:15,bloodCrystal:60,demonHeart:30,miasmaShard:36,paresisCore:12});
 export function darkHeheWave(act,rng){
-  if(act?.chapter!==9)return null;
+  if(act?.extra&&Number.isInteger(act.darkHeheWave))return act.darkHeheWave;
+  if(act?.chapter!==9||act?.extra)return null;
   const roll=rng();
   return Number.isFinite(roll)&&roll>=0&&roll<DARK_HEHE_CHANCE?1+Math.min(4,Math.floor(rng()*5)):null;
 }
@@ -62,6 +63,7 @@ const DARK_BOSS_LIST=Object.freeze([
   ['kephia2','ケフィア・幕間',0xe7a0ff,'拍手のたびに弾幕の切れ目が動く。突進が止まってから反撃。'],
   ['kephia3','ケフィア・暗転',0xc58cff,'照明が落ち、足元の印が先に爆ぜる。印の外へ出てから次の輪へ。'],
   ['kephia4','ケフィア・終幕',0xff8adf,'最終形態。輪、弾幕、突進が間を置かず続く。HP半分で三連になる。倒すとエンディング。'],
+  ['paresisApex','瘴核の門',0xe7a0ff,'核の輪と突進が重なる。帯を横切ってから反撃。'],
 ]);
 export const DARK_BOSS_IDS=Object.freeze(DARK_BOSS_LIST.map(([id])=>id));
 export const DARK_PARESIS_BOSSES=Object.freeze(Object.fromEntries(DARK_BOSS_LIST.map(([id,name,color,hint])=>[id,boss(name,color,hint,id.startsWith('kephia'))])));
@@ -508,4 +510,7 @@ export function kephiaBoard(profile){
     return `<button type="button" data-kephia-phase="${phase}" data-kephia-hero="${hero.id}" aria-pressed="${pairs[phase].includes(hero.id)}" ${disabled?'disabled':''}>${hero.name}</button>`;
   };
   return `<section class="kephia-board" aria-label="終章の配役"><header><h3>終章の配役</h3><p>${ready?'四組そろいました。この順で舞台へ出ます。':'八人を、二人ずつ四つの段階へ。クリアした段階の二人は固定されます。'}</p></header>${KEPHIA_PHASE_LABELS.map((label,phase)=>`<div class="kephia-pair"><strong>${label}</strong><span>${pairs[phase].map(id=>KEPHIA_HERO_NAMES[id]).join('・')||'未定'}</span><div>${ENDING_CREDITS.map(hero=>button(phase,hero)).join('')}</div></div>`).join('')}</section>`;
+}
+export function finaleMemberDialog(profile){
+  return `<div class="modal-heading"><span class="eyebrow">FINAL CAST</span><h2>終章のメンバー</h2><p>八人を、二人ずつ四つの段階へ。第1幕から、この順で舞台に出ます。</p></div>${kephiaBoard(profile)}`;
 }

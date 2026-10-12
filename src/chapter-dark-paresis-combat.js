@@ -14,7 +14,7 @@ export function paresisEnemyAttack(g,e,h){
  if(d>preferred)move(e,route.x,route.z,e.speed*slow,dt);
 }
 export function paresisBossAttack(g,e,h){
- const phase=g.actConfig?.kephiaPhase??0;
+ const phase=g.actConfig?.towerExtra?3:(g.actConfig?.kephiaPhase??0);
  const {angle,action,color,empowered,line,circle,ring,charge,lockCast,volley}=h;
  if(action===0){
   ring(g,e,e.x,e.z,1.8+phase*.28,5.2+phase*.45,.95+phase*.04,42+phase*3,color);

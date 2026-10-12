@@ -118,3 +118,13 @@ export const CHAPTER_UNIQUE_EQUIPMENT=Object.freeze([
   }
 ].map(item=>Object.freeze({...item,bonus:Object.freeze(item.bonus)})));
 export const chapterUniqueReward=act=>CHAPTER_UNIQUE_EQUIPMENT.find(item=>item.act===act);
+export const LEGENDARY_UNIQUE=Object.freeze({
+  id:'eight-light-crown',
+  name:'八光還りの塔冠',
+  act:50,
+  legendary:true,
+  icon:'star',
+  color:'#f3d27a',
+  bonus:Object.freeze({hp:220,attack:.48,defense:52}),
+  note:'ダークパレシスの核を越え、散らされた八つの光を結んだ伝説の冠。いま所持できるユニーク装備で、いちばん高い力を持つ。最大HP +220／攻撃力 +48%／防御力 +52。',
+});

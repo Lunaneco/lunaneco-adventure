@@ -1,5 +1,6 @@
 import {publicUrl} from './public-url.js';
-import {CHAPTER_UNIQUE_EQUIPMENT} from './chapter-unique-equipment.js';
+import {CHAPTER_UNIQUE_EQUIPMENT,LEGENDARY_UNIQUE} from './chapter-unique-equipment.js';
+export {LEGENDARY_UNIQUE};
 export const WEAPONS=Object.freeze({
   lumi:{id:'lumi-rail-cyan',name:'指先のレールガン・青光',kind:'railgun',icon:'spark',effectColor:0x8feaff,note:'るみ専用。銃を持たず指先から青い光を放つ。通常は射程14、もちにゃふぇと組むとねこるみになり射程無限。'},
   hehereal:{id:'hehereal-bow',name:'桜心の魔法弓・2743',kind:'bow',icon:'spark',effectColor:0xff8fc7,note:'へへりある専用。桜色の魔法矢が遠くの敵を追尾する。'},
@@ -34,9 +35,12 @@ export const UNIQUE_EQUIPMENT=Object.freeze([
   {id:'demon-moon-drop-knot',name:'月雫の親友結び',act:14,area:2,icon:'link',color:'#d5b5ef',bonus:{hp:85,attack:.22,defense:18},note:'月と紅い雫を結んだ、背中を預け合う大の仲良しの証。最大HP +85／攻撃力 +22%／防御力 +18。'},
   {id:'demon-kind-king-crown',name:'優しき魔王の冠',act:15,area:2,icon:'star',color:'#e3be8b',bonus:{hp:110,attack:.26,defense:26},note:'正気を取り戻した悪魔大王から贈られた、みんなを守る冠。最大HP +110／攻撃力 +26%／防御力 +26。'},
   ...CHAPTER_UNIQUE_EQUIPMENT,
+  LEGENDARY_UNIQUE,
 ]);
 export const equipmentImage=id=>{
-  const image=UNIQUE_EQUIPMENT.find(item=>item.id===id)?.image;
+  const item=UNIQUE_EQUIPMENT.find(entry=>entry.id===id);
+  if(item?.legendary)return '';
+  const image=item?.image;
   if(image)return publicUrl(image);
   return id.startsWith('lumi-rail-')?publicUrl(`assets/equipment/${id}-v1.png`):id==='hehereal-bow'?publicUrl('assets/equipment/hehereal-bow-v1.png'):publicUrl(`assets/equipment/${['prism-first-light','aurora-wing-charm','prism-heart-knot','prism-home-crown'].includes(id)?id+'-v1':id}.${(id.startsWith('crimson-')||id.startsWith('mochi-')||['light-saber','woodland-token','jade-guard','bell-fragment','guardian-knot'].includes(id))?'png':'webp'}`);
 };

@@ -676,8 +676,8 @@ export const DARK_PARESIS_VOICE_MANIFEST={
   "who": "nyanluna",
   "text": "みんな……！ よかった。けがはない？ 同じ場所にいられるなら、それで十分。",
   "kind": "story",
-  "file": "assets/voices/nyanluna/nyanluna-7a514a6-d65355872b7a.mp3",
-  "duration": 5.613
+  "file": "assets/voices/nyanluna/nyanluna-7a514a6-87c3bef13678.mp3",
+  "duration": 5.757
  },
  "tsukineko-3dd94898": {
   "who": "tsukineko",
