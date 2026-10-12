@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {Adventure,HEROES} from '../src/model.js';
 import {normalizeProgression} from '../src/progression.js';
 import {ACTS,actFor,isActUnlocked} from '../src/acts.js';
-import {PARESIS_EXTRA_ID} from '../src/extra-stages.js';
+import {HEHE_EXTRA_ID,PARESIS_EXTRA_ID,extraCombatFor} from '../src/extra-stages.js';
 import {darkHeheWave,finaleMemberDialog,DARK_HEHE_NAME} from '../src/dark-paresis.js';
 import {LEGENDARY_UNIQUE} from '../src/chapter-unique-equipment.js';
 import {UNIQUE_EQUIPMENT} from '../src/equipment.js';
@@ -38,6 +38,21 @@ test('chapter 10 extra is level 100, uses the tower, and guarantees the rare on 
   }
   const brief=stageBriefingView(PARESIS_EXTRA_ID,'hard',ready());
   assert.match(brief,/Lv\.100/);assert.match(brief,/WAVE 1/);assert.match(brief,/瘴金のへへへ/);
+  const hehe=actFor(HEHE_EXTRA_ID),tower=act,heheCombat=extraCombatFor(hehe),towerCombat=extraCombatFor(tower);
+  assert.ok(tower.bossHp>hehe.bossHp);assert.ok(tower.hpScale>hehe.hpScale);
+  assert.ok(tower.damageScale*(tower.menace??1)>hehe.damageScale*(hehe.menace??1));
+  assert.ok(tower.counts.slice(0,5).every((n,i)=>n>hehe.counts[i]));
+  assert.ok(towerCombat.cooldownRate>heheCombat.cooldownRate);
+  assert.ok(towerCombat.telegraphScale<heheCombat.telegraphScale);
+  assert.ok(towerCombat.moveScale>heheCombat.moveScale);
+  assert.ok(towerCombat.projectileScale>heheCombat.projectileScale);
+  assert.ok(towerCombat.spawnScale<heheCombat.spawnScale);
+  const prior=ready();
+  const heheRun=new Adventure({act:HEHE_EXTRA_ID,progression:prior,party:['nyanluna','tsukineko'],seed:3});
+  const towerBoss=g.spawnEnemy('boss',0,-8),heheBoss=heheRun.spawnEnemy('boss',0,-8);
+  const towerTrash=g.spawnEnemy('paresisChorister',2,0),heheTrash=heheRun.spawnEnemy('heheBrawler',2,0);
+  assert.ok(towerBoss.hp>heheBoss.hp);assert.ok(towerBoss.damage>heheBoss.damage);
+  assert.ok(towerTrash.hp>heheTrash.hp);assert.ok(towerTrash.damage>heheTrash.damage);
 });
 
 test('the first chapter 10 extra clear grants the legendary unique once',()=>{
