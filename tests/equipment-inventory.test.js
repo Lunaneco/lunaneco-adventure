@@ -39,6 +39,6 @@ test('all owned weapon rarities remain selectable and relic ownership is visible
    const html=equipmentView(p,hero.id);assert.equal(ids(html,'data-weapon-option').length,10);
    for(const item of WEAPON_CATALOG.filter(w=>w.heroId!==hero.id))assert.ok(!ids(html,'data-weapon-option').includes(item.id));
  }
- const relics=equipmentView(p,'tsukineko','unique');assert.equal(ids(relics,'data-equipment-card').length,30);assert.match(relics,/にゃんるなが装備中/);assert.match(relics,/にゃんるなから付け替える/);
+ const relics=equipmentView(p,'tsukineko','unique');assert.equal(ids(relics,'data-equipment-card').length,UNIQUE_EQUIPMENT.length);assert.match(relics,/にゃんるなが装備中/);assert.match(relics,/にゃんるなから付け替える/);
  assert.match(equipmentView(p,'nyanluna','unique'),/星露の花飾りを外す/);
 });

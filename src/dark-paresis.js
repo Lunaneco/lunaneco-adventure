@@ -63,10 +63,9 @@ const DARK_BOSS_LIST=Object.freeze([
   ['kephia2','ケフィア・幕間',0xe7a0ff,'拍手のたびに弾幕の切れ目が動く。突進が止まってから反撃。'],
   ['kephia3','ケフィア・暗転',0xc58cff,'照明が落ち、足元の印が先に爆ぜる。印の外へ出てから次の輪へ。'],
   ['kephia4','ケフィア・終幕',0xff8adf,'最終形態。輪、弾幕、突進が間を置かず続く。HP半分で三連になる。倒すとエンディング。'],
-  ['paresisApex','瘴核の門',0xe7a0ff,'核の輪と突進が重なる。帯を横切ってから反撃。'],
 ]);
 export const DARK_BOSS_IDS=Object.freeze(DARK_BOSS_LIST.map(([id])=>id));
-export const DARK_PARESIS_BOSSES=Object.freeze(Object.fromEntries(DARK_BOSS_LIST.map(([id,name,color,hint])=>[id,boss(name,color,hint,id.startsWith('kephia'))])));
+export const DARK_PARESIS_BOSSES=Object.freeze({...Object.fromEntries(DARK_BOSS_LIST.map(([id,name,color,hint])=>[id,boss(name,color,hint,id.startsWith('kephia'))])),paresisApex:boss('瘴核の門',0xe7a0ff,'核の輪と突進が重なる。帯を横切ってから反撃。')});
 
 const paresisTheme=FIELD_THEMES.findIndex(theme=>theme.paresis);
 const stage=(name,_theme,note,index)=>({name,theme:paresisTheme+Math.min(index,2),image:FIELD_THEMES[paresisTheme+Math.min(index,2)].image,note,waves:`WAVE 0${index*2+1}–0${index*2+2}`});
