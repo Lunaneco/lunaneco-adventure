@@ -500,15 +500,19 @@ export function toggleKephiaHero(pairs,phase,heroId,{lockedPhases=new Set()}={})
   next[phase].push(heroId);
   return next;
 }
+export function kephiaLockedPhases(profile){
+  if(profile?.story?.finaleCleared)return new Set();
+  return new Set([0,1,2,3].filter(index=>profile?.story?.actClears?.[46+index]===true));
+}
 export function kephiaBoard(profile){
-  const pairs=normalizeKephiaPairs(profile?.story?.kephiaPairs),ready=kephiaPairsReady(pairs);
-  const locked=index=>profile?.story?.actClears?.[46+index]===true;
+  const pairs=normalizeKephiaPairs(profile?.story?.kephiaPairs),ready=kephiaPairsReady(pairs),locked=kephiaLockedPhases(profile);
   const button=(phase,hero)=>{
     const owner=pairs.findIndex(row=>row.includes(hero.id));
-    const disabled=locked(phase)||(owner>=0&&locked(owner));
+    const disabled=locked.has(phase)||(owner>=0&&locked.has(owner));
     return `<button type="button" data-kephia-phase="${phase}" data-kephia-hero="${hero.id}" aria-pressed="${pairs[phase].includes(hero.id)}" ${disabled?'disabled':''}>${hero.name}</button>`;
   };
-  return `<section class="kephia-board" aria-label="終章の配役"><header><h3>終章の配役</h3><p>${ready?'四組そろいました。この順で舞台へ出ます。':'八人を、二人ずつ四つの段階へ。クリアした段階の二人は固定されます。'}</p></header>${KEPHIA_PHASE_LABELS.map((label,phase)=>`<div class="kephia-pair"><strong>${label}</strong><span>${pairs[phase].map(id=>KEPHIA_HERO_NAMES[id]).join('・')||'未定'}</span><div>${ENDING_CREDITS.map(hero=>button(phase,hero)).join('')}</div></div>`).join('')}</section>`;
+  const note=profile?.story?.finaleCleared?'クリア済みです。配役を組み直して、また第1幕から挑めます。':ready?'四組そろいました。この順で舞台へ出ます。':'八人を、二人ずつ四つの段階へ。クリアした段階の二人は固定されます。';
+  return `<section class="kephia-board" aria-label="終章の配役"><header><h3>終章の配役</h3><p>${note}</p></header>${KEPHIA_PHASE_LABELS.map((label,phase)=>`<div class="kephia-pair"><strong>${label}</strong><span>${pairs[phase].map(id=>KEPHIA_HERO_NAMES[id]).join('・')||'未定'}</span><div>${ENDING_CREDITS.map(hero=>button(phase,hero)).join('')}</div></div>`).join('')}</section>`;
 }
 export function finaleMemberDialog(profile){
   return `<div class="modal-heading"><span class="eyebrow">FINAL CAST</span><h2>終章のメンバー</h2><p>八人を、二人ずつ四つの段階へ。第1幕から、この順で舞台に出ます。</p></div>${kephiaBoard(profile)}`;

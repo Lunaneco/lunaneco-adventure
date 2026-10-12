@@ -2,7 +2,7 @@ import {NYAN_AWAKENING_RULES,createNyanAwakening,canAwakenNyan,startNyanAwakenin
 import {hasNekoLumi,lumiUltimate,fireLumiRail,fireNekoLumiAttack,tickLumiAttacks} from './lumi-combat.js';
 import {canPredate,startPredation,finishPredation,resetPredation,predationUltimate,predationKill} from './hehereal-predation.js';
 import {advanceFloors,tickFloors,floorMovementScale} from './special-floors.js';
-import {PRIM_BOND,PRIM_MOUNT,PRIM_DUET,hasPrimBond,canPrimDuet,canMount,startMount,endMount,tickMount} from './prim-combat.js';
+import {PRIM_BOND,PRIM_MOUNT,PRIM_DUET,hasPrimBond,canPrimDuet,canMount,startMount,endMount,tickMount,mountNegatesFootHazard} from './prim-combat.js';
 import {SHIZUKU_BOND,hasShizukuBond,canShizukuDuet,SHIZUKU_DUET,drainShizuku} from './shizuku-combat.js';
 import {DARK_HEHE_LIFETIME,DARK_HEHE_NAME,darkHeheWave} from './dark-paresis.js';
 import {GOLDEN_HEHE,goldenHeheWave} from './chapter-six-enemies.js';
@@ -36,7 +36,7 @@ export const HEROES = [
   {id:'omsolo',name:'オムソロ',title:'翠光の剣士',color:'#aaffba',moveSpeed:11.2,dashSpeed:48,range:3.2,damage:42,baseHp:250,baseDefense:21,interval:.60,skillPower:1.1,chargeRate:1.2,role:'近接・守護',trait:'守り手の剣',traitText:'通常移動速度・回避距離2倍／扇状の近接攻撃／高いHPと防御力／必殺ゲージ獲得 +20%。必殺技で周囲を斬り払い、自分を守る'},
   {id:'mochinyafe',name:'もちにゃふぇ',title:'最後のもちもち守り手',color:'#ffb8d4',moveSpeed:4.2,dashSpeed:20,range:6,damage:5,baseHp:75,baseDefense:1,interval:1.4,skillPower:1,chargeRate:1.3,role:'援護特化・大器晩成',trait:'小さな声の大きな奇跡',traitText:'操作中は弱い追尾音弾で攻撃。援護のふぇ〜で雑魚を1.8秒停止／ボスの攻撃・防御を5秒間30%低下。初期能力は最弱、Lv.50では全員を超える基礎能力。ツリーのHP・防御成長3倍、攻撃成長2.5倍'},
   {id:'shizuku',name:'雫',title:'紅月の鎌使い',color:'#e5a0ba',moveSpeed:7,dashSpeed:30,range:3.9,damage:39,baseHp:230,baseDefense:16,interval:.64,skillPower:1.15,chargeRate:1.15,role:'近接・HP吸収',trait:'不器用な守り手',traitText:'鎌で与えた実ダメージの10%を自分のHPへ吸収。にゃんるなと編成すると二人のHP・攻撃+12%、必殺ゲージ獲得+20%。二人のゲージ100で特殊連携技。'},
-  {id:'prim',name:'プリム',title:'七彩の小竜',color:'#bceaff',moveSpeed:6.2,dashSpeed:26,range:3.5,damage:41,baseHp:265,baseDefense:20,interval:.62,skillPower:1.15,chargeRate:1.15,role:'爪・直線ブレス・搭乗',trait:'キュ〜の約束',traitText:'爪で近接攻撃。必殺技は一直線のプリズムブレス。つきねこと組むとHP・攻撃+12%、ゲージ+20%。搭乗中12秒は二人がメインで攻撃・個別に被弾し、オムソロと同じ速さで移動。終了後20秒待機。'},
+  {id:'prim',name:'プリム',title:'七彩の小竜',color:'#bceaff',moveSpeed:6.2,dashSpeed:26,range:3.5,damage:41,baseHp:265,baseDefense:20,interval:.62,skillPower:1.15,chargeRate:1.15,role:'爪・直線ブレス・搭乗',trait:'キュ〜の約束',traitText:'爪で近接攻撃。必殺技は一直線のプリズムブレス。つきねこと組むとHP・攻撃+12%、ゲージ+20%。搭乗は乗り降り自由。搭乗中は二人がメインで攻撃・個別に被弾し、足元が光る敵の攻撃を無効にする。移動はオムソロと同じ速さ。'},
   {id:'hehereal',name:'へへりある',title:'桜心の花弓使い',color:'#ff9dc9',moveSpeed:5.6,dashSpeed:24,range:15,damage:28,baseHp:190,baseDefense:10,interval:.65,skillPower:1.1,chargeRate:1.2,role:'遠距離・追尾弓',trait:'おむすびの約束',traitText:'桜の魔法矢で遠くの敵を追尾。必殺技は追尾矢9連射。第6章ではオムソロの援護として共闘。二人編成時は捕食でオムソロを取り込み、へへへに変身。攻撃力・弓・HP・防御は自分のものを維持。必殺技は捕食の舞に変わり、発動中の撃破1体ごとに攻撃力が＋1。戦闘終了まで解除不可。'},
   {id:'lumi',name:'るみ',title:'指先の光をつなぐ少女',color:'#b8c9ff',moveSpeed:5.6,dashSpeed:24,range:14,damage:30,baseHp:185,baseDefense:9,interval:.72,skillPower:1.1,chargeRate:1.15,role:'直線貫通・レールガン',trait:'ねこみみに、ときめいて',traitText:'指先から色の違う光を放つ。通常は武器ごとの有限射程。もちにゃふぇと編成するとねこみみが生えてねこるみに変わり、通常攻撃・援護・必殺技の射程が無限になる。ねこるみの通常攻撃は直線上の最大3体を貫く3連撃。第7章クリア後に仲間になる。'},
 ];
@@ -122,12 +122,12 @@ export class Adventure {
   ultimateActive(hero){return this.ultimateEffects.some(effect=>effect.heroId===this.heroId(hero)||effect.heroIds?.includes(this.heroId(hero)));}
   get duetReady(){return canShizukuDuet(this)||canPrimDuet(this);}
   get duetKind(){return canPrimDuet(this)?'prim':canShizukuDuet(this)?'shizuku':null;}
-  get mountReady(){return canMount(this);}
+  get mountReady(){return this.mount.active||canMount(this);}
   get nyanAwakeningReady(){return canAwakenNyan(this);}
   awakenNyan(){return startNyanAwakening(this);}
   get predationReady(){return canPredate(this);}
   predate(){return startPredation(this);}
-  mountPrim(){return startMount(this);}
+  mountPrim(){return this.mount.active?endMount(this):startMount(this);}
   dismount(){return endMount(this);}
   sourceFor(heroId){return this.heroId(this.player.hero)===heroId?this.player:this.partner;}
   skillDamage(heroId,base){const index=HEROES.findIndex(h=>h.id===heroId);if(index<0)return 0;const hero=HEROES[index];return base*(this.statsFor(index).attack/hero.damage)*(1+this.rank('prismBond')*.15+this.rank('moonDropBond')*.15+this.rank('power')*.25+this.rank('moonGuard')*.18+this.rank('starBlade')*.18)*hero.skillPower*(1+this.rank('arcanePower')*.18)*(heroId==='lumi'?1+this.rank('lumiBrave')*.15:heroId==='hehereal'?1+this.rank('sakuraBrave')*.15:heroId==='prim'?1+this.rank('primBrave')*.15:1);}
@@ -484,7 +484,7 @@ export class Adventure {
     }
     this.projectiles=this.projectiles.filter(b=>b.life>0);
     this.hazards=this.hazards.filter(h=>!h.sourceId||this.enemies.some(e=>e.id===h.sourceId&&e.hp>0));
-    for(const h of this.hazards){if(h.riceHeld)continue;h.timer-=dt;if(h.timer<=0){if(h.damage)this.emit('hazard',{x:h.x,z:h.z,radius:h.radius,innerRadius:h.innerRadius,color:h.color,shape:h.shape,length:h.length,width:h.width,angle:h.angle});if(distanceToHazard(p.x,p.z,h)<.45&&h.damage){this.hurt(mochiIncomingDamage(this,h.damage,h.sourceId),h.x,h.z);if(this.phase==='defeat')return;}}}
+    for(const h of this.hazards){if(h.riceHeld)continue;h.timer-=dt;if(h.timer<=0){if(h.damage)this.emit('hazard',{x:h.x,z:h.z,radius:h.radius,innerRadius:h.innerRadius,color:h.color,shape:h.shape,length:h.length,width:h.width,angle:h.angle});if(distanceToHazard(p.x,p.z,h)<.45&&h.damage&&!mountNegatesFootHazard(this,h)){this.hurt(mochiIncomingDamage(this,h.damage,h.sourceId),h.x,h.z);if(this.phase==='defeat')return;}}}
     this.hazards=this.hazards.filter(h=>h.timer>0);
     this.orbitTimer-=dt;if(this.effectRank('orbit')&&this.orbitTimer<=0){this.orbitTimer=.45;for(let i=0;i<this.effectRank('orbit');i++){const a=this.time*2.3+i/this.effectRank('orbit')*Math.PI*2,x=p.x+Math.cos(a)*2.5,z=p.z+Math.sin(a)*2.5;for(const e of this.enemies)if(e.hp>0&&Math.hypot(e.x-x,e.z-z)<e.radius+1)this.hit(e,this.skillDamage(this.heroId(p.hero),12+this.rank('starlightHeal')*4),p.x,p.z,false,false,HEROES[p.hero].id);}}
     for(const orb of this.orbs){orb.age+=dt;const x=p.x-orb.x,z=p.z-orb.z,d=Math.hypot(x,z)||.01;if(d<3.5+this.effectRank('reach')*1.5||orb.age>7){const k=Math.min(1,dt*(orb.age>7?5:9));orb.x+=x*k;orb.z+=z*k;}if(d<.8){this.addCrystals(orb.value);orb.value=0;this.emit('collect');}}

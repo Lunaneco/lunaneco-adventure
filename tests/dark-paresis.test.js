@@ -9,7 +9,7 @@ import {LEVEL_RULES} from '../src/level-rules.js';
 import {storyScenesFor} from '../src/chapter.js';
 import {STORY_CAST} from '../src/story-cast.js';
 import {existsSync} from 'node:fs';
-import {darkHeheWave,kephiaPairsReady,toggleKephiaHero,ENDING_CREDITS,PARESIS_ACT_START,DARK_PARESIS_SCENES,KEPHIA_BATTLE_LINES} from '../src/dark-paresis.js';
+import {darkHeheWave,kephiaPairsReady,kephiaLockedPhases,kephiaBoard,toggleKephiaHero,ENDING_CREDITS,PARESIS_ACT_START,DARK_PARESIS_SCENES,KEPHIA_BATTLE_LINES} from '../src/dark-paresis.js';
 import {VOICE_MANIFEST} from '../src/voice-manifest.js';
 import {finishPredation} from '../src/hehereal-predation.js';
 import {dialogueVoiceId} from '../src/voice-catalog.js';
@@ -105,6 +105,12 @@ test('the finale assigns eight heroes into four disjoint pairs and fights in tha
   assert.deepEqual(g.party,['hehereal','lumi']);
   for(const id of [46,47,48,49])completeAct(ready,id);
   assert.equal(ready.story.finaleCleared,true);
+  assert.equal(kephiaLockedPhases(ready).size,0);
+  assert.equal(kephiaBoard(ready).includes('disabled'),false);
+  const rearranged=toggleKephiaHero(ready.story.kephiaPairs,0,'nyanluna',{lockedPhases:kephiaLockedPhases(ready)});
+  assert.equal(rearranged[0].includes('nyanluna'),false);
+  ready.story.kephiaPairs=toggleKephiaHero(rearranged,0,'lumi');
+  assert.deepEqual(partyForAct(['nyanluna'],roster,ready,46,'nyanluna'),['tsukineko','lumi']);
 });
 
 test('dark paresis rooms and enemies belong to the tower',()=>{

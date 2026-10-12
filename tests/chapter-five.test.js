@@ -51,11 +51,25 @@ test('the pair bonus is confined to the deployed pair; mount uses Omsolo speed a
 });
 test('mounted damage uses each defense, ends on either knockout, and both down defeats once',()=>{
  for(const loser of ['prim','tsukineko','both']){const g=quiet();g.mountPrim();g.player.invincible=0;const before=[g.healthFor(1).hp,g.healthFor(5).hp];g.hurt(100,0,0);for(const [j,i] of [1,5].entries())near(before[j]-g.healthFor(i).hp,100*100/(100+g.statsFor(i).defense));
-  g.player.invincible=0;if(loser!=='prim')g.healthFor(1).hp=1;if(loser!=='tsukineko')g.healthFor(5).hp=1;g.hurt(100,0,0);assert.equal(g.mount.active,false);assert.equal(g.mount.cooldown,20);assert.equal(g.phase,loser==='both'?'defeat':'playing');if(loser==='tsukineko')assert.equal(g.player.hero,5);assert.equal(g.drainEvents().filter(e=>e.type==='defeat').length,loser==='both'?1:0);
+  g.player.invincible=0;if(loser!=='prim')g.healthFor(1).hp=1;if(loser!=='tsukineko')g.healthFor(5).hp=1;g.hurt(100,0,0);assert.equal(g.mount.active,false);assert.equal(g.mount.cooldown,0);assert.equal(g.phase,loser==='both'?'defeat':'playing');if(loser==='tsukineko')assert.equal(g.player.hero,5);assert.equal(g.drainEvents().filter(e=>e.type==='defeat').length,loser==='both'?1:0);
  }
 });
-test('mount duration/cooldown freeze in pause and choices, prevent immediate remount, then recover',()=>{
- const g=quiet();g.mountPrim();g.pause();tick(g,2);assert.equal(g.mount.remaining,12);g.resume();g.phase='upgrade';tick(g,2);assert.equal(g.mount.remaining,12);g.phase='playing';tick(g,12.1);assert.equal(g.mount.active,false);assert.ok(g.mount.cooldown>19.8);assert.equal(g.mountPrim(),false);tick(g,20.1);assert.equal(g.mount.cooldown,0);assert.equal(g.mountPrim(),true);assert.ok(PRIM_MOUNT.scale>1.5);
+test('mount toggles on and off with no cooldown, and a foot hazard deals damage only after dismount',()=>{
+ const g=quiet();assert.equal(g.mount.active,false);assert.equal(g.mount.cooldown,0);
+ assert.ok(g.mountPrim());assert.equal(g.mount.active,true);assert.equal(g.mount.cooldown,0);
+ g.pause();tick(g,2);assert.equal(g.mount.active,true);g.resume();g.phase='upgrade';tick(g,2);assert.equal(g.mount.active,true);g.phase='playing';
+ tick(g,30);assert.equal(g.mount.active,true);assert.equal(g.mount.cooldown,0);
+ assert.ok(g.mountPrim());assert.equal(g.mount.active,false);assert.equal(g.mount.cooldown,0);
+ assert.ok(g.mountPrim());assert.equal(g.mount.active,true);
+ const hazard={kind:'sigil',x:g.player.x,z:g.player.z,radius:2.2,timer:.02,damage:80,color:0xd389ff};
+ g.player.invincible=0;const mounted=[g.healthFor(1).hp,g.healthFor(5).hp];g.hazards.push(hazard);g.tick(.05);
+ assert.equal(g.healthFor(1).hp,mounted[0]);assert.equal(g.healthFor(5).hp,mounted[1]);
+ g.player.invincible=0;const shot=g.player.hp;g.projectiles.push({owner:'enemy',x:g.player.x,z:g.player.z,vx:0,vz:0,life:1,damage:40,radius:.3});g.tick(.05);
+ assert.ok(g.player.hp<shot);assert.equal(g.mount.active,true);
+ assert.ok(g.mountPrim());assert.equal(g.mount.active,false);assert.equal(g.mount.cooldown,0);
+ hazard.timer=.02;hazard.x=g.player.x;hazard.z=g.player.z;g.player.invincible=0;const before=g.player.hp,partner=g.healthFor(5).hp;g.hazards.push(hazard);g.tick(.05);
+ near(before-g.player.hp,80*100/(100+g.statsFor(g.player.hero).defense));assert.equal(g.healthFor(5).hp,partner);
+ assert.ok(PRIM_MOUNT.scale>1.5);
 });
 test('Prim breath is a forward fixed-direction piercing beam; duet consumes both meters and uses both attack values',()=>{
  for(const duet of [false,true]){const g=quiet({party:duet?['tsukineko','prim']:['prim'],hero:duet?1:5});Object.assign(g.partner,{x:0,z:0});const inside=target(g,0,2),far=target(g,0,18),side=target(g,6,3),back=target(g,0,-5);g.ultimateCharges.prim=100;if(duet)g.ultimateCharges.tsukineko=100;assert.ok(g.ultimate());const effect=g.ultimateEffects[0];assert.equal(effect.kind,'prismBeam');assert.equal(effect.angle,0);assert.equal(g.ultimateCharges.prim,0);if(duet)assert.equal(g.ultimateCharges.tsukineko,0);

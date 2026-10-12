@@ -50,16 +50,20 @@ test('invalid heroes, slot indices, duplicate and unknown skills remain guarded 
  const restored=normalizeProgression({...p,blessingLoadouts:{lumi:['nova','nova','missing']}},HEROES);
  assert.deepEqual(equippedSkills(restored,'lumi'),['nova','lumiPower','lumiReach']);
 });
-test('all solo/duo parties include chosen foreign skills and preserve automatic common/pair candidates',()=>{
+test('after the extra clear, common and pair skills enter combat only when placed in a slot',()=>{
  for(const a of HEROES)for(const b of [null,...HEROES.filter(h=>h.id!==a.id)]){
-   const party=b?[a.id,b.id]:[a.id],p=profile();assert.ok(equipSkill(p,a.id,0,'bladeTempo'));assert.ok(equipSkill(p,a.id,1,'moonDropBond'));
-   const pool=skillsForParty(party,p);assert.equal(new Set(pool.map(s=>s.id)).size,pool.length);
-   for(const id of ['bladeTempo','moonDropBond','ward','vitality','leech','stride'])assert.ok(pool.some(s=>s.id===id));
-   for(const pair of SKILLS.filter(s=>s.requires?.length===2&&s.requires.every(id=>party.includes(id))))assert.ok(pool.includes(pair));
+   const party=b?[a.id,b.id]:[a.id],p=profile();assert.ok(equipSkill(p,a.id,0,'bladeTempo'));assert.ok(equipSkill(p,a.id,1,'moonDropBond'));assert.ok(equipSkill(p,a.id,2,'ward'));
+   const pool=skillsForParty(party,p),chosen=new Set([...equippedSkills(p,a.id),...(b?equippedSkills(p,b.id):[])]);
+   assert.equal(new Set(pool.map(s=>s.id)).size,pool.length);
+   for(const skill of SKILLS){
+    const inPool=pool.some(s=>s.id===skill.id);
+    if(chosen.has(skill.id))assert.equal(inPool,true,skill.id);
+    else if((skill.requires?.length??0)!==1)assert.equal(inPool,false,skill.id);
+   }
    const view=partyView(party,HEROES.indexOf(a),HEROES,()=>1,p,'戻る',null,{skillHero:b?.id??a.id,skillSlot:2});
    assert.match(view,/id="party-skill-loadout"/);assert.equal((view.match(/data-party-skill-slot=/g)??[]).length,3);
    assert.equal((view.match(/data-party-equip-skill=/g)??[]).length,SKILLS.length);
-   assert.match(view,/対象が出撃していないスキルは効果が出ない場合/);
+   assert.match(view,/自動では入りません/);
  }
 });
 test('shared candidates snapshot on deployment, activate only when chosen and persist through gates',()=>{

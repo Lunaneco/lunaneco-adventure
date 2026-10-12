@@ -7,11 +7,11 @@ export function blessingLoadoutView(profile,hero,selectedSlot=0,{party=false}={}
   const slotAttribute=party?'data-party-skill-slot':'data-blessing-slot',equipAttribute=party?'data-party-equip-skill':'data-equip-blessing';
   return `<section class="blessing-loadout" id="${party?'party-skill-loadout':'blessing-loadout'}" aria-label="${hero.name}のスキル候補を付け替える">
     <header><small>SKILL LOADOUT</small><h3>祝福の候補をセット</h3><span>${available.length} / ${skills.length}種類 解放</span></header>
-    ${free?'<p class="free-skill-unlocked">極宴クリア報酬：全員のスキル・全枠の付け替え解放。編成や成長ツリーの解放状況に関係なく選べます。</p>':''}
+    ${free?'<p class="free-skill-unlocked">極宴クリア報酬：共通・連携・個人のスキルを、全員の3枠へ自由にセットできます。自動では入りません。</p>':''}
     <p>枠を選び、下のスキルをタップして入れ替え。セットした3つが、戦闘中の3択候補に入ります。</p>
     <div class="blessing-slots" role="group" aria-label="入れ替えるスキル枠">${loadout.map((id,i)=>{const skill=SKILLS.find(s=>s.id===id);return `<button ${slotAttribute}="${i}" aria-pressed="${slot===i}" aria-label="${hero.name}の枠${i+1}：${skill.name}"><small>枠 ${i+1}</small>${icon(skill.icon)}<strong>${skill.name}</strong></button>`;}).join('')}</div>
     <h4>${hero.name}の枠${slot+1}に入れるスキル</h4><div class="blessing-options">${available.map(skill=>{const current=loadout.indexOf(skill.id);return `<button ${equipAttribute}="${skill.id}" data-blessing-hero="${hero.id}" aria-label="${skill.name}を枠${slot+1}にセット" ${loadout[slot]===skill.id?'disabled':''}>${icon(skill.icon)}<span>${skill.upgrades?`<b class="skill-upgrade-label">${skillUpgradeLabel(skill)}</b>`:''}<strong>${skill.name}</strong><small>${skill.text}</small></span><em>${current===slot?'セット中':current>=0?`枠${current+1}と交換`:'セット'}</em></button>`;}).join('')}</div>
-    <p class="blessing-loadout-note">上位版は元の効果を継承して強化。元のスキルと両方選んだ場合、共通の効果は高い方のランクで適用します。<br>共通4種と二人の連携スキルは、編成に応じて自動で追加。枠を使いません。${free?'<br>極宴クリア後は、他キャラ・未解放の上位版・連携スキルも枠にセットできます。効果の対象キャラ・武器条件は各スキルの説明どおりです。対象が出撃していないスキルは効果が出ない場合があります。':''}<br>効果が発動するのは戦闘中に祝福を選んでから。効果はその幕の全6WAVEで続き、新しい出撃でリセットされます。候補の設定は自動保存・付け替え無料です。</p>
+    <p class="blessing-loadout-note">上位版は元の効果を継承して強化。元のスキルと両方選んだ場合、共通の効果は高い方のランクで適用します。<br>${free?'共通4種と二人の連携スキルも、セットした枠だけが戦闘の候補になります。自動追加はありません。効果の対象キャラ・武器条件は各スキルの説明どおりです。対象が出撃していないスキルは効果が出ない場合があります。':'共通4種と二人の連携スキルは、編成に応じて自動で追加。枠を使いません。'}<br>効果が発動するのは戦闘中に祝福を選んでから。効果はその幕の全6WAVEで続き、新しい出撃でリセットされます。候補の設定は自動保存・付け替え無料です。</p>
   </section>`;
 }
 

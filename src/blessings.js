@@ -96,10 +96,10 @@ export function equipSkill(profile,heroId,slot,skillId){
   if(old!==-1)next[old]=next[slot];
   next[slot]=skillId;profile.blessingLoadouts??={};profile.blessingLoadouts[heroId]=next;return true;
 }
-// Common and pair blessings are automatic. Personal candidates use a fixed loadout.
+// Before the Hehe extra clear, common and pair blessings are automatic. After it, every skill uses the three slots.
 export function skillsForParty(party,profile){
   const ids=new Set(party),equipped=new Set(party.flatMap(id=>equippedSkills(profile,id)));
-  if(hasFreeSkillLoadout(profile))return SKILLS.filter(skill=>equipped.has(skill.id)||skill.requires?.length!==1&&(skill.requires??[]).every(id=>ids.has(id)));
+  if(hasFreeSkillLoadout(profile))return SKILLS.filter(skill=>equipped.has(skill.id));
   return SKILLS.filter(skill=>(skill.requires??[]).every(id=>ids.has(id))&&(skill.requires?.length!==1||equipped.has(skill.id)));
 }
 export function blessingSource(skill,roster){
