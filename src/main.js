@@ -34,7 +34,7 @@ import {STAGE_MISSIONS,missionsFor,trialStatus} from './missions.js';
 import {equipUnique,uniqueEquipment} from './equipment.js';
 import {PARTY_KEY,normalizeParty,changeParty} from './party.js';
 import {partyView} from './party-ui.js';
-import {skillUpgradeLabel,blessingSource,partyTitle,equipSkill,hasFreeSkillLoadout} from './blessings.js';
+import {skillUpgradeLabel,blessingSource,partyTitle,equipSkill,equippedSkills,hasFreeSkillLoadout} from './blessings.js';
 import './style.css';
 import './chapter.css';
 import './story-cast.css';
@@ -453,7 +453,7 @@ document.addEventListener('click',event=>{
     if(target.hasAttribute('data-party-skill-slot')){const slot=Number(target.dataset.partySkillSlot);if(Number.isInteger(slot)&&slot>=0&&slot<3){partySkillSlot=slot;renderPartyDialog();$(`[data-party-skill-slot="${slot}"]`)?.focus({preventScroll:true});}}
     const hero=$('#party-skill-loadout [data-blessing-hero]')?.dataset.blessingHero;
     if(target.dataset.partyEquipSkill&&target.dataset.blessingHero===hero&&selectedParty.includes(hero)&&equipSkill(progression,hero,partySkillSlot,target.dataset.partyEquipSkill)){
-      persistProgression();renderPartyDialog();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.partyEquipSkill),message=`枠${partySkillSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#party-skill-feedback').textContent=message;announce(message);$(`[data-party-skill-slot="${partySkillSlot}"]`)?.focus({preventScroll:true});
+      persistProgression();renderPartyDialog();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.partyEquipSkill),on=equippedSkills(progression,hero).includes(skill.id),message=hasFreeSkillLoadout(progression)?`「${skill.name}」を候補${on?'に加えました':'から外しました'}。${storageAvailable?'保存しました。':'この環境では保存できません。'}`:`枠${partySkillSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#party-skill-feedback').textContent=message;announce(message);(hasFreeSkillLoadout(progression)?$(`[data-party-equip-skill="${skill.id}"]`):$(`[data-party-skill-slot="${partySkillSlot}"]`))?.focus({preventScroll:true});
     }
   }
   if(target.dataset.equipWeapon&&!game&&!$('#chapter-menu').classList.contains('hidden')&&(!activeDialog||activeDialog==='weapon-result')){
@@ -477,7 +477,7 @@ document.addEventListener('click',event=>{
   if(target.hasAttribute('data-edit-blessings')&&!game){if(activeDialog==='talent')closeDialog();$('#blessing-loadout')?.scrollIntoView({block:'start',behavior:'instant'});$(`[data-blessing-slot="${blessingSlot}"]`)?.focus({preventScroll:true});}
   if(target.hasAttribute('data-blessing-slot')&&!game){const slot=Number(target.dataset.blessingSlot);if(Number.isInteger(slot)&&slot>=0&&slot<3){blessingSlot=slot;renderTalent();$(`[data-blessing-slot="${slot}"]`).focus({preventScroll:true});}}
   if(target.dataset.equipBlessing&&!game&&target.dataset.blessingHero===treeHero&&equipSkill(progression,treeHero,blessingSlot,target.dataset.equipBlessing)){
-    persistProgression();renderTalent();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.equipBlessing),message=`枠${blessingSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#tree-feedback').textContent=message;announce(message);$(`[data-blessing-slot="${blessingSlot}"]`).focus({preventScroll:true});
+    persistProgression();renderTalent();audio.play('click');const skill=SKILLS.find(s=>s.id===target.dataset.equipBlessing),on=equippedSkills(progression,treeHero).includes(skill.id),message=hasFreeSkillLoadout(progression)?`「${skill.name}」を候補${on?'に加えました':'から外しました'}。${storageAvailable?'保存しました。':'この環境では保存できません。'}`:`枠${blessingSlot+1}に「${skill.name}」をセット。${storageAvailable?'保存しました。':'この環境では保存できません。'}`;$('#tree-feedback').textContent=message;announce(message);(hasFreeSkillLoadout(progression)?$(`[data-equip-blessing="${skill.id}"]`):$(`[data-blessing-slot="${blessingSlot}"]`))?.focus({preventScroll:true});
   }
   if(target.dataset.treeHero)chooseTreeHero(target.dataset.treeHero);
   if(target.dataset.treeTier&&!game){treeSelection=target.dataset.treeTier==='5'?'miasmaGate':target.dataset.treeTier==='4'?'demonGate':target.dataset.treeTier==='3'?'blessing1':target.dataset.treeTier==='2'?'ascension':'origin';renderTalent();$(`[data-tree-tier="${target.dataset.treeTier}"]`).focus({preventScroll:true});}

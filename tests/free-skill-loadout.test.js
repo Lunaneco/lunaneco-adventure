@@ -29,12 +29,13 @@ test('the last gate alone grants the reward once and keeps clear tickets intact'
  for(const act of [0,20,21,22,27,31]){const other=new Adventure({act,progression:profile(false)});other.drainEvents();assert.ok(gate(other,2));assert.equal(hasFreeSkillLoadout(other.progression),false);assert.equal(other.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);}
  const lost=new Adventure({act:33,progression:profile(false)});Object.assign(lost,{phase:'defeat',wave:6,area:2,exitOpen:true,exitDelay:0,pendingBlessings:0});Object.assign(lost.player,lost.exitPoint);assert.equal(lost.crossExit(),false);assert.equal(hasFreeSkillLoadout(lost.progression),false);
 });
-test('every recruited hero can equip every skill in every slot without growth or wallet mutation',()=>{
- for(const hero of HEROES)for(const skill of SKILLS)for(let slot=0;slot<3;slot++){
+test('every recruited hero can add and remove every skill without a three-slot cap',()=>{
+ for(const hero of HEROES){
    const p=profile(),characters=structuredClone(p.characters),wallet=structuredClone(p.inventory);
    assert.equal(loadoutSkillChoices(p,hero.id).length,SKILLS.length);
-   if(equippedSkills(p,hero.id)[slot]!==skill.id)assert.ok(equipSkill(p,hero.id,slot,skill.id));
-   assert.equal(equippedSkills(p,hero.id)[slot],skill.id);assert.equal(new Set(equippedSkills(p,hero.id)).size,3);
+   for(const skill of SKILLS)if(!equippedSkills(p,hero.id).includes(skill.id))assert.ok(equipSkill(p,hero.id,0,skill.id));
+   assert.equal(equippedSkills(p,hero.id).length,SKILLS.length);
+   assert.ok(equipSkill(p,hero.id,0,SKILLS[0].id));assert.equal(equippedSkills(p,hero.id).includes(SKILLS[0].id),false);
    assert.deepEqual(p.characters,characters);assert.deepEqual(p.inventory,wallet);
    assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
  }
@@ -43,12 +44,12 @@ test('every recruited hero can equip every skill in every slot without growth or
 test('invalid heroes, slot indices, duplicate and unknown skills remain guarded after unlocking',()=>{
  const p=profile(),before=structuredClone(p);
  for(const id of ['constructor','__proto__','missing']){assert.deepEqual(loadoutSkillChoices(p,id),[]);assert.equal(equipSkill(p,id,0,'nova'),false);}
- for(const slot of [-1,3,.5,NaN,'1'])assert.equal(equipSkill(p,'lumi',slot,'nova'),false);
+ for(const slot of [-1,3,.5,NaN,'1'])assert.equal(equipSkill(p,'lumi',slot,'missing'),false);
  for(const id of ['constructor','__proto__','missing'])assert.equal(equipSkill(p,'lumi',0,id),false);
- assert.deepEqual(p,before);assert.ok(equipSkill(p,'lumi',0,'nova'));assert.ok(equipSkill(p,'lumi',1,'nova'));
- assert.deepEqual(equippedSkills(p,'lumi'),['lumiReach','nova','lumiFocus']);
+ assert.deepEqual(p,before);assert.ok(equipSkill(p,'lumi',0,'nova'));assert.ok(equippedSkills(p,'lumi').includes('nova'));
+ assert.ok(equipSkill(p,'lumi',1,'nova'));assert.equal(equippedSkills(p,'lumi').includes('nova'),false);
  const restored=normalizeProgression({...p,blessingLoadouts:{lumi:['nova','nova','missing']}},HEROES);
- assert.deepEqual(equippedSkills(restored,'lumi'),['nova','lumiPower','lumiReach']);
+ assert.deepEqual(equippedSkills(restored,'lumi'),['nova']);
 });
 test('after the extra clear, common and pair skills enter combat only when placed in a slot',()=>{
  for(const a of HEROES)for(const b of [null,...HEROES.filter(h=>h.id!==a.id)]){
@@ -61,9 +62,9 @@ test('after the extra clear, common and pair skills enter combat only when place
     else if((skill.requires?.length??0)!==1)assert.equal(inPool,false,skill.id);
    }
    const view=partyView(party,HEROES.indexOf(a),HEROES,()=>1,p,'戻る',null,{skillHero:b?.id??a.id,skillSlot:2});
-   assert.match(view,/id="party-skill-loadout"/);assert.equal((view.match(/data-party-skill-slot=/g)??[]).length,3);
+   assert.match(view,/id="party-skill-loadout"/);assert.equal((view.match(/data-party-skill-slot=/g)??[]).length,0);
    assert.equal((view.match(/data-party-equip-skill=/g)??[]).length,SKILLS.length);
-   assert.match(view,/自動では入りません/);
+   assert.match(view,/好きな数だけ候補にできます/);
  }
 });
 test('shared candidates snapshot on deployment, activate only when chosen and persist through gates',()=>{
@@ -72,11 +73,11 @@ test('shared candidates snapshot on deployment, activate only when chosen and pe
  assert.ok(choose(g,'penetration'));assert.equal(g.effectRank('haste'),1);assert.ok(choose(g,'power'));assert.equal(g.rank('power'),1);
  equipSkill(g.progression,'lumi',0,'nova');assert.ok(g.skillPool.some(s=>s.id==='penetration'));assert.ok(!g.skillPool.some(s=>s.id==='nova'));
  assert.ok(gate(g,0));assert.equal(g.rank('penetration'),1);
- const next=new Adventure({progression:g.progression,hero:7,party:['lumi']});assert.deepEqual(next.skills,{});assert.ok(next.skillPool.some(s=>s.id==='nova'));assert.equal(choose(next,'penetration'),false);
+ const next=new Adventure({progression:g.progression,hero:7,party:['lumi']});assert.deepEqual(next.skills,{});assert.ok(next.skillPool.some(s=>s.id==='nova'));assert.ok(next.skillPool.some(s=>s.id==='penetration'));
 });
 test('pre-clear restrictions are unchanged and reward notice is exclusive to Hehe EX',()=>{
  const p=profile(false);assert.equal(equipSkill(p,'lumi',0,'bladeTempo'),false);assert.deepEqual(equippedSkills(p,'lumi'),defaultSkills('lumi'));
  assert.doesNotMatch(partyView(['lumi'],7,HEROES,()=>1,p),/party-free-skills|data-party-equip-skill/);
  assert.doesNotMatch(blessingLoadoutView(p,HEROES[7]),/free-skill-unlocked/);
- assert.match(extraDifficultyView(actFor(33)),/全員のスキル・全3枠/);assert.doesNotMatch(extraDifficultyView(actFor(20)),/全員のスキル/);
+ assert.match(extraDifficultyView(actFor(33)),/好きな数だけ候補/);assert.doesNotMatch(extraDifficultyView(actFor(20)),/全員のスキル/);
 });
