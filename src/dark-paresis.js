@@ -7,15 +7,19 @@ export const STORY_ACT_SLOTS=50;
 export const isParesisAct=id=>id>=PARESIS_ACT_START&&id<=PARESIS_ACT_END;
 
 export const ENDING_CREDITS=Object.freeze([
-  Object.freeze({id:'nyanluna',name:'にゃんるな',handle:'@nyanlunaAI'}),
-  Object.freeze({id:'mochinyafe',name:'もちにゃふぇ',handle:'@nyanlunaAI'}),
-  Object.freeze({id:'tsukineko',name:'つきねこ',handle:'@nyanlunaAI'}),
-  Object.freeze({id:'prim',name:'プリム',handle:'@nyanlunaAI'}),
-  Object.freeze({id:'omsolo',name:'オムソロ',handle:'@omusbi2580'}),
-  Object.freeze({id:'shizuku',name:'雫',handle:'@yuno_yuu_AIart'}),
-  Object.freeze({id:'hehereal',name:'へへりある',handle:'@hehehehehe035'}),
-  Object.freeze({id:'lumi',name:'るみ',handle:'@Project_Luminus'}),
+  Object.freeze({id:'nyanluna',name:'にゃんるな',handle:'@nyanlunaAI',line:'月の光は、まだ道になる。'}),
+  Object.freeze({id:'mochinyafe',name:'もちにゃふぇ',handle:'@nyanlunaAI',line:'小さな声も、届くところまで。'}),
+  Object.freeze({id:'tsukineko',name:'つきねこ',handle:'@nyanlunaAI',line:'隣の席は、空けたままにしない。'}),
+  Object.freeze({id:'prim',name:'プリム',handle:'@nyanlunaAI',line:'虹の向こうに、名前を呼ぶ声がある。'}),
+  Object.freeze({id:'omsolo',name:'オムソロ',handle:'@omusbi2580',line:'守りたい人がいるなら、剣はそこにある。'}),
+  Object.freeze({id:'shizuku',name:'雫',handle:'@yuno_yuu_AIart',line:'紅い月の下で、また会おう。'}),
+  Object.freeze({id:'hehereal',name:'へへりある',handle:'@hehehehehe035',line:'冷めた食卓も、また温められる。'}),
+  Object.freeze({id:'lumi',name:'るみ',handle:'@Project_Luminus',line:'指先の光は、帰れる方角を指す。'}),
 ]);
+export function endingRollMarkup(imageFor){
+  const cast=ENDING_CREDITS.map(hero=>{const speaker=imageFor(hero.id);return `<article class="ending-credit"><img src="${speaker.image}" alt="${speaker.alt}"><div><strong>${hero.name}</strong><small>${hero.handle}</small><p>${hero.line}</p></div></article>`;}).join('');
+  return `<section class="ending-roll-screen" aria-label="エンドロール"><div class="ending-roll-viewport"><div class="ending-roll-track"><header><p class="eyebrow">LUNANECO ADVENTURE</p><h2>ルナネコの不思議な冒険</h2><p>終章</p></header>${cast}<p class="ending-thanks">闇を分けて、また同じ場所で。</p><p class="ending-thanks">ここまで遊んでくれて、ありがとう。</p></div></div><button id="ending-close" class="primary">メニューへ</button></section>`;
+}
 export const KEPHIA_HERO_NAMES=Object.freeze(Object.fromEntries(ENDING_CREDITS.map(hero=>[hero.id,hero.name])));
 export const KEPHIA_PHASE_LABELS=Object.freeze(['1段階','2段階','3段階','最終形態']);
 export const KEPHIA_BATTLE_LINES=Object.freeze({

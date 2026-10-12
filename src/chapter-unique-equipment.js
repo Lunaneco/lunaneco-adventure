@@ -118,6 +118,17 @@ export const CHAPTER_UNIQUE_EQUIPMENT=Object.freeze([
   }
 ].map(item=>Object.freeze({...item,bonus:Object.freeze(item.bonus)})));
 export const chapterUniqueReward=act=>CHAPTER_UNIQUE_EQUIPMENT.find(item=>item.act===act);
+export const BANQUET_UNIQUE=Object.freeze({
+  id:'banquet-gold-ring',
+  name:'極宴の金環',
+  act:33,
+  extraReward:true,
+  icon:'star',
+  color:'#e7c56a',
+  image:'assets/equipment/banquet-gold-ring-v1.png',
+  bonus:Object.freeze({hp:180,attack:.4,defense:42}),
+  note:'へへへ極宴を越えた証。八光還りの塔冠よりは控えめだが、章のユニーク装備を上回る。最大HP +180／攻撃力 +40%／防御力 +42。',
+});
 export const LEGENDARY_UNIQUE=Object.freeze({
   id:'eight-light-crown',
   name:'八光還りの塔冠',
@@ -125,6 +136,7 @@ export const LEGENDARY_UNIQUE=Object.freeze({
   legendary:true,
   icon:'star',
   color:'#f3d27a',
+  image:'assets/equipment/eight-light-crown-v1.png',
   bonus:Object.freeze({hp:220,attack:.48,defense:52}),
   note:'ダークパレシスの核を越え、散らされた八つの光を結んだ伝説の冠。いま所持できるユニーク装備で、いちばん高い力を持つ。最大HP +220／攻撃力 +48%／防御力 +52。',
 });

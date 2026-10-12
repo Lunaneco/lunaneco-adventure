@@ -27,5 +27,5 @@ export function partyView(party,lead,roster,levelFor,profile,backLabel='戻る',
 function partySkillEditor(party,lead,roster,profile,selected,slot){
  const hero=roster.find(h=>h.id===selected&&party.includes(h.id))??(party.includes(roster[lead]?.id)?roster[lead]:roster.find(h=>party.includes(h.id)));
  if(!hero)return '';
- return `<section class="party-free-skills" aria-label="極宴クリア報酬のスキル付け替え"><h3>全員のスキルを自由にセット</h3><p>付け替えるキャラを選択。共通・連携・個人のスキルを、好きな数だけ候補にできます。</p><div class="party-skill-heroes" role="group" aria-label="スキルを設定する仲間">${party.map(id=>roster.find(h=>h.id===id)).filter(Boolean).map(h=>`<button data-party-skill-hero="${h.id}" aria-pressed="${h.id===hero.id}">${h.name}</button>`).join('')}</div>${blessingLoadoutView(profile,hero,slot,{party:true})}<p id="party-skill-feedback" role="status"></p></section>`;
+ return `<section class="party-free-skills" aria-label="ラスボス討伐後のスキル付け替え"><h3>全員のスキルを自由にセット</h3><p>付け替えるキャラを選択。共通・連携・個人のスキルを、好きな数だけ候補にできます。</p><div class="party-skill-heroes" role="group" aria-label="スキルを設定する仲間">${party.map(id=>roster.find(h=>h.id===id)).filter(Boolean).map(h=>`<button data-party-skill-hero="${h.id}" aria-pressed="${h.id===hero.id}">${h.name}</button>`).join('')}</div>${blessingLoadoutView(profile,hero,slot,{party:true})}<p id="party-skill-feedback" role="status"></p></section>`;
 }

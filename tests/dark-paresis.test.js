@@ -9,7 +9,7 @@ import {LEVEL_RULES} from '../src/level-rules.js';
 import {storyScenesFor} from '../src/chapter.js';
 import {STORY_CAST} from '../src/story-cast.js';
 import {existsSync} from 'node:fs';
-import {darkHeheWave,kephiaPairsReady,kephiaLockedPhases,kephiaBoard,toggleKephiaHero,ENDING_CREDITS,PARESIS_ACT_START,DARK_PARESIS_SCENES,KEPHIA_BATTLE_LINES} from '../src/dark-paresis.js';
+import {darkHeheWave,kephiaPairsReady,kephiaLockedPhases,kephiaBoard,toggleKephiaHero,ENDING_CREDITS,endingRollMarkup,PARESIS_ACT_START,DARK_PARESIS_SCENES,KEPHIA_BATTLE_LINES} from '../src/dark-paresis.js';
 import {VOICE_MANIFEST} from '../src/voice-manifest.js';
 import {finishPredation} from '../src/hehereal-predation.js';
 import {dialogueVoiceId} from '../src/voice-catalog.js';
@@ -195,4 +195,9 @@ test('clearing the final kephia form records all four finale acts',()=>{
   assert.equal(g.phase,'victory');
   assert.equal(g.progression.story.actClears.slice(46,50).every(Boolean),true);
   assert.equal(g.progression.story.finaleCleared,true);
+});
+test('the ending roll names every hero and scrolls their closing line',()=>{
+  const html=endingRollMarkup(id=>({image:`/portraits/${id}.png`,alt:id}));
+  for(const hero of ENDING_CREDITS){assert.match(html,new RegExp(hero.name));assert.match(html,new RegExp(hero.line));assert.match(html,new RegExp(hero.handle));}
+  assert.match(html,/ending-roll-track/);assert.match(html,/ここまで遊んでくれて、ありがとう/);
 });

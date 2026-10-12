@@ -61,6 +61,7 @@ test('the first chapter 10 extra clear grants the legendary unique once',()=>{
   }
   const before=ready();
   assert.match(equipmentView(before,'nyanluna','unique'),/八光還りの塔冠/);
+  assert.match(equipmentView(before,'nyanluna','unique'),/eight-light-crown-v1\.png/);
   assert.match(equipmentView(before,'nyanluna','unique'),/未入手/);
   assert.equal(equipmentView(before,'nyanluna','unique').includes('data-equip-item="eight-light-crown"'),false);
   const g=new Adventure({act:PARESIS_EXTRA_ID,progression:before,party:['shizuku','prim'],seed:4});

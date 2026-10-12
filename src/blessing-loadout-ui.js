@@ -6,7 +6,7 @@ export function blessingLoadoutView(profile,hero,selectedSlot=0,{party=false}={}
   const slotAttribute=party?'data-party-skill-slot':'data-blessing-slot',equipAttribute=party?'data-party-equip-skill':'data-equip-blessing';
   if(free)return `<section class="blessing-loadout" id="${party?'party-skill-loadout':'blessing-loadout'}" aria-label="${hero.name}のスキル候補を付け替える">
     <header><small>SKILL LOADOUT</small><h3>祝福の候補をセット</h3><span>${loadout.length} / ${available.length}種類 セット中</span></header>
-    <p class="free-skill-unlocked">極宴クリア報酬：共通・連携・個人のスキルを、好きな数だけ候補にできます。</p>
+    <p class="free-skill-unlocked">ラスボス討伐の特典：共通・連携・個人のスキルを、好きな数だけ候補にできます。</p>
     <p>スキルをタップすると、そのキャラの戦闘候補に入ったり外れたりします。セットしたスキルが、クリスタルの3択に現れます。</p>
     <div class="blessing-options">${available.map(skill=>{const on=loadout.includes(skill.id);return `<button ${equipAttribute}="${skill.id}" data-blessing-hero="${hero.id}" aria-pressed="${on}" aria-label="${skill.name}を${on?'候補から外す':'候補に加える'}">${icon(skill.icon)}<span>${skill.upgrades?`<b class="skill-upgrade-label">${skillUpgradeLabel(skill)}</b>`:''}<strong>${skill.name}</strong><small>${skill.text}</small></span><em>${on?'セット中':'セット'}</em></button>`;}).join('')}</div>
     <p class="blessing-loadout-note">上位版は元の効果を継承して強化。元のスキルと両方選んだ場合、共通の効果は高い方のランクで適用します。<br>共通・連携・個人の区別なく、セットしたスキルだけが候補です。自動追加はありません。対象が出撃していないスキルは効果が出ない場合があります。<br>効果が発動するのは戦闘中に祝福を選んでから。効果はその幕の全6WAVEで続き、新しい出撃でリセットされます。候補の設定は自動保存・付け替え無料です。</p>

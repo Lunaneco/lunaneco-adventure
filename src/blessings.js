@@ -82,7 +82,7 @@ export function skillSourceKey(skill,profile){const requires=skillSourceRequires
 export function slottedPersonalSkills(heroId,profile){const list=personalSkills(heroId);return chapterSixSkillsOpen(profile)?list.filter(s=>!OPEN_AS_COMMON.has(s.id)):list;}
 export function defaultSkills(heroId,profile){return slottedPersonalSkills(heroId,profile).filter(s=>!s.unlockNode).map(s=>s.id);}
 // Derive this permanent reward from the existing validated EX clear record.
-export const hasFreeSkillLoadout=profile=>profile?.story?.chapterSixCleared===true&&profile.story.extraClears?.[5]===true;
+export const hasFreeSkillLoadout=profile=>profile?.story?.finaleCleared===true;
 export const loadoutSkillChoices=(profile,heroId)=>Object.hasOwn(PERSONAL_SKILLS,heroId)?hasFreeSkillLoadout(profile)?SKILLS:slottedPersonalSkills(heroId,profile):[];
 export function isSkillAvailable(profile,heroId,skillId){
   if(!Object.hasOwn(PERSONAL_SKILLS,heroId))return false;

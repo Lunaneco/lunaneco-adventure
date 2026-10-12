@@ -8,26 +8,31 @@ import {blessingLoadoutView} from '../src/blessing-loadout-ui.js';
 import {extraDifficultyView} from '../src/extra-stage-ui.js';
 import {actFor} from '../src/acts.js';
 
-const profile=(cleared=true,story={})=>normalizeProgression({story:{version:2,actClears:Array(32).fill(true),extraClears:[false,false,false,false,false,cleared],...story}},HEROES);
+const profile=(cleared=true,story={})=>normalizeProgression({story:{version:2,actClears:Array.from({length:50},(_,i)=>cleared||i<32),...story}},HEROES);
 const choose=(g,id)=>{g.phase='upgrade';g.pendingBlessings=1;g.offers=[SKILLS.find(s=>s.id===id)];return g.chooseSkill(id);};
 const gate=(g,area)=>{g.phase='playing';g.wave=area*2+2;g.area=area;g.exitOpen=true;g.exitDelay=0;g.pendingBlessings=0;Object.assign(g.player,g.exitPoint);return g.crossExit();};
 
-test('valid old extreme-banquet clear records unlock retroactively; other or forged clears do not',()=>{
- const p=profile();assert.equal(hasFreeSkillLoadout(p),true);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
+test('a cleared finale unlocks free skills; an old banquet clear and forged flags do not',()=>{
+ const p=profile();assert.equal(p.story.finaleCleared,true);assert.equal(hasFreeSkillLoadout(p),true);assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
  assert.equal(hasFreeSkillLoadout(profile(false)),false);
- assert.equal(hasFreeSkillLoadout(profile(false,{extraClears:[true,true,true,false,false,false]})),false);
- assert.equal(hasFreeSkillLoadout(profile(true,{actClears:Array(27).fill(true),chapterSixCleared:true})),false);
- assert.equal(hasFreeSkillLoadout(profile(false,{freeSkills:true})),false);
+ assert.equal(hasFreeSkillLoadout(profile(false,{extraClears:[false,false,false,false,false,true],chapterSixCleared:true})),false);
+ assert.equal(hasFreeSkillLoadout(profile(false,{freeSkills:true,finaleCleared:true})),false);
 });
-test('the last gate alone grants the reward once and keeps clear tickets intact',()=>{
- const g=new Adventure({act:33,party:['omsolo'],hero:2,progression:profile(false)});g.drainEvents();
- assert.equal(hasFreeSkillLoadout(g.progression),false);assert.ok(gate(g,0));assert.ok(gate(g,1));
- assert.equal(hasFreeSkillLoadout(g.progression),false);assert.equal(g.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);
- assert.ok(gate(g,2));assert.equal(g.phase,'victory');assert.equal(g.clearRewardTickets,10);
+test('the finale grants free skills once, and the Hehe extra grants the banquet ring once',()=>{
+ const banquet=new Adventure({act:33,party:['omsolo'],hero:2,progression:profile(false)});banquet.drainEvents();
+ assert.equal(hasFreeSkillLoadout(banquet.progression),false);assert.ok(gate(banquet,2));assert.equal(banquet.phase,'victory');
+ assert.equal(banquet.earnedUnique,'banquet-gold-ring');assert.equal(banquet.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);
+ const repeat=new Adventure({act:33,party:['omsolo'],hero:2,progression:banquet.progression});repeat.drainEvents();assert.ok(gate(repeat,2));assert.equal(repeat.earnedUnique,undefined);assert.equal(repeat.progression.equipment.owned.filter(id=>id==='banquet-gold-ring').length,1);
+ const ready=profile(false);for(let id=0;id<49;id++)ready.story.actClears[id]=true;ready.story.kephiaPairs=[['nyanluna','tsukineko'],['omsolo','mochinyafe'],['shizuku','prim'],['hehereal','lumi']];
+ const g=new Adventure({act:49,progression:ready,party:['lumi']});g.player.invincible=999;g.drainEvents();
+ assert.equal(g.act,49);assert.equal(hasFreeSkillLoadout(g.progression),false);
+ g.enemies.find(e=>e.type==='boss').hp=0;g.tick(1/60);
+ for(let i=0;i<200&&!g.exitOpen&&g.phase==='playing';i++)g.tick(1/60);
+ g.exitDelay=0;Object.assign(g.player,g.exitPoint);assert.equal(g.crossExit(),true);
  assert.equal(g.drainEvents().filter(e=>e.type==='freeSkillsUnlocked').length,1);assert.equal(hasFreeSkillLoadout(g.progression),true);
- const again=new Adventure({act:33,party:['omsolo'],hero:2,progression:g.progression});again.drainEvents();assert.ok(gate(again,2));assert.equal(again.clearRewardTickets,2);assert.equal(again.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);
- for(const act of [0,20,21,22,27,31]){const other=new Adventure({act,progression:profile(false)});other.drainEvents();assert.ok(gate(other,2));assert.equal(hasFreeSkillLoadout(other.progression),false);assert.equal(other.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);}
- const lost=new Adventure({act:33,progression:profile(false)});Object.assign(lost,{phase:'defeat',wave:6,area:2,exitOpen:true,exitDelay:0,pendingBlessings:0});Object.assign(lost.player,lost.exitPoint);assert.equal(lost.crossExit(),false);assert.equal(hasFreeSkillLoadout(lost.progression),false);
+ const again=new Adventure({act:49,progression:g.progression,party:['lumi']});again.player.invincible=999;again.enemies.find(e=>e.type==='boss').hp=0;again.tick(1/60);
+ for(let i=0;i<200&&!again.exitOpen&&again.phase==='playing';i++)again.tick(1/60);
+ again.exitDelay=0;Object.assign(again.player,again.exitPoint);assert.equal(again.crossExit(),true);assert.equal(again.drainEvents().some(e=>e.type==='freeSkillsUnlocked'),false);
 });
 test('every recruited hero can add and remove every skill without a three-slot cap',()=>{
  for(const hero of HEROES){
@@ -39,7 +44,7 @@ test('every recruited hero can add and remove every skill without a three-slot c
    assert.deepEqual(p.characters,characters);assert.deepEqual(p.inventory,wallet);
    assert.deepEqual(normalizeProgression(JSON.parse(JSON.stringify(p)),HEROES),p);
  }
- const p=profile(true,{actClears:Array(28).fill(true)});assert.equal(equipSkill(p,'lumi',0,'nova'),false);assert.equal(equipSkill(p,'omsolo',0,'lumiBrave'),true);
+ const locked=profile(true,{actClears:Array(28).fill(true)});assert.equal(equipSkill(locked,'lumi',0,'nova'),false);assert.equal(equipSkill(locked,'omsolo',0,'lumiBrave'),false);assert.equal(equipSkill(profile(),'omsolo',0,'lumiBrave'),true);
 });
 test('invalid heroes, slot indices, duplicate and unknown skills remain guarded after unlocking',()=>{
  const p=profile(),before=structuredClone(p);
@@ -53,7 +58,7 @@ test('invalid heroes, slot indices, duplicate and unknown skills remain guarded 
  const empty=normalizeProgression({...profile(),blessingLoadouts:{...profile().blessingLoadouts,lumi:[]}},HEROES);
  assert.deepEqual(equippedSkills(empty,'lumi'),[]);assert.deepEqual(skillsForParty(['lumi'],empty),[]);
 });
-test('after the extra clear, common and pair skills enter combat only when placed in a slot',()=>{
+test('after the finale, common and pair skills enter combat only when placed in a slot',()=>{
  for(const a of HEROES)for(const b of [null,...HEROES.filter(h=>h.id!==a.id)]){
    const party=b?[a.id,b.id]:[a.id],p=profile();assert.ok(equipSkill(p,a.id,0,'bladeTempo'));assert.ok(equipSkill(p,a.id,1,'moonDropBond'));assert.ok(equipSkill(p,a.id,2,'ward'));
    const pool=skillsForParty(party,p),chosen=new Set([...equippedSkills(p,a.id),...(b?equippedSkills(p,b.id):[])]);
@@ -77,5 +82,5 @@ test('pre-clear restrictions are unchanged and reward notice is exclusive to Heh
  const p=profile(false);assert.equal(equipSkill(p,'lumi',0,'bladeTempo'),false);assert.deepEqual(equippedSkills(p,'lumi'),defaultSkills('lumi'));
  assert.doesNotMatch(partyView(['lumi'],7,HEROES,()=>1,p),/party-free-skills|data-party-equip-skill/);
  assert.doesNotMatch(blessingLoadoutView(p,HEROES[7]),/free-skill-unlocked/);
- assert.match(extraDifficultyView(actFor(33)),/好きな数だけ候補/);assert.doesNotMatch(extraDifficultyView(actFor(20)),/全員のスキル/);
+ assert.match(extraDifficultyView(actFor(33)),/極宴の金環/);assert.doesNotMatch(extraDifficultyView(actFor(20)),/極宴の金環/);
 });

@@ -223,7 +223,8 @@ export class Adventure {
       const knewRice=hasRicePower(this.progression),knewNyan=hasNyanAwakening(this.progression),knewFreeSkills=hasFreeSkillLoadout(this.progression);
       if(finaleClear)for(const id of [46,47,48])this.progression.story.actClears[id]=true;
       if(completeAct(this.progression,this.act)){this.recruitedHeroId=this.actConfig.recruit;this.emit('recruited',{heroId:this.recruitedHeroId});}
-      if(this.actConfig.towerExtra){const relicId='eight-light-crown';if(!this.progression.equipment.owned.includes(relicId)){this.progression.equipment.owned.push(relicId);this.earnedUnique=relicId;this.emit('uniqueReward',{id:relicId});}}
+      const relicId=this.actConfig.towerExtra?'eight-light-crown':this.actConfig.endgame?'banquet-gold-ring':'';
+      if(relicId&&!this.progression.equipment.owned.includes(relicId)){this.progression.equipment.owned.push(relicId);this.earnedUnique=relicId;this.emit('uniqueReward',{id:relicId});}
       if(!knewRice&&hasRicePower(this.progression)){this.riceNewlyLearned=true;this.emit('riceAwakened');}
       if(!knewNyan&&hasNyanAwakening(this.progression)){this.nyanAwakeningNewlyLearned=true;this.emit('nyanAwakeningLearned');}
       if(!knewFreeSkills&&hasFreeSkillLoadout(this.progression))this.emit('freeSkillsUnlocked');
