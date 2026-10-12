@@ -106,7 +106,7 @@ export function equipSkill(profile,heroId,slot,skillId){
   if(old!==-1)next[old]=next[slot];
   next[slot]=skillId;profile.blessingLoadouts??={};profile.blessingLoadouts[heroId]=next;return true;
 }
-// Before the Hehe extra clear, common and pair blessings are automatic. After it, every skill uses the three slots.
+// Before the Hehe extra clear, common and pair blessings are automatic. After it, only the skills the player turned on are candidates.
 export function skillsForParty(party,profile){
   const ids=new Set(party),equipped=new Set(party.flatMap(id=>equippedSkills(profile,id)));
   if(hasFreeSkillLoadout(profile))return SKILLS.filter(skill=>equipped.has(skill.id));

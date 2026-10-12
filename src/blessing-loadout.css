@@ -18,11 +18,11 @@
 .blessing-loadout h4{font-size:max(13px,var(--ui-min-font,0px));color:#efdfbc;font-weight:500}
 .blessing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .blessing-options button{display:flex;align-items:center;gap:12px;text-align:left;min-width:0;padding:16px;border:1px solid #b0bdd040;border-radius:8px;background:#16283b;color:#e1e5f3}
-.blessing-options button:disabled{opacity:1;border-color:#bca5e071;background:#bca5e014}
+.blessing-options button:disabled,.blessing-options button[aria-pressed=true]{opacity:1;border-color:#efd8a3;background:#c6aff726;box-shadow:0 0 0 2px #efd8a320}
 .blessing-options button>.icon{width:25px;height:25px;flex-shrink:0;color:#d1b8f5}
 .blessing-options button>span{flex:1;min-width:0}.blessing-options strong{font-size:max(13px,var(--ui-min-font,0px));line-height:1.7;font-weight:500;display:block}
 .blessing-options small{display:block;font-size:max(11px,var(--ui-min-font,0px));line-height:1.8;margin-top:5px;color:#b6c6d8}
-.blessing-options em{font-size:max(10px,var(--ui-min-font,0px));font-style:normal;flex-shrink:0;color:#ebd7a4;text-align:center;max-width:52px;line-height:1.8}
+.blessing-options em{font-size:max(10px,var(--ui-min-font,0px));font-style:normal;flex-shrink:0;color:#ebd7a4;text-align:center;white-space:nowrap;line-height:1.8}
 .blessing-loadout .blessing-loadout-note{font-size:max(11px,var(--ui-min-font,0px));padding-top:16px;margin-bottom:0;border-top:1px solid #bdc8d32d;color:#b3c7db}
 .blessing-slots button:focus-visible,.blessing-options button:focus-visible,.skill-loadout-link:focus-visible{outline:2px solid #f6d8a0;outline-offset:3px}
 @media(max-width:760px){.blessing-loadout{padding:18px 14px}.blessing-options{grid-template-columns:1fr}.blessing-slots{gap:6px}.blessing-slots strong{font-size:max(11px,var(--ui-min-font,0px))}.tree-tiers button{padding:12px 5px}.tree-tiers strong{font-size:max(10px,var(--ui-min-font,0px));letter-spacing:0}.tree-tiers small,.tree-tiers span{font-size:max(8px,var(--ui-min-font,0px))}.blessing-options button{padding:14px 10px;gap:9px}}
@@ -41,6 +41,8 @@
 .party-free-skills .blessing-loadout h4{overflow-wrap:anywhere}
 #party-skill-feedback{font-size:max(12px,var(--ui-min-font,0px));line-height:1.8}
 body:has(#chapter-menu:not(.hidden)) #modal .party-free-skills .blessing-loadout{background:#f9f5eb;border-color:#d0c8b9}
+body:has(#chapter-menu:not(.hidden)) #modal .party-free-skills .blessing-options button[aria-pressed=true]{background:#efe4c8;border-color:#b79964;color:#3c3428;box-shadow:inset 0 0 0 2px #b79964}
+body:has(#chapter-menu:not(.hidden)) #modal .party-free-skills .blessing-options button[aria-pressed=true] small{color:#5c5346}
 @media(max-width:760px){
   .skill-card>.skill-upgrade-label{grid-column:2;grid-row:3;font-size:max(9px,var(--ui-min-font,0px));line-height:1.6;margin:0 0 5px}
   .skill-card:has(>.skill-upgrade-label)>p{grid-row:4}

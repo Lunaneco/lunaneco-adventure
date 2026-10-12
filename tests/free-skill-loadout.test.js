@@ -50,17 +50,15 @@ test('invalid heroes, slot indices, duplicate and unknown skills remain guarded 
  assert.ok(equipSkill(p,'lumi',1,'nova'));assert.equal(equippedSkills(p,'lumi').includes('nova'),false);
  const restored=normalizeProgression({...p,blessingLoadouts:{lumi:['nova','nova','missing']}},HEROES);
  assert.deepEqual(equippedSkills(restored,'lumi'),['nova']);
+ const empty=normalizeProgression({...profile(),blessingLoadouts:{...profile().blessingLoadouts,lumi:[]}},HEROES);
+ assert.deepEqual(equippedSkills(empty,'lumi'),[]);assert.deepEqual(skillsForParty(['lumi'],empty),[]);
 });
 test('after the extra clear, common and pair skills enter combat only when placed in a slot',()=>{
  for(const a of HEROES)for(const b of [null,...HEROES.filter(h=>h.id!==a.id)]){
    const party=b?[a.id,b.id]:[a.id],p=profile();assert.ok(equipSkill(p,a.id,0,'bladeTempo'));assert.ok(equipSkill(p,a.id,1,'moonDropBond'));assert.ok(equipSkill(p,a.id,2,'ward'));
    const pool=skillsForParty(party,p),chosen=new Set([...equippedSkills(p,a.id),...(b?equippedSkills(p,b.id):[])]);
    assert.equal(new Set(pool.map(s=>s.id)).size,pool.length);
-   for(const skill of SKILLS){
-    const inPool=pool.some(s=>s.id===skill.id);
-    if(chosen.has(skill.id))assert.equal(inPool,true,skill.id);
-    else if((skill.requires?.length??0)!==1)assert.equal(inPool,false,skill.id);
-   }
+   for(const skill of SKILLS)assert.equal(pool.some(s=>s.id===skill.id),chosen.has(skill.id),skill.id);
    const view=partyView(party,HEROES.indexOf(a),HEROES,()=>1,p,'戻る',null,{skillHero:b?.id??a.id,skillSlot:2});
    assert.match(view,/id="party-skill-loadout"/);assert.equal((view.match(/data-party-skill-slot=/g)??[]).length,0);
    assert.equal((view.match(/data-party-equip-skill=/g)??[]).length,SKILLS.length);
