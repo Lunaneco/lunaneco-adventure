@@ -9,7 +9,10 @@ export const SEVENTH_CHAPTER_ACTS=Object.freeze([
  {id:30,title:'好きでいても、いい',summary:'姿が違うだけで追い出そうとする集団の包囲。好きなものと帰る場所を守るため、るみともちにゃふぇは避難所へ進む。',boss:'アンチケモみみ・装甲包囲長',bossId:'antiGuard',bossHp:14000,counts:[32,34,36,38,40,1],stages:[stage('包囲された住居跡',25,'盾の列と時間差の攻撃を越える',0),stage('小さな避難所の庭',25,'安心して暮らせる場所を守る',1),stage('包囲陣の中庭',25,'見た目で分ける壁を破る',2)]},
  {id:31,title:'どこまでも、いっしょ',summary:'アンチケモみみ集団の首領が占拠した村の広場へ。小さなふぇ〜と指先のレールガンで、ケモミミ族の帰る村を取り戻す。',boss:'アンチケモみみ集団・首領',bossId:'antiLeader',bossHp:17000,counts:[34,36,38,40,42,1],recruit:'lumi',stages:[stage('帰り道をつなぐ参道',26,'避難した村人を迎えるために',0),stage('ねこみみの鐘の階段',26,'二人の光で最後の包囲へ',1),stage('みんなの村の広場',26,'首領を退け、るみを仲間に迎える',2)]},
 ].map((act,i)=>Object.freeze({...act,chapter:6,number:i+1,recommendedLevel:60,soloHero:'mochinyafe',soloFirstClear:true,storyAlly:'lumi'})));
-const scene=(act,area,title,lines,extra={})=>({act,area,kicker:`第7章 · 第${act-27}幕`,title,next:'村を守りに行く',image:SEVENTH_CHAPTER_STORY_BACKGROUND,...extra,lines:lines.map(([who,text])=>({who,text,voiced:who==='lumi'||who==='nekolumi'||who==='mochinyafe'}))});
+const scene=(act,area,title,lines,extra={})=>({act,area,kicker:`第7章 · 第${act-27}幕`,title,next:'村を守りに行く',image:SEVENTH_CHAPTER_STORY_BACKGROUND,...extra,lines:lines.map(([who,text,extra])=>({who,text,voiced:who==='lumi'||who==='nekolumi'||who==='mochinyafe',...extra}))});
+// 一枚絵：るみともちにゃふぇの出会い（この章で最初に見せる絵）と、仲間に加わったときの、虹のレインコートのるみ
+const MEET={cg:'assets/story/lumi-meets-mochinyafe-v1.jpg',cgAlt:'猫の門の前の石畳で、しゃがみこんで頬を赤くし、もちにゃふぇを見つめるるみ'};
+const JOIN={cg:'assets/story/lumi-prism-coat-v1.jpg',cgAlt:'虹色に透けるレインコートを着て、光の中でほほえむるみ'};
 export const SEVENTH_CHAPTER_SCENES=Object.freeze([
  {
   opening:scene(28,0,'返事のない、ケモみみの村。',[
@@ -19,10 +22,10 @@ export const SEVENTH_CHAPTER_SCENES=Object.freeze([
    ['narrator','奥から、青い光が一筋走った。ひとりの普通の女の子が、指先を兵士へ向けている。もちにゃふぇは彼女のいる路地へ進んだ。'],
   ]),
   ruins:scene(28,1,'指先の光、となりのぬくもり。',[
-   ['lumi','わたし、るみです。この村を、これ以上壊させたくなくて……。あなたも、逃げ遅れたんですか？'],
-   ['mochinyafe','ふぇ〜！'],
-   ['lumi','一緒に、守ってくれるんですか。……そのおみみ、すごくかわいいです。そばにいてくれると、胸があったかくなります。'],
-   ['narrator','ケモみみが大好きなるみが、ときめいた瞬間。銀色のねこみみが、彼女の髪からぴょこんと生えた。ねこるみの指先の光は、ずっと遠くまで届く。ここから共闘が始まる。'],
+   ['lumi','わたし、るみです。この村を、これ以上壊させたくなくて……。あなたも、逃げ遅れたんですか？',MEET],
+   ['mochinyafe','ふぇ〜！',MEET],
+   ['lumi','一緒に、守ってくれるんですか。……そのおみみ、すごくかわいいです。そばにいてくれると、胸があったかくなります。',MEET],
+   ['narrator','ケモみみが大好きなるみが、ときめいた瞬間。銀色のねこみみが、彼女の髪からぴょこんと生えた。ねこるみの指先の光は、ずっと遠くまで届く。ここから共闘が始まる。',MEET],
   ],{neko:true}),
   sanctuary:scene(28,2,'ここは、みんなの帰る場所。',[
    ['narrator','門封じ隊長は、ケモみみのある者は村に近づくなと武器を振り上げた。ねこるみは、もちにゃふぇの前へ立つ。'],
@@ -36,7 +39,7 @@ export const SEVENTH_CHAPTER_SCENES=Object.freeze([
  },
  {
   opening:scene(29,0,'ときめきの、ねこみみ。',[
-   ['lumi','そばにいると、ねこみみになっちゃいます。少し恥ずかしいけれど……わたし、この姿も好きです。'],
+   ['lumi','そばにいると、ねこみみになっちゃいます。少し恥ずかしいけれど……わたし、この姿も好きです。',{portrait:'lumiShy'}],
    ['narrator','アンチケモみみ集団は市場を封鎖し、避難した村人が戻れないよう見張っていた。二人は帰り道を開くため、広場へ進む。'],
   ],{neko:true}),
   ruins:scene(29,1,'距離よりも、近い気持ち。',[
@@ -49,14 +52,14 @@ export const SEVENTH_CHAPTER_SCENES=Object.freeze([
    ['narrator','封鎖射撃隊長が照準を並べた。もちにゃふぇの声が一瞬の隙をつくり、指先の光が射線を越える。'],
   ],{neko:true}),
   ending:scene(29,2,'ひらいた市場。',[
-   ['lumi','道が、戻りました。いつかここで、みんなとお買い物できたら……うれしいです。'],
+   ['lumi','道が、戻りました。いつかここで、みんなとお買い物できたら……うれしいです。',{portrait:'lumiJoy'}],
    ['narrator','閉ざされた市場に朝の風が通った。残る包囲は、住民の避難所を囲んでいる。'],
   ],{neko:true}),
  },
  {
   opening:scene(30,0,'好きでいても、いい。',[
    ['narrator','集団は、ねこみみを生やしたるみまで敵だと決めつけた。るみは少し震え、それでも手を下ろさなかった。'],
-   ['lumi','誰かを好きなことも、自分の姿を好きなことも……悪いことでは、ないはずです。'],
+   ['lumi','誰かを好きなことも、自分の姿を好きなことも……悪いことでは、ないはずです。',{portrait:'lumiThink'}],
   ],{neko:true}),
   ruins:scene(30,1,'小さな声に、背中を押されて。',[
    ['mochinyafe','ふぇ〜っ！'],
@@ -87,9 +90,9 @@ export const SEVENTH_CHAPTER_SCENES=Object.freeze([
   ],{neko:true}),
   ending:scene(31,2,'新しい仲間と、おかえり。',[
    ['narrator','首領が撤退し、アンチケモみみ集団は村を去った。避難していたケモミミ族が、一軒ずつ家に灯りを戻していく。'],
-   ['lumi','おかえりなさい。……もちにゃふぇさん、これからも一緒に旅をしていいですか。あなたと、いろんな帰る場所を守りたいです。'],
+   ['lumi','おかえりなさい。……もちにゃふぇさん、これからも一緒に旅をしていいですか。あなたと、いろんな帰る場所を守りたいです。',{portrait:'lumiLaugh'}],
    ['mochinyafe','ふぇ〜！'],
-   ['narrator','るみが仲間に加わった。単独や他の仲間との編成では通常のるみ。もちにゃふぇと組むとねこるみになり、指先のレールガンの射程は無限になる。第7章はクリアした幕から自由に編成して遊べる。'],
+   ['narrator','るみが仲間に加わった。単独や他の仲間との編成では通常のるみ。もちにゃふぇと組むとねこるみになり、指先のレールガンの射程は無限になる。第7章はクリアした幕から自由に編成して遊べる。',JOIN],
   ],{neko:true}),
  },
 ]);

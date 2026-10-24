@@ -4,7 +4,7 @@ import {existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {HEROES} from '../src/model.js';
 import {normalizeProgression} from '../src/progression.js';
-import {STILL_UNLOCK_LEVELS,galleryEntries,galleryProgress,galleryView,galleryViewerMarkup,isStillUnlocked,stillsUnlockedByLevel,adjacentUnlockedStill} from '../src/collection-gallery.js';
+import {STILL_UNLOCK_LEVELS,stillLevelsFor,galleryEntries,galleryProgress,galleryView,galleryViewerMarkup,isStillUnlocked,stillsUnlockedByLevel,adjacentUnlockedStill} from '../src/collection-gallery.js';
 
 const profile=()=>normalizeProgression({},HEROES);
 const recruit=(saved,id)=>{
@@ -17,11 +17,11 @@ test('stills open in order at Lv.30, Lv.50 and Lv.70, with the fourth beside the
   assert.deepEqual([...STILL_UNLOCK_LEVELS],[30,50,70,70]);
   const entries=galleryEntries();
   assert.deepEqual(entries.map(hero=>hero.id),HEROES.map(hero=>hero.id));
-  assert.equal(entries.find(hero=>hero.id==='lumi').stills.length,1);
+  assert.equal(entries.find(hero=>hero.id==='lumi').stills.length,4);
   assert.equal(entries.find(hero=>hero.id==='shizuku').stills.length,4);
-  assert.equal(entries.reduce((sum,hero)=>sum+hero.stills.length,0),23);
+  assert.equal(entries.reduce((sum,hero)=>sum+hero.stills.length,0),26);
   for(const hero of entries)for(const still of hero.stills){
-    assert.equal(still.level,STILL_UNLOCK_LEVELS[still.index]);
+    assert.equal(still.level,stillLevelsFor(hero.id)[still.index]);
     assert.equal(existsSync(fileURLToPath(new URL(`../public/assets/stills/${still.file}`,import.meta.url))),true);
   }
 });
@@ -41,7 +41,7 @@ test('a recruited character reveals each still only at its level, and ③ and �
   assert.deepEqual([0,1,2,3].map(index=>isStillUnlocked(saved,'shizuku',index)),[true,true,true,true]);
   assert.deepEqual(stillsUnlockedByLevel('shizuku',69,70).map(still=>still.mark),['③','④']);
   assert.deepEqual(stillsUnlockedByLevel('nyanluna',29,50).map(still=>still.mark),['①','②']);
-  assert.deepEqual(stillsUnlockedByLevel('lumi',1,80).map(still=>still.mark),['①']);
+  assert.deepEqual(stillsUnlockedByLevel('lumi',1,80).map(still=>still.mark),['①','②','③','④']);
   assert.equal(adjacentUnlockedStill(saved,'shizuku',2,1),3);
   saved.characters.shizuku.level=50;
   assert.equal(adjacentUnlockedStill(saved,'shizuku',1,1),null);
@@ -59,7 +59,22 @@ test('level alone does not reveal a still before the character joins',()=>{
   assert.match(html,/未加入/);
   recruit(saved,'lumi');
   assert.equal(isStillUnlocked(saved,'lumi',0),true);
-  assert.equal(galleryEntries().find(hero=>hero.id==='lumi').stills.length,1);
+  assert.equal(galleryEntries().find(hero=>hero.id==='lumi').stills.length,4);
+});
+
+test('Rumi opens LV30A and LV30B together at Lv.30, then LV50 at Lv.50 and LV70 at Lv.70',()=>{
+  assert.deepEqual([...stillLevelsFor('lumi')],[30,30,50,70]);
+  assert.deepEqual(galleryEntries().find(hero=>hero.id==='lumi').stills.map(still=>still.file),['lumi-lv30a.jpg','lumi-lv30b.jpg','lumi-lv50.jpg','lumi-lv70.jpg']);
+  const saved=recruit(profile(),'lumi');
+  for(const [level,open] of [[29,[false,false,false,false]],[30,[true,true,false,false]],[50,[true,true,true,false]],[69,[true,true,true,false]],[70,[true,true,true,true]]]){
+    saved.characters.lumi.level=level;
+    assert.deepEqual([0,1,2,3].map(index=>isStillUnlocked(saved,'lumi',index)),open,`Lv.${level}`);
+  }
+  assert.deepEqual(stillsUnlockedByLevel('lumi',29,30).map(still=>still.mark),['①','②']);
+  assert.deepEqual(stillsUnlockedByLevel('lumi',49,50).map(still=>still.mark),['③']);
+  const html=galleryView(saved,'lumi');
+  assert.match(html,/①と同時/);
+  assert.doesNotMatch(html,/③と同時/);
 });
 
 test('the gallery shows an opened frame and hides the picture until that level',()=>{

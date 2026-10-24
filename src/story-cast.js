@@ -2,6 +2,11 @@ import {publicUrl} from './public-url.js';
 // The narrator is represented by the lost moonlight already present in the story.
 export const STORY_CAST=Object.freeze({
   lumi:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-story-v1.png'),alt:'銀色のボブと紫の瞳、薄紫の制服のるみ',color:'#b8c9ff'}),
+  // るみの表情（普通のるみの時だけ使う。ねこるみの場面では、ねこるみの立ち絵になる）
+  lumiThink:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-think-v1.png'),alt:'あごに手を当てて考えこむ、制服のるみ',color:'#b8c9ff'}),
+  lumiShy:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-shy-v1.png'),alt:'両手を前でそろえて、はにかむ制服のるみ',color:'#b8c9ff'}),
+  lumiJoy:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-joy-v1.png'),alt:'両手でピースをして弾むように笑う、制服のるみ',color:'#b8c9ff'}),
+  lumiLaugh:Object.freeze({name:'るみ',role:'村を守る、指先の光の少女',image:publicUrl('assets/story/lumi-laugh-v1.png'),alt:'目を細めて、こちらへピースを向けて笑うるみ',color:'#b8c9ff'}),
   nekolumi:Object.freeze({name:'ねこるみ',role:'もちにゃふぇと一緒なら、どこまでも',image:publicUrl('assets/story/nekolumi-story-v1.png'),alt:'ねこみみが生えたるみ',color:'#d0baff'}),
   hehereal:Object.freeze({name:'へへりある',role:'おなかいっぱいで、街を守る花弓使い',image:publicUrl('assets/story/hehereal-story-v1.png'),alt:'ピンクのツインテールとメガネ、2743の飾り、桜の魔法弓を持つへへりある',color:'#ff9dc9'}),
   primRaging:Object.freeze({name:'プリズムドラゴン',role:'あふれる光に苦しむ、結晶の竜',image:publicUrl('assets/story/prim-raging-v1.webp'),alt:'暴走する青い結晶の鱗と虹の翼を持つプリズムドラゴン',color:'#97dfff'}),
