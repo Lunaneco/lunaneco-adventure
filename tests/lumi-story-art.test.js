@@ -19,8 +19,7 @@ test('Rumi and Mochinyafe first meet over the meeting illustration, before any o
   const meeting=lines.filter(line=>line.cg==='assets/story/lumi-meets-mochinyafe-v1.jpg');
   assert.equal(meeting.length,4,'the whole first exchange, up to her cat ears appearing, keeps the meeting on screen');
   assert.match(meeting.at(-1).text,/ねこみみ/);
-  const join=lines.find(line=>line.cg==='assets/story/lumi-prism-coat-v1.jpg');
-  assert.match(join.text,/るみが仲間に加わった/);
+  assert.ok(!lines.some(line=>line.cg&&line.cg!=='assets/story/lumi-meets-mochinyafe-v1.jpg'),'the meeting is the only illustration in chapter 7');
   for(const line of lines.filter(line=>line.cg))assert.ok(file(line.cg)&&line.cgAlt,line.cg);
 });
 
